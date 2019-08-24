@@ -198,7 +198,11 @@ class PHPGraphLibPie extends PHPGraphLib
 				// generate a darker version of the indexed color
 				// do not draw if the value is zero
 				if (! $value == 0){
-					$this->imageFilledSmoothArc($this->image, $this->pie_center_x, $i, $this->pie_width, $this->pie_height, $arcStart, (360 * $value) + $arcStart, $color, IMG_ARC_PIE);
+					if ($this->antialias)
+						$this->imageFilledSmoothArc($this->image, $this->pie_center_x, $i, $this->pie_width, $this->pie_height, $arcStart, (360 * $value) + $arcStart, $color, IMG_ARC_PIE);
+					else
+						imagefilledarc($this->image, $this->pie_center_x, $i, $this->pie_width, $this->pie_height, $arcStart, (360 * $value) + $arcStart, $color, IMG_ARC_PIE);
+					
 					$arcStart += 360*$value;
 				}
 			}
@@ -208,9 +212,11 @@ class PHPGraphLibPie extends PHPGraphLib
 		foreach ($this->pie_data_array_percents as $key => $value) {
 			$color = $this->generateNextColor();
 			// do not draw if the value is zero
-
 			if (! $value == 0){
-				$this->imageFilledSmoothArc($this->image, $this->pie_center_x, $this->pie_center_y, $this->pie_width, $this->pie_height, $arcStart, (360*$value)+$arcStart, $color);
+				if ($this->antialias)
+					$this->imageFilledSmoothArc($this->image, $this->pie_center_x, $this->pie_center_y, $this->pie_width, $this->pie_height, $arcStart, (360*$value)+$arcStart, $color);
+				else
+					imagefilledarc($this->image, $this->pie_center_x, $this->pie_center_y, $this->pie_width, $this->pie_height, $arcStart, (360*$value)+$arcStart, $color, IMG_ARC_PIE);
 				$arcStart += 360 * $value;
 			}
 			if ($this->bool_data_labels) { 
