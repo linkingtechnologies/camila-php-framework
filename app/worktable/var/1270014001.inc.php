@@ -42,7 +42,7 @@ if ($_ENV["DATABASE_URL"] != '') {
 	$dbpath = str_replace ("+", "%20", $dbpath);
 	define('CAMILA_DB_DSN', "sqlite3://$dbpath");
 }
-//define('CAMILA_AUTH_DSN', "sqlite3://$dbpath");
+define('CAMILA_AUTH_DSN', "sqlite3://$dbpath");
 define('CAMILA_AUTH_PASSWORD_HASHING', true);
 
 //define('CAMILA_DB_DSN', "mysql://user:pass@host/dbname");
