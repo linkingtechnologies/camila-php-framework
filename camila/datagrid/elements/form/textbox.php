@@ -67,7 +67,7 @@
               $form->add_userdefined($js);
 			  $autosuggest_callback = 'camila_autosuggest_cb_' . $this->field;
 			  $url = $this->autosuggest_script . "?camila_autosuggest&table=" . $this->autosuggest_table . "&field=" . $this->autosuggest_field . "&id=" . $this->autosuggest_idfield . "&infofields=" . urlencode($this->autosuggest_infofields) . "&pickfields=" . urlencode($this->autosuggest_pickfields) . "&maxresults=" . $this->autosuggest_maxresults . "&";
-			  $l = '<a tabindex="-1" onclick="camila_autosuggest_open_modal(\''.$url.'\',\''.$autosuggest_callback.'\',\''.$this->key.'\',\''.$this->title.'\')" class=""><span class="glyphicon glyphicon-search"></span></a>';
+			  $l = '<a tabindex="-1" onclick="camila_autosuggest_open_modal(\''.$url.'\',\''.$autosuggest_callback.'\',\''.$this->key.'\',\''.addslashes($this->title).'\')" class=""><span class="glyphicon glyphicon-search"></span></a>';
               $popup = new CHAW_js($l);
               $form->add_userdefined($popup);
 		  }
