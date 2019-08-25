@@ -33,7 +33,7 @@ $i18n = new CamilaTranslator();
 
 class CHAW_deck extends HAW_deck
 {
-  var $camila_force_js_update_token = '2017';
+  var $camila_force_js_update_token = '2019';
   var $camila_num_tables = 0;
   var $camila_headjsscripts = Array();
   var $camila_headjsscriptsids = Array();

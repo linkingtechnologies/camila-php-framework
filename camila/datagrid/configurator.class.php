@@ -450,7 +450,7 @@ class configurator
         }
         
         $success = true;
-        
+
         $result = $this->db->Execute('select max(id) as id from ' . CAMILA_TABLE_WORKT);
         if ($result === false)
 		{
@@ -464,6 +464,7 @@ class configurator
         
         $id                    = intval($result->fields['id']) + 1;
         $record['id']          = $id;
+		$record['parent_id']   = 0;
         $record['status']      = 'd';
         $record['active']      = 'n';
         $record['filename']    = basename($filename);
@@ -476,6 +477,9 @@ class configurator
         
         $insertSQL = $this->db->AutoExecute(CAMILA_TABLE_WORKT, $record, 'INSERT');
         if (!$insertSQL) {
+			echo CAMILA_TABLE_WORKT;
+			print_r($record);
+			echo "0";
             $this->camila_information_text($this->camila_get_translation('camila.worktable.db.error'));
             $success = false;
         }
@@ -611,7 +615,8 @@ class configurator
 							camila_information_text(camila_get_translation('camila.worktable.db.error'));
 						else
 							echo ($this->camila_get_translation('camila.worktable.db.error'));
-                        $success = false;
+                        echo "1";
+						$success = false; 
                     }
                     
                     $fieldArr[$record['col_name']] = $record['name'];
@@ -650,6 +655,7 @@ class configurator
                 $updateSQL = $this->db->AutoExecute(CAMILA_TABLE_WORKT, $record, 'UPDATE', 'id=' . $this->db->qstr($id));
                 if (!$updateSQL) {
 					echo CAMILA_TABLE_WORKT;
+					echo "1";
 					print_r($record);
                     $this->camila_information_text($this->camila_get_translation('camila.worktable.db.error'));
                     $success = false;
@@ -674,8 +680,10 @@ class configurator
                     
                     $insertSQL = $this->db->AutoExecute(CAMILA_APPLICATION_PREFIX . 'camila_bookmarks', $record, 'INSERT');
                     if (!$insertSQL) {
+						echo "1";
+						print_r($record);
                         camila_information_text(camila_get_translation('camila.worktable.db.error'));
-                        $success = false;
+                        $success = false; 
                     }
                     
                     $j++;
@@ -712,6 +720,8 @@ class configurator
                     $record['size']           = $this->default_size[$record['type']];
                     $insertSQL                = $this->db->AutoExecute(CAMILA_TABLE_WORKC, $record, 'INSERT');
                     if (!$insertSQL) {
+						print_r($record);
+						echo "1";
                         camila_information_text(camila_get_translation('camila.worktable.db.error'));
                         $success = false;
                     }
@@ -802,10 +812,15 @@ class configurator
             $record['sequence']            = $sequence;
             $record['maxlength']           = $this->default_maxlength[$record['type']];
             $record['size']                = $this->default_size[$record['type']];
+			$record['help']                = '';
             $insertSQL                     = $_CAMILA['db']->AutoExecute(CAMILA_TABLE_WORKC, $record, 'INSERT');
             if (!$insertSQL) {
+				print_r($record);
+				echo $_CAMILA['db']->ErrorMsg();
+				
                 camila_information_text(camila_get_translation('camila.worktable.db.error'));
                 $success = false;
+				echo "1";
             }
         }
         
