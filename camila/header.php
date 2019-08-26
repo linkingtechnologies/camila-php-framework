@@ -882,5 +882,9 @@ if (!$_CAMILA['page']->camila_exporting())
   $_CAMILA['page']->add_userdefined($js);
 
   $_CAMILA['page']->smartMenusTheme = $smartMenusTheme;
+
+
+require('../../camila/views/cf_worktable_rebuild.inc.php');
+
  
 ?>

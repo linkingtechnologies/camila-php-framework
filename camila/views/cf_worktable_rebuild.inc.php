@@ -16,7 +16,7 @@
     along with Camila PHP Framework. If not, see <http://www.gnu.org/licenses/>. */
 
 
-require_once('../../camila/autoloader.inc.php');
+/*require_once('../../camila/autoloader.inc.php');
 
 require('../../camila/config.inc.php');
 
@@ -36,28 +36,46 @@ $_CAMILA['page'] = new CHAW_deck('', HAW_ALIGN_LEFT);
 $_CAMILA['page']->camila_export_enabled = false;
 
 $camilaAuth = new CamilaAuth();
-$db = $camilaAuth->getDatabaseConnection(CAMILA_DB_DSN);
+$db = $camilaAuth->getDatabaseConnection(CAMILA_DB_DSN);*/
+
+defined('CAMILA_APPLICATION_NAME') or die('No direct script access.');
+
+$fCheckName = CAMILA_WORKTABLES_DIR . '/ephemeral.txt';
+
+if (!file_exists($fCheckName)){
+
+$db = $_CAMILA['db'];
+$configurator = new configurator();
+$configurator->db = $db;	
+//$configurator->translation_init();
+//$configurator->interactive = false;
 
 if (is_object($db)) {
-	$camilaAuth->db = $db;
-	if ($camilaAuth->checkUserTable() >=0) {		
-		$configurator = new configurator();
-		$configurator->db = $db;		
+	//$camilaAuth->db = $db;
+	//if ($camilaAuth->checkUserTable() >=0) {	
 		$resultTemp = $db->Execute('select id from ' . CAMILA_TABLE_WORKT);
         if ($resultTemp === false) {
-            camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
+            //camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
 		} else {
 			while (!$resultTemp->EOF) {
 				$successTemp = $configurator->create_script_from_template($resultTemp->fields['id']);
-				camila_information_text('WorkTable rebuild ['.$resultTemp->fields['id'].']: OK');
+				//camila_information_text('WorkTable rebuild ['.$resultTemp->fields['id'].']: OK');
 				$resultTemp->MoveNext();
 			}
-		}
-	}
-} else {
-	camila_error_text('Database Connection: KO');
-}
 
-$_CAMILA['page']->use_simulator(CAMILA_CSS_DIR . 'skin0.css');
-$_CAMILA['page']->create_page();
+			$fh = fopen($fCheckName, 'wb');
+			if (!$fh) {
+				echo 'File open failed.';
+			}
+			fwrite($fh, "OK");
+			fclose($fh);
+		}
+	//}
+}
+//} else {
+//	camila_error_text('Database Connection: KO');
+//}
+}
+//$_CAMILA['page']->use_simulator(CAMILA_CSS_DIR . 'skin0.css');
+//$_CAMILA['page']->create_page();
 ?>

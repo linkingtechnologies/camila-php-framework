@@ -1432,6 +1432,9 @@ class configurator
         $fh = fopen(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $id . '.inc.php', 'wb');
         fwrite($fh, $trans->mixed_to_utf8($output));
         fclose($fh);
+		
+		if (function_exists('opcache_reset'))
+			opcache_reset();
         
         $record            = Array();
         $record['visible'] = 'yes';
