@@ -341,7 +341,7 @@ class configurator
             new form_hidden($form, 'sheet', '1');
             new form_hidden($form, 'wtname', camila_get_translation('camila.worktable.name.predefault'));
             new form_hidden($form, 'wtdesc', camila_get_translation('camila.worktable.desc.predefault'));
-            new form_filebox($form, 'file', camila_get_translation('camila.worktable.xls.choose'), 50, CAMILA_TMP_DIR);
+            new form_filebox($form, 'file', camila_get_translation('camila.worktable.xls.choose'), 50, CAMILA_TMP_DIR, $this->camila_get_max_filesize());
             
             $fp = $form->process();
             
@@ -615,7 +615,8 @@ class configurator
 							camila_information_text(camila_get_translation('camila.worktable.db.error'));
 						else
 							echo ($this->camila_get_translation('camila.worktable.db.error'));
-                        echo "1";
+						print_r($record);
+                        echo "1.3";
 						$success = false; 
                     }
                     
@@ -655,7 +656,7 @@ class configurator
                 $updateSQL = $this->db->AutoExecute(CAMILA_TABLE_WORKT, $record, 'UPDATE', 'id=' . $this->db->qstr($id));
                 if (!$updateSQL) {
 					echo CAMILA_TABLE_WORKT;
-					echo "1";
+					echo "1.4";
 					print_r($record);
                     $this->camila_information_text($this->camila_get_translation('camila.worktable.db.error'));
                     $success = false;
@@ -680,7 +681,7 @@ class configurator
                     
                     $insertSQL = $this->db->AutoExecute(CAMILA_APPLICATION_PREFIX . 'camila_bookmarks', $record, 'INSERT');
                     if (!$insertSQL) {
-						echo "1";
+						echo "1.5";
 						print_r($record);
                         camila_information_text(camila_get_translation('camila.worktable.db.error'));
                         $success = false; 
@@ -720,8 +721,8 @@ class configurator
                     $record['size']           = $this->default_size[$record['type']];
                     $insertSQL                = $this->db->AutoExecute(CAMILA_TABLE_WORKC, $record, 'INSERT');
                     if (!$insertSQL) {
+						echo "1.1";
 						print_r($record);
-						echo "1";
                         camila_information_text(camila_get_translation('camila.worktable.db.error'));
                         $success = false;
                     }
@@ -820,7 +821,7 @@ class configurator
 				
                 camila_information_text(camila_get_translation('camila.worktable.db.error'));
                 $success = false;
-				echo "1";
+				echo "1.2";
             }
         }
         
@@ -1796,7 +1797,7 @@ class configurator
         if ($returl != '')
             new form_hidden($form3, 'returl', $_REQUEST['camila_returl']);
         
-        new form_filebox($form3, 'filename', camila_get_translation('camila.worktable.xls.choose'), 50, CAMILA_TMP_DIR);
+        new form_filebox($form3, 'filename', camila_get_translation('camila.worktable.xls.choose'), 50, CAMILA_TMP_DIR, $this->camila_get_max_filesize());
         
         $sheet_list = '';
         for ($i = 0; $i < 10; $i++) {
@@ -2262,7 +2263,31 @@ class configurator
                     echo 'Error deleting ' . $filename;
         }
     }
-}
+	}
+
+	
+	function camila_get_max_filesize() {
+		$value = ini_get('upload_max_filesize');
+		if ( is_numeric( $value ) ) {
+			return $value;
+		} else {
+			$value_length = strlen($value);
+			$qty = substr( $value, 0, $value_length - 1 );
+			$unit = strtolower( substr( $value, $value_length - 1 ) );
+			switch ( $unit ) {
+				case 'k':
+					$qty *= 1024;
+					break;
+				case 'm':
+					$qty *= 1048576;
+					break;
+				case 'g':
+					$qty *= 1073741824;
+					break;
+			}			
+			return $qty;
+		}
+	}	
     
 }
 

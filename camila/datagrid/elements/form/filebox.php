@@ -44,7 +44,6 @@
               $this->uploadfolder = $uploadfolder;
 
           $this->size = $size;
-          $this->maxsize = $maxsize;
 
           $form->add($this);
           if ($extfsenabled) {
@@ -100,7 +99,7 @@
           }
 
           if ($this->showmaxsizewarning) {
-		     $text = new CHAW_text(camila_get_translation('camila.fm.maxfilesizeallowed') . ': ' . $this->_convertfilesize(CAMILA_FM_MAX_UPLOAD_SIZE));
+		     $text = new CHAW_text(camila_get_translation('camila.fm.maxfilesizeallowed') . ': ' . $this->_convertfilesize($this->maxsize));
              $text->set_br(2);
              $form->add_text($text);
 		  }
