@@ -320,20 +320,17 @@ class configurator
     
     function start_wizard($source = 'xls')
     {
-        
-        //require_once(CAMILA_DIR . 'datagrid/form.class.php');
-        
+        //require_once(CAMILA_DIR . 'datagrid/form.class.php');        
         //require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
         //require_once(CAMILA_DIR . 'datagrid/elements/form/filebox.php');
         //require_once(CAMILA_DIR . 'datagrid/elements/form/textbox.php');
         //require_once(CAMILA_DIR . 'datagrid/elements/form/static_listbox.php');
-        
+
         global $_CAMILA;
-        
+
         if ($_REQUEST['configurator_step'] == '2' && (($_REQUEST['configurator_wtname'] != '' && $_REQUEST['configurator_wtdesc'] != '') || $_REQUEST['configurator_filename'] != '')) {
             $this->xls_read();
         } else {
-            
             $form               = new phpform('configurator');
             $form->submitbutton = camila_get_translation('camila.worktable.xls.submit');
             $form->drawrules    = false;
@@ -393,31 +390,28 @@ class configurator
 				if (is_object($form2->fields['sheet'])) {
 					$form2->fields['sheet']->set_br(2);
 				}
-                
+
                 $form2->process();
                 $form2->fields['step']->value = 2;
-                
                 $form2->draw();
             } else {
 				$myText = new CHAW_text('');
 				$_CAMILA['page']->add_text($myText);
-			
+
                 $myText = new CHAW_text(camila_get_translation('camila.wizard.choosexlsfile'));
                 $myText->set_br(2);
                 $_CAMILA['page']->add_text($myText);
-                
+
                 $form->draw();
                 $myText = new CHAW_text(camila_get_translation('camila.wizard.or'));
                 $myText->set_br(0);
                 $_CAMILA['page']->add_text($myText);
-                
+
                 $myLink = new CHAW_link(camila_get_translation('camila.wizard.skip'), $_SERVER['PHP_SELF'] . '?camila_noxlsfile=y');
                 $myLink->set_br(2);
                 $_CAMILA['page']->add_link($myLink);
-                
             }
         }
-        
     }
     
     
