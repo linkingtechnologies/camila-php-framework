@@ -10,7 +10,7 @@ Class xml2pdf_tag_qrcode {
     public $height = 0;
 	public $size = 1;
     public $position = 'relative';
-	public $level = 'L';
+	public $level = 'M';
 
     private $_parent;
 
@@ -61,8 +61,9 @@ Class xml2pdf_tag_qrcode {
                 $this->left += $this->pdf->GetX();
                 $this->top += $this->pdf->GetY();
             }
-			$qrcode = new QRcode($this->content, $this->level); // error level : L, M, Q, H			
-			$qrcode->displayFPDF($this->pdf, $this->left, $this->top, $this->size);
+			$qrcode = new QRcode(utf8_encode($this->content), $this->level); // error level : L, M, Q, H
+			$qrcode->disableBorder();
+			$qrcode->displayFPDF($this->pdf, $this->left, $this->top, $this->size, array(255,255,255), array(0,0,0));
         }
     }
 
