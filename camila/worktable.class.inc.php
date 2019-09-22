@@ -160,7 +160,7 @@ class CamilaWorkTable
 	function endExecuteQuery()
 	{
 	}
-	
+
 	function insertRow($worktableName, $lang, $fields, $values, $created_by='')
 	{
 		//camila_parse_default_expression
@@ -225,8 +225,8 @@ class CamilaWorkTable
 		}
 		return $opts;
 	}
-	
-	function insertSuggestionRecords($from,$to,$idsString) {
+
+	function insertSuggestionRecords($from,$to,$idsString,$overrides = null) {
 		$r = false;
 		global $_CAMILA;
 		$fId = $this->getWorktableSheetId($from);
@@ -234,15 +234,25 @@ class CamilaWorkTable
 		
 		$fInfo = $this->getWorktableRawInfo($fId);
 		$tInfo = $this->getWorktableRawInfo($tId);
-		
-		//print_r($tInfo);
-		//print_r($fInfo);
 
-		$result2 = $this->db->Execute('select sequence,col_name,autosuggest_wt_colname,field_options from ' . $this->wtColumn . ' where (autosuggest_wt_name IS NOT NULL and wt_id=' . $this->db->qstr($tId) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
-		
+		$qry = 'select sequence,col_name,autosuggest_wt_colname,field_options from ' . $this->wtColumn . ' where (autosuggest_wt_name IS NOT NULL and wt_id=' . $this->db->qstr($tId) . ' and is_deleted<>' . $this->db->qstr('y') . ')';
+		//echo $qry;
+		$result2 = $this->db->Execute($qry);
+
 		$fields = Array();
 		$values = Array();
 		$predefaults = Array();
+		$ovs = Array();
+		if ($overrides != null) {
+			foreach($overrides as $k => $v) {
+				foreach($v as $k2 => $v2) {
+					if (!in_array($k2, $ovs)) {
+						$ovs[] = $k2;
+					}
+				}
+			}
+		}
+
 		while (!$result2->EOF) {
 			$b = $result2->fields;
 			//echo $b['col_name'];
@@ -255,7 +265,8 @@ class CamilaWorkTable
 			$result2->MoveNext();
 		}
 
-		$result2 = $this->db->Execute('select sequence,col_name,autosuggest_wt_colname,field_options,default_value from ' . $this->wtColumn . ' where (default_value IS NOT NULL and wt_id=' . $this->db->qstr($tId) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
+		//$result2 = $this->db->Execute('select sequence,col_name,autosuggest_wt_colname,field_options,default_value from ' . $this->wtColumn . ' where (default_value IS NOT NULL and wt_id=' . $this->db->qstr($tId) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
+		$result2 = $this->db->Execute('select sequence,col_name,autosuggest_wt_colname,field_options,default_value from ' . $this->wtColumn . ' where (wt_id=' . $this->db->qstr($tId) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
 		
 		//$fields = Array();
 		//$values = Array();
@@ -267,45 +278,73 @@ class CamilaWorkTable
 				$values[] = $b['default_value'];
 				$predefaults[] = true;
 			}
+			
+			if (in_array($b['col_name'], $ovs)) {
+				$fields[] = $b['col_name'];
+				$values[] = '';
+			}
 			$result2->MoveNext();
 		}
 
 		//print_r($fields);
 		//print_r($values);
+		//print_r($overrides);
 
 		$ids = explode(',', $idsString);
+		
 		foreach ($ids as $v) {
 			//echo '::'.$v.'::';
-			$r = $this->insertSuggestion($fInfo['tablename'], $tInfo['tablename'], $v, $fields, $values, $predefaults);
+			$r = $this->insertSuggestion($fInfo['tablename'], $tInfo['tablename'], $v, $fields, $values, $predefaults, $overrides);
 		}
 		
 		return $r;
 
 	}
 
-	function insertSuggestion($fromTable, $toTable, $fromId, $fields, $values, $predefaults)
+	function insertSuggestion($fromTable, $toTable, $fromId, $fields, $values, $predefaults, $overrides)
 	{
-		global $_CAMILA;
+		//print_r($overrides);
+		//print_r($fields);
+		$ovs = Array();
+		if ($overrides != null) {
+			foreach($overrides as $k => $v) {
+				foreach($v as $k2 => $v2) {
+					if (!in_array($k2, $ovs)) {
+						$ovs[] = $k2;
+					}
+				}
+			}
+		}
 		$old = $this->db->SetFetchMode(ADODB_FETCH_ASSOC);
 		//$fields=Array();
 		//$values=Array();
-		$newId = $_CAMILA['db']->GenID(CAMILA_APPLICATION_PREFIX.'worktableseq', 100000);
+		$newId = $this->db->GenID(CAMILA_APPLICATION_PREFIX.'worktableseq', 100000);
 		$q = 'select * FROM ' . $fromTable . ' where id=' . $this->db->qstr($fromId);
-		//echo $q;
 		$result2 = $this->db->Execute($q);
 		$b = $result2->fields;		
 		foreach ($values as $k => $v) {
-			if (!$predefaults[$k])
+			if (!$predefaults[$k]) {
 				$values[$k] = $b[$v];
+			}
 			else
 				$values[$k] = camila_parse_default_expression($values[$k], $newId, true);
+			
+			$xxx = $fields[$k]; 
+			
+			if (in_array($xxx, $ovs)) {
+				//$fields[] = $b['col_name'];
+				$values[$k] = $overrides[$fromId][$xxx];
+			}
+
+			/*if ($overrides[$fromId]['badgeassegnato'] != '') {
+				$values[$k] = $overrides[$fromId][$xxx];
+			}*/
 		}
 		
 		//print_r($fields);
 		//print_r($values);
 
-		
-		$now = $_CAMILA['db']->BindTimeStamp(date("Y-m-d H:i:s", time()));
+		$now = $this->db->BindTimeStamp(date("Y-m-d H:i:s", time()));
 
 		$fields2 = Array();
 		$fields2[]='id';
@@ -363,6 +402,46 @@ class CamilaWorkTable
 
 		return !($result === false);
 	}
+	
+	function getWorktableRecordIdByKeyColumn($wtFrom, $column, $value)
+    {
+		$old = $this->db->SetFetchMode(ADODB_FETCH_ASSOC);
+		$rId = '';
+		$sql = "Select Id FROM \${".$wtFrom."} WHERE \${".$wtFrom.".".$column."}=".$this->db->qstr($value);
+		//echo $sql;
+		$result = $this->startExecuteQuery($sql);
+		while (!$result->EOF) {
+			$a = $result->fields;
+			$rId = $a[0];
+			$result->MoveNext();
+		}
+		$this->db->SetFetchMode($old);
+		return $rId;
+    }
+	
+	/* draft, not used yet */
+	function updateWorktableRecord($wtTo, $id, $fields, $values)
+    {
+		$old = $this->db->SetFetchMode(ADODB_FETCH_ASSOC);
+
+		$query = "UPDATE \${".$wtTo."} ";
+		$count = 0;
+		foreach($fields as $k => $val) {
+			if ($count>0)
+				$query .= ',';
+			else
+				$query = ' SET ';
+			$query .= " \${".$wtTo.".".$val."} = " . $this->db->qstr($val);
+			$count++;
+		}
+		
+		$query .= " WHERE Id = " . $this->db->qstr($id);
+		
+		echo $query;
+		
+		$this->db->SetFetchMode($old);
+		return $rId;
+    }
 
 }
 

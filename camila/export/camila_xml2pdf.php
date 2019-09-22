@@ -54,6 +54,11 @@
 			  //2016
 			  $t->setVariable(camila_get_translation('camila.export.template.worktable.filter'), isUTF8($text) ? utf8_decode($_CAMILA['page']->camila_worktable_filter) : $_CAMILA['page']->camila_worktable_filter, true);
 			  
+			  //2019
+			  foreach ($_CAMILA['page']->camila_worktable_filter_values as $k => $v) {
+				  $t->setVariable(camila_get_translation('camila.export.template.worktable.filter') . ' ' . $k, isUTF8($text) ? utf8_decode($v) : $v, true);
+			  }
+
 			  $sheetName = substr ( $_REQUEST['camila_xml2pdf'] , 0 , strpos($_REQUEST['camila_xml2pdf'], '_'));
 			  $t->setVariable(camila_get_translation('camila.export.template.worktable.name'), isUTF8($text) ? utf8_decode($sheetName) : $sheetName, true);
           }

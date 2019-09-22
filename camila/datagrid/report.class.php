@@ -1310,6 +1310,7 @@ class report
     }
     
 	function getFilterDescription() {
+		global $_CAMILA;
 		
 		require_once(CAMILA_DIR . 'datagrid/form.class.php');
             require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
@@ -1397,11 +1398,10 @@ class report
                 }
             }
 		
-		
-		
-		
 		$filterstring = '';
 		$condstring   = camila_get_translation('camila.report.condstring') . $addfilterconds;
+		
+		$_CAMILA['page']->camila_worktable_filter_values = Array();
 
 		for ($i = 1; $i <= $this->filternum; $i++) {
 			$val = null;
@@ -1448,7 +1448,10 @@ class report
 			{
 				$v = $_REQUEST['camila_w' . $i . 'v'];
 
-				$filterstring .= ' "' . $v . '"';	
+				$filterstring .= ' "' . $v . '"';
+				//2019
+				$_CAMILA['page']->camila_worktable_filter_values[$i] = $v;
+				
 			}
 		}
 		
