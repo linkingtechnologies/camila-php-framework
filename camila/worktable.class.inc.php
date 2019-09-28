@@ -270,6 +270,9 @@ class CamilaWorkTable
 		
 		//$fields = Array();
 		//$values = Array();
+		//echo "Pre:";
+		//print_r($fields);
+		//print_r($ovs);
 		while (!$result2->EOF) {
 			$b = $result2->fields;
 			//echo $b['default_value'];
@@ -279,19 +282,20 @@ class CamilaWorkTable
 				$predefaults[] = true;
 			}
 			
-			if (in_array($b['col_name'], $ovs)) {
+			//? Check "&& !in_array($b['col_name'], $fields"
+			if (in_array($b['col_name'], $ovs) && !in_array($b['col_name'], $fields)) {
 				$fields[] = $b['col_name'];
 				$values[] = '';
 			}
 			$result2->MoveNext();
 		}
-
+		//echo "Post:";
 		//print_r($fields);
 		//print_r($values);
 		//print_r($overrides);
 
 		$ids = explode(',', $idsString);
-		
+
 		foreach ($ids as $v) {
 			//echo '::'.$v.'::';
 			$r = $this->insertSuggestion($fInfo['tablename'], $tInfo['tablename'], $v, $fields, $values, $predefaults, $overrides);
