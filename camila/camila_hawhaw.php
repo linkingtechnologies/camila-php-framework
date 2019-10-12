@@ -1834,7 +1834,7 @@ class CHAW_input extends HAW_input
         if (trim($this->label)!=':')
 			printf("<label for=\"%s\">%s</label>\n",
                 $this->name, HAW_specchar($this->label, $deck));
-        printf("<input %s name=\"%s\" id=\"%s\" value=\"%s\" %s %s%s%s /> ",
+        printf("<input %s autocomplete=\"off\" name=\"%s\" id=\"%s\" value=\"%s\" %s %s%s%s /> ",
                 $type, $this->name,
                 $this->name, $this->value, $size, $maxlength, $mode, $class_param);
       }
