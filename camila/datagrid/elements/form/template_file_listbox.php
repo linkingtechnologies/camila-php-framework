@@ -26,7 +26,9 @@
 
           global $_CAMILA;
 
+
           $mySelect = new CHAW_select($this->key);
+
           /*if (is_dir($this->basedir)) {
               if ($dh = opendir($this->basedir)) {
                   while (($file = readdir($dh)) !== false) {
@@ -56,18 +58,24 @@
 					$files[] = $filename;
 				}
 			}
+			
+			
 
 			$pDir = CAMILA_APP_PATH . '/plugins/';
 			$pdh  = opendir($pDir);
-			while (false !== ($dir = readdir($pdh))) {
-				$tDir = $pDir. $dir . '/templates/' . $_CAMILA['lang'];
-				if ($dir != '.' && $dir != '..' && is_dir($tDir)) {
-					$dh2  = opendir($tDir);
-					while (false !== ($filename = readdir($dh2))) {
-						$files[] = $filename;
+
+			if (file_exists()) {
+				while (false !== ($dir = readdir($pdh))) {
+					$tDir = $pDir. $dir . '/templates/' . $_CAMILA['lang'];
+					if ($dir != '.' && $dir != '..' && is_dir($tDir)) {
+						$dh2  = opendir($tDir);
+						while (false !== ($filename = readdir($dh2))) {
+							$files[] = $filename;
+						}
 					}
 				}
 			}
+
 
 			sort($files);
 			
