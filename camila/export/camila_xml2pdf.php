@@ -281,6 +281,8 @@
           }
 		  
           $t->generateOutputToString($xml);
+		  
+		  //echo $xml;
 
           $obj = new Xml2Pdf($xml);
           $pdf = $obj->render();
