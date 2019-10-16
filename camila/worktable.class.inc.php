@@ -286,6 +286,7 @@ class CamilaWorkTable
 			if (in_array($b['col_name'], $ovs) && !in_array($b['col_name'], $fields)) {
 				$fields[] = $b['col_name'];
 				$values[] = '';
+				$predefaults[] = false;
 			}
 			$result2->MoveNext();
 		}
