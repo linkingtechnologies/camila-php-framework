@@ -21,6 +21,7 @@
 
   class form_password extends form_textbox
   {
+	  var $originalValue;
 
       function draw(&$form)
       {
@@ -48,6 +49,8 @@
 		  global $_CAMILA;
 		  $camilaAuth = new CamilaAuth();
 		  //$camilaAuth->db = $_CAMILA['db'];
+		  //echo '['.$this->value.'}';
+		  $this->originalValue = $this->value;
 		  $this->value = $camilaAuth->hashPassword($this->value);
 		  }
 	  }
