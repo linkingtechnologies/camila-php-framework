@@ -69,6 +69,67 @@ if (is_object($db)) {
 			}
 			fwrite($fh, "OK");
 			fclose($fh);
+			
+			if (defined('CAMILA_TABLE_TEMPL')) {
+				$lang = $_CAMILA['lang'];
+				$camilaTemplate = new CamilaTemplate($lang);
+	
+				$old = $db->SetFetchMode(ADODB_FETCH_ASSOC);
+
+				$query = 'SELECT name, lang, value FROM ' . CAMILA_TABLE_TEMPL . ' WHERE lang = ' . $db->qstr($lang);
+				
+				$rs = $db->Execute($query);
+				if ($rs) {
+					$cnt = $rs->recordCount();
+					if ($cnt > 0) {
+						while ($arr = $rs->FetchRow()) {
+							//echo $arr;
+							$camilaTemplate->setParameter($arr['name'], $arr['value']);
+							//echo $arr['name'] .'-->'.$arr['value'];
+						}
+					} else {						
+						$params = $camilaTemplate->getParameters();
+
+						$record = array();
+
+						foreach ($params as $key => $val) {
+							$record = Array();
+							$record['name'] = $key;
+							$record['lang'] = $lang;
+							$record['value'] = $val;
+							$updateSQL = $db->AutoExecute(CAMILA_TABLE_TEMPL, $record, 'INSERT', 'name=' . $db->qstr($key) . ' and lang=' . $db->qstr($lang));
+
+							if (!$updateSQL) {
+								//camila_information_text(camila_get_translation('camila.worktable.db.error'));
+								//$success = false;
+								echo "Error rebuild!";
+							}
+						}
+					}
+				}
+				$db->SetFetchMode($old);
+
+				/*$camilaTemplate = new CamilaTemplate($lang);
+				echo $lang;
+				$params = $camilaTemplate->getParameters();
+				
+				$record = array(); # Initialize an array to hold the record data to insert*/
+				
+				foreach ($params as $key => $val) {
+					$record = Array();
+					$record['name'] = $key;
+					$record['lang'] = $lang;
+					$record['value'] = $val;
+					/*$updateSQL = $db->AutoExecute(CAMILA_TABLE_TEMPL, $record, 'UPDATE', 'name=' . $db->qstr($key) . ' and lang=' . $db->qstr($lang));
+					
+					if (!$updateSQL) {
+						camila_information_text(camila_get_translation('camila.worktable.db.error'));
+						$success4 = false;
+					}*/
+
+				}
+			}
+			
 		}
 	//}
 }

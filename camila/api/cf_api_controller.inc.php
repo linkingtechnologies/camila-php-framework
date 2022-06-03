@@ -21,7 +21,8 @@ require_once('../../camila/database.inc.php');
 require_once('../../camila/auth.class.inc.php');
 require_once('../../camila/worktable.class.inc.php');
 
-require_once(CAMILA_LIB_DIR . 'adodb5/adodb-csvlib.inc.php');
+require_once(CAMILA_VENDOR_DIR . '/adodb/adodb-php/adodb-csvlib.inc.php');
+//require_once(CAMILA_LIB_DIR . 'adodb5/adodb-csvlib.inc.php');
 
 $camilaAuth                  = new CamilaAuth();
 $camilaAuth->db              = $_CAMILA['db'];

@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-Copyright (C) 2006-2019 Umberto Bresciani
+Copyright (C) 2006-2021 Umberto Bresciani
 
 Camila PHP Framework is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -103,7 +103,8 @@ class CAMILA_XLS_deck extends CHAW_deck
                                     $text = $column->get_label();
                                     $url  = $column->get_url();
                                     $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, $text);
-                                    $spreadsheet->getActiveSheet()->getCellValueByColumnAndRow($b + 1, $a + 1)->getHyperlink()->setUrl($url);
+									//FIX ME
+                                    //$spreadsheet->getActiveSheet()->getCellValueByColumnAndRow($b + 1, $a + 1)->getHyperlink()->setUrl($url);
                                 } else {
                                     
                                     if (is_object($column) && $column->get_elementtype() == HAW_PLAINTEXT)
@@ -327,7 +328,7 @@ class CAMILA_XLS_deck extends CHAW_deck
             header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
             header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
             header('Pragma: public'); // HTTP/1.0     
-            $writer = IOFactory::createWriter($spreadsheet, 'Xls');
+            $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
             $writer->save('php://output');
             
             

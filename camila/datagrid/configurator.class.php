@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2019 Umberto Bresciani
+    Copyright (C) 2006-2021 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -360,7 +360,6 @@ class configurator
                             $sheet_list .= ',';
                         $sheet_list .= ($i + 1) . ';' . ($i + 1) . ' - ' . $this->boundsheets[$i]['name'];
                     }
-                    
                     $myText = new CHAW_text(camila_get_translation('camila.wizard.choosesheetnum'));
                     $myText->set_br(2);
                     $_CAMILA['page']->add_text($myText);
@@ -417,7 +416,11 @@ class configurator
     
     function xls_count_sheets($file)
     {
-        require_once(CAMILA_LIB_DIR . 'php-excel-reader/excel_reader2.php');
+		if ($this->ends_with($file,'xlsx'))
+			require_once(CAMILA_DIR . 'datagrid/php-excel-reader/excel_reader_wrapper.php');
+			
+		if ($this->ends_with($file,'xls'))
+			require_once(CAMILA_LIB_DIR . 'php-excel-reader/excel_reader2.php');
         
         $data              = new Spreadsheet_Excel_Reader($file, false);
         $this->boundsheets = $data->boundsheets;
@@ -479,24 +482,21 @@ class configurator
         }
         
         if ($filename != '') {
-            require_once(CAMILA_LIB_DIR . 'php-excel-reader/excel_reader2.php');
+			
+			if ($this->ends_with($filename,'xlsx'))
+				require_once(CAMILA_DIR . 'datagrid/php-excel-reader/excel_reader_wrapper.php');
+			
+			if ($this->ends_with($filename,'xls'))
+				require_once(CAMILA_LIB_DIR . 'php-excel-reader/excel_reader2.php');
             
             if ($this->interactive)
                 $data = new Spreadsheet_Excel_Reader(CAMILA_TMP_DIR . '/' . $filename);
             else
                 $data = new Spreadsheet_Excel_Reader($filename);
             
-            $fmt     = str_replace(Array(
-                'd',
-                'm',
-                'y'
-            ), Array(
-                'dd',
-                'mm',
-                'yyyy'
-            ), strtolower($_CAMILA['date_format']));
+            $fmt = str_replace(Array('d','m','y'), Array('dd','mm','yyyy'), strtolower($_CAMILA['date_format']));
             $datefmt = preg_replace('/[^a-z0-9]/', '', $fmt);
-            
+
             $i = 1;
             while ($data->val(1, $i, $sheetnum) != '') {
                 $cols[$i - 1] = $data->val(1, $i, $sheetnum);
@@ -504,22 +504,37 @@ class configurator
                 //print_r($data->sheets[$sheetnum]['cellsInfo']);
                 for ($j = 1; $j <= $data->rowcount($sheetnum); $j++) {
                     $curr = $data->type($j, $i, $sheetnum);
-                    
+					echo $curr;
+    
                     if ($data->sheets[$sheetnum]['cellsInfo'][$j][$i]['hyperlink']['link'] != '')
                         $curr = 'hyperlink';
-                    
-                    if ($curr != '') {
-                        $safefmt = strtolower(preg_replace('/[^a-z0-9]/', '', $data->read16bitstring($data->sheets[$sheetnum]['cellsInfo'][$j][$i]['format'], 0)));
-                        //echo $data->read16bitstring($data->sheets[$sheetnum]['cellsInfo'][$j][$i]['format'],0);
-                        
-                        if ($curr == 'unknown' && $safefmt == $datefmt)
-                            $curr = 'date';
-                        
-                        $types[$i - 1] = $curr;
-                        continue;
-                        
-                    }
-                    
+					
+					//PHPSpreadsheet						
+					$reflector = new ReflectionClass(get_class($data));
+					if ($this->ends_with($reflector->getFileName(),'excel_reader_wrapper.php')) {
+						if ($curr=='n') {
+							$pCell = $data->cell($j, $i, $sheetnum);
+							
+							$isDateTime = $data->isDateTimeCell($pCell);
+							if ($isDateTime) {
+								$curr = 'date';
+								$types[$i - 1] = $curr;
+								continue;
+							}
+						}
+					} else {
+
+						if ($curr != '') {
+							$safefmt = strtolower(preg_replace('/[^a-z0-9]/', '', $data->read16bitstring($data->sheets[$sheetnum]['cellsInfo'][$j][$i]['format'], 0)));
+							//echo $data->read16bitstring($data->sheets[$sheetnum]['cellsInfo'][$j][$i]['format'],0);
+							
+							if ($curr == 'unknown' && $safefmt == $datefmt)
+								$curr = 'date';
+							
+							$types[$i - 1] = $curr;
+							continue;                        
+						}
+					}   
                 }
                 
                 $i++;
@@ -576,6 +591,7 @@ class configurator
                         $forceArr     = $this->camila_get_translation_array('camila.worktable.options.force');
                         $orderDirArr  = $this->camila_get_translation_array('camila.worktable.options.order.dir');
                     }
+					
                     
                     $record = Array();
 					
@@ -655,7 +671,7 @@ class configurator
                     $this->camila_information_text($this->camila_get_translation('camila.worktable.db.error'));
                     $success = false;
                 }
-                
+
                 $j = 0;
                 while ($data->val(18 + $j, 3, $sheetnum + 1) != '') {
                     $title = $data->val(18 + $j, 3, $sheetnum + 1);
@@ -741,9 +757,9 @@ class configurator
                 $myText->set_br(2);
                 $_CAMILA['page']->add_text($myText);
             }
-            
+
         }
-        
+
         if ($this->interactive) {
             $form3               = new phpform('camila', 'cf_worktable_wizard_step2.php', HAW_METHOD_GET);
             $form3->submitbutton = camila_get_translation('camila.wizard.next');
@@ -752,11 +768,11 @@ class configurator
             $form3->process();
             $form3->draw();
         }
-        
+
         return $id;
     }
-    
-    
+
+
     function configure_columns($id, $returl = '')
     {
         global $_CAMILA;
@@ -1776,7 +1792,7 @@ class configurator
     {
         
         global $_CAMILA;
-        
+
         require_once(CAMILA_DIR . 'datagrid/form.class.php');
         require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
         require_once(CAMILA_DIR . 'datagrid/elements/form/filebox.php');
@@ -1827,7 +1843,13 @@ class configurator
             }
 
             if ($filename != '') {
-                require_once(CAMILA_LIB_DIR . 'php-excel-reader/excel_reader2.php');
+ 				
+				if ($this->ends_with($filename,'xlsx'))
+					require_once(CAMILA_DIR . 'datagrid/php-excel-reader/excel_reader_wrapper.php');
+			
+				if ($this->ends_with($filename,'xls'))
+					require_once(CAMILA_LIB_DIR . 'php-excel-reader/excel_reader2.php');
+			
                 $data = new Spreadsheet_Excel_Reader(CAMILA_TMP_DIR . '/' . $filename);
                 
                 $excelColNames = Array();
@@ -1871,6 +1893,9 @@ class configurator
                 $failCount    = 0;
 				$totalRowCount = $data->rowcount($sheetnum);
 				//$trPending = false;
+				
+				$reflector = new ReflectionClass(get_class($data));
+					
 
                 //db fields
                 for ($i = 2; $i <= $totalRowCount; $i++) {
@@ -1899,21 +1924,26 @@ class configurator
                             
                             if ($worktableColName != '') {
                                 if ($types[$k] == 'date' && $data->val($i, $k2 + 1, $sheetnum) != '') {
-                                    $numValue = $data->sheets[$sheetnum]['cellsInfo'][$i][$k2 + 1]['raw'];
+									if ($this->ends_with($reflector->getFileName(),'excel_reader_wrapper.php')) {
+										$dt = $data->excelToDateTimeObject($data->value($i, $k2 + 1, $sheetnum));
+										$record[$worktableColName] = $_CAMILA['db']->BindDate($dt->format('Y-m-d'));
+									} else {
+										$numValue = $data->sheets[$sheetnum]['cellsInfo'][$i][$k2 + 1]['raw'];
                                     
-                                    $utcDays  = floor($numValue - ($data->nineteenFour ? SPREADSHEET_EXCEL_READER_UTCOFFSETDAYS1904 : SPREADSHEET_EXCEL_READER_UTCOFFSETDAYS));
-                                    $utcValue = ($utcDays) * SPREADSHEET_EXCEL_READER_MSINADAY;
-                                    $dateinfo = gmgetdate($utcValue);
-                                    
-                                    $fractionalDay = $numValue - floor($numValue) + .0000001; // The .0000001 is to fix for php/excel fractional diffs
-                                    
-                                    $totalseconds = floor(SPREADSHEET_EXCEL_READER_MSINADAY * $fractionalDay);
-                                    $secs         = $totalseconds % 60;
-                                    $totalseconds -= $secs;
-                                    $hours                     = floor($totalseconds / (60 * 60));
-                                    $mins                      = floor($totalseconds / 60) % 60;
-                                    $dt                        = date('Y-m-d', mktime($hours, $mins, $secs, $dateinfo["mon"], $dateinfo["mday"], $dateinfo["year"]));
-                                    $record[$worktableColName] = $_CAMILA['db']->BindDate($dt);
+										$utcDays  = floor($numValue - ($data->nineteenFour ? SPREADSHEET_EXCEL_READER_UTCOFFSETDAYS1904 : SPREADSHEET_EXCEL_READER_UTCOFFSETDAYS));
+										$utcValue = ($utcDays) * SPREADSHEET_EXCEL_READER_MSINADAY;
+										$dateinfo = gmgetdate($utcValue);
+										
+										$fractionalDay = $numValue - floor($numValue) + .0000001; // The .0000001 is to fix for php/excel fractional diffs
+										
+										$totalseconds = floor(SPREADSHEET_EXCEL_READER_MSINADAY * $fractionalDay);
+										$secs         = $totalseconds % 60;
+										$totalseconds -= $secs;
+										$hours                     = floor($totalseconds / (60 * 60));
+										$mins                      = floor($totalseconds / 60) % 60;
+										$dt                        = date('Y-m-d', mktime($hours, $mins, $secs, $dateinfo["mon"], $dateinfo["mday"], $dateinfo["year"]));
+										$record[$worktableColName] = $_CAMILA['db']->BindDate($dt);
+									}
                                 } elseif ($orig_types[$k] == 'number' && $data->sheets[$sheetnum]['cellsInfo'][$i][$k2 + 1]['raw'] != '')
                                     $record[$worktableColName] = $data->sheets[$sheetnum]['cellsInfo'][$i][$k2 + 1]['raw'];
                                 elseif ($types[$k] == 'hyperlink' && $data->hyperlink($i, $k2 + 1, $sheetnum) != '') {
@@ -2096,6 +2126,15 @@ class configurator
     {
         return str_replace("'", "\'", $string);
     }
+	
+	function ends_with($string, $endString)
+	{
+		$len = strlen($endString);
+		if ($len == 0) {
+			return true;
+		}
+		return (substr($string, -$len) === $endString);
+	}
     
     
     function is_configuration_sheet($data, $sheetnum)

@@ -15,7 +15,9 @@
     You should have received a copy of the GNU General Public License
     along with Camila PHP Framework. If not, see <http://www.gnu.org/licenses/>. */
 
-require_once(CAMILA_LIB_DIR.'adodb5/adodb.inc.php');
+//require_once(CAMILA_LIB_DIR.'adodb5/adodb.inc.php');
+require_once(CAMILA_VENDOR_DIR . '/adodb/adodb-php/adodb.inc.php');
+
 require_once('worktable.class.inc.php');
 
 class CamilaIntegrity

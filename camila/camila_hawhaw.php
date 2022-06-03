@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2019 Umberto Bresciani
+   Copyright (C) 2006-2021 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ $i18n = new CamilaTranslator();
 
 class CHAW_deck extends HAW_deck
 {
-  var $camila_force_js_update_token = '2019';
+  var $camila_force_js_update_token = '2021';
   var $camila_num_tables = 0;
   var $camila_headjsscripts = Array();
   var $camila_headjsscriptsids = Array();
@@ -62,7 +62,7 @@ class CHAW_deck extends HAW_deck
 
   function CHAW_deck($title = '', $alignment=HAW_ALIGN_LEFT, $output=HAW_OUTPUT_AUTOMATIC)
   {
-	  $this->camila_force_js_update_token = date("mdy").'2017';
+	  $this->camila_force_js_update_token = date("mdy").'2021';
       global $_CAMILA;
 
       if (!isset($_REQUEST['camila_print'])) {
@@ -146,7 +146,7 @@ class CHAW_deck extends HAW_deck
 
   function camila_export_get_ext() {
       if(isset($_REQUEST['camila_xls']))
-          return 'xls';
+          return 'xlsx';
 
       if(isset($_REQUEST['camila_csv']))
           return 'csv';
