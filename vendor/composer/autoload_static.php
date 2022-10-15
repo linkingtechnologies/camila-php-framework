@@ -10,6 +10,20 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
         'bf9f5270ae66ac6fa0290b4bf47867b7' => __DIR__ . '/..' . '/adodb/adodb-php/adodb.inc.php',
     );
 
+    public static $prefixLengthsPsr4 = array (
+        's' => 
+        array (
+            'splitbrain\\phpcli\\' => 18,
+        ),
+    );
+
+    public static $prefixDirsPsr4 = array (
+        'splitbrain\\phpcli\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/splitbrain/php-cli/src',
+        ),
+    );
+
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
@@ -17,6 +31,8 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
+            $loader->prefixLengthsPsr4 = ComposerStaticInit53a81370871755f8d209560b0ef96d21::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit53a81370871755f8d209560b0ef96d21::$prefixDirsPsr4;
             $loader->classMap = ComposerStaticInit53a81370871755f8d209560b0ef96d21::$classMap;
 
         }, null, ClassLoader::class);
