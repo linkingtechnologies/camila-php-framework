@@ -504,7 +504,7 @@ class configurator
                 //print_r($data->sheets[$sheetnum]['cellsInfo']);
                 for ($j = 1; $j <= $data->rowcount($sheetnum); $j++) {
                     $curr = $data->type($j, $i, $sheetnum);
-					echo $curr;
+					//echo $curr;
     
                     if ($data->sheets[$sheetnum]['cellsInfo'][$j][$i]['hyperlink']['link'] != '')
                         $curr = 'hyperlink';
