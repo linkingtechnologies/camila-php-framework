@@ -276,7 +276,12 @@ class configurator
     
     function translation_init()
     {
-        $this->i18n = new M2Translator($_REQUEST['lang'], CAMILA_DIR . 'lang/');
+		global $_CAMILA;
+		if ($_CAMILA['worktable_configurator_force_lang'] != '') {
+			$this->i18n = new M2Translator($_CAMILA['worktable_configurator_force_lang'], CAMILA_DIR . 'lang/');
+		} else {
+			$this->i18n = new M2Translator($_REQUEST['lang'], CAMILA_DIR . 'lang/');
+		}
     }
     
     
@@ -686,7 +691,7 @@ class configurator
                     $record['url']      = $record['base_url'];
                     if ($url != '')
                         $record['url'] .= '?filter=' . urlencode($url);
-                    $record['lang']     = $_REQUEST['lang'];
+                    $record['lang']     = $_CAMILA['worktable_configurator_force_lang'] != '' ? $_CAMILA['worktable_configurator_force_lang'] : $_REQUEST['lang'];
                     $record['sequence'] = $j + 1;
                     
                     $insertSQL = $this->db->AutoExecute(CAMILA_APPLICATION_PREFIX . 'camila_bookmarks', $record, 'INSERT');

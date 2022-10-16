@@ -59,6 +59,7 @@ class CamilaPlugins
 		$camilaApp = new CamilaApp();
 		$camilaApp->db = $db;
 		$camilaApp->lang = $lang;
+		$_CAMILA['worktable_configurator_force_lang'] = $lang;
 		$camilaApp->resetTables(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/tables');
 		$camilaApp->resetWorkTables(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/tables');
 		CamilaFileManagement::copyFiles(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/templates/'.$lang,CAMILA_TMPL_DIR.'/'.$lang,'txt',false);
