@@ -144,6 +144,14 @@ function XLS_import($file, $table, $db) {
 }
 
 function XLS_import2($file, $table, $db) {
+	global $_CAMILA;
+	$lang = CAMILA_LANG;
+	if ($_CAMILA['worktable_configurator_force_lang'] != '')
+		$lang = $_CAMILA['worktable_configurator_force_lang'];
+	
+	if ($_REQUEST['lang'] != '')
+		$lang = $_REQUEST['lang'];
+	
 
     $filename=basename($file);
     $sequence = intval(substr($filename,0,strpos($filename,'_')));
@@ -178,7 +186,7 @@ function XLS_import2($file, $table, $db) {
     $scriptname = $res->fields['scriptname'];
     $category = $res->fields['category'];
 
-    $updateSQL = $db->AutoExecute(CAMILA_TABLE_PLANG, $record, 'UPDATE', 'page_url='.$db->qstr($scriptname) . ' and lang='.$db->qstr($_REQUEST['lang']));
+    $updateSQL = $db->AutoExecute(CAMILA_TABLE_PLANG, $record, 'UPDATE', 'page_url='.$db->qstr($scriptname) . ' and lang='.$db->qstr($lang));
     if (!$updateSQL) {
          camila_information_text(camila_get_translation('camila.worktable.db.error'));
     }
@@ -190,7 +198,7 @@ function XLS_import2($file, $table, $db) {
 
     if (trim($category) != '')
     {
-        $res = $db->Execute('select page_url from ' . CAMILA_TABLE_PLANG . ' where short_title='.$db->qstr($category) . ' AND page_url LIKE '.$db->qstr('cf_app.php?cat%') . ' and lang='.$db->qstr($_REQUEST['lang']));
+        $res = $db->Execute('select page_url from ' . CAMILA_TABLE_PLANG . ' where short_title='.$db->qstr($category) . ' AND page_url LIKE '.$db->qstr('cf_app.php?cat%') . ' and lang='.$db->qstr($lang));
         if ($res === false)
             camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $db->ErrorMsg());
 
@@ -199,7 +207,7 @@ function XLS_import2($file, $table, $db) {
         if ($res->RecordCount() == 0)
         {
 
-            $res = $db->Execute('select page_url from ' . CAMILA_TABLE_PLANG . ' where full_title<>'.$db->qstr('-') . ' AND page_url LIKE '.$db->qstr('cf_app.php?cat%') . ' and lang='.$db->qstr($_REQUEST['lang']));
+            $res = $db->Execute('select page_url from ' . CAMILA_TABLE_PLANG . ' where full_title<>'.$db->qstr('-') . ' AND page_url LIKE '.$db->qstr('cf_app.php?cat%') . ' and lang='.$db->qstr($lang));
             if ($res === false)
                 camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $db->ErrorMsg());
 
@@ -209,7 +217,7 @@ function XLS_import2($file, $table, $db) {
             $record['label_order'] = $sequence;
             $record['short_title'] = $category;
             $record['full_title'] = '-';
-            $updateSQL = $db->AutoExecute(CAMILA_TABLE_PLANG, $record, 'UPDATE', 'page_url='.$db->qstr($cat_url) . ' and lang='.$db->qstr($_REQUEST['lang']));
+            $updateSQL = $db->AutoExecute(CAMILA_TABLE_PLANG, $record, 'UPDATE', 'page_url='.$db->qstr($cat_url) . ' and lang='.$db->qstr($lang));
             if (!$updateSQL)
                  camila_information_text(camila_get_translation('camila.worktable.db.error'));
 
