@@ -104,35 +104,6 @@ class CamilaUserInterface
 		$html.='<br />';
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
 	}
-	
-	function insertBootstrapTable($options) {
-		global $_CAMILA;
-		$myTable = new CHAW_table();
-		$_CAMILA['page']->add_table($myTable);
-		
-		$_CAMILA['page']->camila_add_js("<link href=\"".CAMILA_LIB_DIR."bootstrap-table/bootstrap-table.css\" rel=\"stylesheet\">\n");
-		$_CAMILA['page']->camila_add_js("<script type='text/javascript' src='".CAMILA_LIB_DIR."bootstrap-table/bootstrap-table.js'></script>\n");
-		
-		//$_CAMILA['page']->camila_add_js("<script type='text/javascript' src='".CAMILA_LIB_DIR."bootstrap-table/extensions/filter/bootstrap-table-filter.min.js'></script>\n");
-		
-		$_CAMILA['page']->camila_add_js("<script type='text/javascript' src='".CAMILA_LIB_DIR."bootstrap-table/extensions/export/bootstrap-table-export.js'></script>\n");
-				
-		$_CAMILA['page']->camila_add_js("<script type='text/javascript' src='".CAMILA_LIB_DIR."bootstrap-table/bootstrap-table-locale-all.min.js'></script>\n");
-		
-		$_CAMILA['page']->camila_add_js("<script type='text/javascript' src='".CAMILA_LIB_DIR."jquery-tableExport/libs/FileSaver/FileSaver.min.js'></script>\n");
-		
-		$_CAMILA['page']->camila_add_js("<script type='text/javascript' src='".CAMILA_LIB_DIR."jquery-tableExport/libs/js-xlsx/xlsx.core.min.js'></script>\n");
-		
-		$_CAMILA['page']->camila_add_js("<script type='text/javascript' src='".CAMILA_LIB_DIR."jquery-tableExport/tableExport.min.js'></script>\n");
-		
-		
-		$code = "<script>
-\$( document ).ready(function() {
-\$('#table0').bootstrapTable(".json_encode($options).")});
-</script>";
-		$js = new CHAW_js($code);
-		$_CAMILA['page']->add_userdefined($js);
-	}
 
 }
 
