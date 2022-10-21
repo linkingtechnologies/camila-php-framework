@@ -101,7 +101,11 @@ class CamilaWorkTable
 		$query = 'SELECT tablename FROM ' . $this->wtTable . ' WHERE id=' . $id;
 		$result = $this->db->Execute($query);
 		$a = $result->fields;
-		$query = 'SELECT id FROM ' . $a['tablename'];
+		
+		$int = (int) filter_var(substr($a['tablename'],strpos($a['tablename'], '_')), FILTER_SANITIZE_NUMBER_INT);
+		$tablename = CAMILA_TABLE_WORKP.$int;
+		
+		$query = 'SELECT id FROM ' . $tablename;
 		$result2 = $this->db->Execute($query);
 		$result3=$result2->RecordCount();
 		$this->db->SetFetchMode($old);
@@ -119,11 +123,14 @@ class CamilaWorkTable
 		$result = $this->getWorktableSheets();
 		while (!$result->EOF) {
 			$a = $result->fields;
-			$ttemp->setVariable($a['short_title'], $a['tablename'], true);
+			$int = (int) filter_var(substr($a['tablename'],strpos($a['tablename'], '_')), FILTER_SANITIZE_NUMBER_INT);
+			$tablename = CAMILA_TABLE_WORKP.$int;
+			$ttemp->setVariable($a['short_title'], $tablename, true);
+			
 			$result2 = $this->getWorktableColumnsById($a['id']);
 			while (!$result2->EOF) {
 				$b = $result2->fields;
-				$ttemp->setVariable($a['short_title'].'.'.$b['name'], $prefix ? $a['tablename'].'.'.$b['col_name'] : $b['col_name'], true);
+				$ttemp->setVariable($a['short_title'].'.'.$b['name'], $prefix ? $tablename.'.'.$b['col_name'] : $b['col_name'], true);
 				$result2->MoveNext();
 			}
 			$result->MoveNext();
