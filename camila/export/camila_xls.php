@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-Copyright (C) 2006-2021 Umberto Bresciani
+Copyright (C) 2006-2022 Umberto Bresciani
 
 Camila PHP Framework is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,16 +20,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 //error_reporting( E_ALL );
 
 
-require_once CAMILA_LIB_DIR . 'simple-cache/src/CacheException.php';
-require_once CAMILA_LIB_DIR . 'simple-cache/src/CacheInterface.php';
-require_once CAMILA_LIB_DIR . 'simple-cache/src/InvalidArgumentException.php';
+require_once CAMILA_VENDOR_DIR . 'autoload.php';
 
-
-spl_autoload_register(function($class)
+/*spl_autoload_register(function($class)
 {
     $filename = CAMILA_LIB_DIR . str_replace('\\', '/', $class) . '.php';
     require_once($filename);
-});
+});*/
 
 use PhpOffice\PhpSpreadsheet\Helper\Sample;
 use PhpOffice\PhpSpreadsheet\IOFactory;
