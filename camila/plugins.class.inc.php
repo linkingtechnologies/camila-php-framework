@@ -53,6 +53,10 @@ class CamilaPlugins
 	public static function getPluginInformation($pluginId) {
 		return new SimpleXMLElement(file_get_contents(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/conf/plugin.xml'));
 	}
+	
+	public static function getRepositoryInformation($pluginId) {
+		return json_decode(file_get_contents(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/conf/repo.json'), true);
+	}
 
 	public static function install($db, $lang, $pluginId) {
 		global $_CAMILA;
