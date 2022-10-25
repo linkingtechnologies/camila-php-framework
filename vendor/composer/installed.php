@@ -145,5 +145,14 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'tinybutstrong/tinybutstrong' => array(
+            'pretty_version' => 'v3.14.0',
+            'version' => '3.14.0.0',
+            'reference' => '3fd7b9a7c4a23993a401d24dc3eeae0174132ffa',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../tinybutstrong/tinybutstrong',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
     ),
 );

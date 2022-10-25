@@ -102,6 +102,9 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Stringable' => __DIR__ . '/..' . '/myclabs/php-enum/stubs/Stringable.php',
+        'clsTbsDataSource' => __DIR__ . '/..' . '/tinybutstrong/tinybutstrong/tbs_class.php',
+        'clsTbsLocator' => __DIR__ . '/..' . '/tinybutstrong/tinybutstrong/tbs_class.php',
+        'clsTinyButStrong' => __DIR__ . '/..' . '/tinybutstrong/tinybutstrong/tbs_class.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
