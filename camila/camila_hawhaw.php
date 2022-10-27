@@ -46,6 +46,7 @@ class CHAW_deck extends HAW_deck
   var $camila_rtf_export_enabled = true;
   var $camila_csv_export_enabled = false;
   var $camila_xls_export_enabled = false;
+  var $camila_ods_export_enabled = false;
   var $camila_xml2pdf_export_enabled = true;
   var $camila_print_export_enabled = true;
   
@@ -159,6 +160,9 @@ class CHAW_deck extends HAW_deck
 
       if(isset($_REQUEST['camila_xml2pdf']))
           return 'pdf';
+	  
+	  if(isset($_REQUEST['camila_ods']))
+          return 'ods';
 
   }
 
@@ -202,7 +206,7 @@ class CHAW_deck extends HAW_deck
 
   function camila_exporting()
   {
-    if (isset($_REQUEST["camila_inline"]) || isset($_REQUEST["camila_print"]) || isset($_REQUEST["camila_soap"]) || isset($_REQUEST["camila_js"]) || isset($_REQUEST["camila_txt"]) || isset($_REQUEST["camila_pdf"]) || isset($_REQUEST["camila_xls"]) || isset($_REQUEST["camila_csv"]) || isset($_REQUEST["camila_rtf"]) || isset($_REQUEST["camila_xml2pdf"]) || isset($_REQUEST["camila_bookmark"]) || isset($_REQUEST["camila_json"]) || isset($_REQUEST["camila_xml"]))
+    if (isset($_REQUEST["camila_inline"]) || isset($_REQUEST["camila_print"]) || isset($_REQUEST["camila_soap"]) || isset($_REQUEST["camila_js"]) || isset($_REQUEST["camila_txt"]) || isset($_REQUEST["camila_pdf"]) || isset($_REQUEST["camila_xls"]) || isset($_REQUEST["camila_csv"]) || isset($_REQUEST["camila_rtf"]) || isset($_REQUEST["camila_xml2pdf"]) || isset($_REQUEST["camila_bookmark"]) || isset($_REQUEST["camila_json"]) || isset($_REQUEST["camila_xml"]) || isset($_REQUEST["camila_ods"]))
       return true;
     else
       return false;
