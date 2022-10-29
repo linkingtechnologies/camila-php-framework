@@ -110,8 +110,11 @@ class Colors
         $this->set($color);
         fwrite($channel, rtrim($line) . "\n");
 		global $_CAMILA;
-		if ($_CAMILA['cli'])
-			echo(rtrim($line)."\n");
+		if (isset($_CAMILA['cli'])) {
+			if ($_CAMILA['cli']) {
+				echo(rtrim($line)."\n");
+			}
+		}
 		$this->reset();
     }
 
