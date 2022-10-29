@@ -6,12 +6,12 @@ require __DIR__ . './vendor/autoload.php';
 use splitbrain\phpcli\CLI;
 use splitbrain\phpcli\Options;
 
-require CAMILA_DIR. 'cli/Exception.php';
-require CAMILA_DIR. 'cli/TableFormatter.php';
-require CAMILA_DIR. 'cli/Options.php';
-require CAMILA_DIR. 'cli/Base.php';
-require CAMILA_DIR. 'cli/Colors.php';
-require CAMILA_DIR. 'cli/CLI.php';
+require __DIR__. './camila/cli/Exception.php';
+require __DIR__. './camila/cli/TableFormatter.php';
+require __DIR__. './camila/cli/Options.php';
+require __DIR__. './camila/cli/Base.php';
+require __DIR__. './camila/cli/Colors.php';
+require __DIR__. './camila/cli/CLI.php';
 
 class CamilaMasterCli extends CLI
 {
