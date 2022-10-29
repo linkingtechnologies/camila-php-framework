@@ -6,6 +6,13 @@ require __DIR__ . './vendor/autoload.php';
 use splitbrain\phpcli\CLI;
 use splitbrain\phpcli\Options;
 
+require CAMILA_DIR. 'cli/Exception.php';
+require CAMILA_DIR. 'cli/TableFormatter.php';
+require CAMILA_DIR. 'cli/Options.php';
+require CAMILA_DIR. 'cli/Base.php';
+require CAMILA_DIR. 'cli/Colors.php';
+require CAMILA_DIR. 'cli/CLI.php';
+
 class CamilaMasterCli extends CLI
 {
 
@@ -15,6 +22,10 @@ class CamilaMasterCli extends CLI
         $options->registerArgument('slug', 'App slug', true, 'create-app');
 		$options->registerArgument('template', 'App template', true, 'create-app');
 		$options->registerArgument('lang', 'App language', true, 'create-app');
+
+		$options->registerCommand('exe-remote-cmd', 'Execute remote command');
+		$options->registerArgument('url', 'Remote URL', true, 'exe-remote-cmd');
+		$options->registerArgument('cmd', 'Command', true, 'exe-remote-cmd');
     }
 
     protected function main(Options $options)
@@ -22,6 +33,9 @@ class CamilaMasterCli extends CLI
         switch ($options->getCmd()) {
             case 'create-app':
 				$this->createApp($options);
+                break;
+			case 'exe-remote-cmd':
+				$this->executeRemoteCommand($options);
                 break;
             default:
                 $this->error('No known command was called, we show the default help instead:');
