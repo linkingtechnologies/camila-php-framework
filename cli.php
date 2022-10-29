@@ -18,14 +18,12 @@ class CamilaMasterCli extends CLI
 
     protected function setup(Options $options)
     {
+		$this->registerDefaultCommands($options);
+
 		$options->registerCommand('create-app', 'Create new App');
         $options->registerArgument('slug', 'App slug', true, 'create-app');
 		$options->registerArgument('template', 'App template', true, 'create-app');
 		$options->registerArgument('lang', 'App language', true, 'create-app');
-
-		$options->registerCommand('exe-remote-cmd', 'Execute remote command');
-		$options->registerArgument('url', 'Remote URL', true, 'exe-remote-cmd');
-		$options->registerArgument('cmd', 'Command', true, 'exe-remote-cmd');
     }
 
     protected function main(Options $options)
