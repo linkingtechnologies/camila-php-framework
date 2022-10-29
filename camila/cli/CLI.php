@@ -124,6 +124,12 @@ abstract class CLI extends Base
     {
         $this->logMessage($level, $message, $context);
     }
+	
+	public function registerDefaultCommands(Options $options) {
+		$options->registerCommand('exe-remote-cmd', 'Execute remote command');
+		$options->registerArgument('url', 'Remote URL', true, 'exe-remote-cmd');
+		$options->registerArgument('cmd', 'Command', true, 'exe-remote-cmd');
+	}
 
 	public function executeRemoteCommand(Options $options) {
 		$url = $options->getArgs()[0];
