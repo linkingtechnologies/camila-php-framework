@@ -50,18 +50,30 @@ class CamilaMasterCli extends CLI
 			$this->error('Slug already in use!');
 		} else {
 			$zipFile = bin2hex(random_bytes(10)).'.zip';
-			file_put_contents('app/'.$zipFile, file_get_contents('https://github.com/linkingtechnologies/camila-php-framework-app-template-'.$template.'/archive/refs/heads/main.zip'));
-			$zip = new ZipArchive;
-			if ($zip->open('app/'.$zipFile) === TRUE) {
-				$zip->extractTo('app/');
-				$zip->close();
-				rename('app/camila-php-framework-app-template-'.$template.'-main', 'app/'.$slug);
-				unlink('app/'.$zipFile);
-				$this->success('App ' . $options->getArgs()[0] . ' created!');
-				echo shell_exec('cd app && cd ' . $slug . ' && php cli.php init-app ' . $lang);
+			$templateSrc = 'https://github.com/linkingtechnologies/camila-php-framework-app-template-'.$template.'/archive/refs/heads/main.zip';
+
+			/*$handle = fopen($templateSrc, "rb");
+			$contents = fread($handle, filesize($templateSrc));
+			fclose($handle);*/
+			/*if (!file_get_contents($templateSrc)){
+				echo ":-(";
+			}*/
+			if (file_put_contents('app/'.$zipFile, file_get_contents($templateSrc))) {
+				$zip = new ZipArchive;
+				if ($zip->open('app/'.$zipFile) === TRUE) {
+					$zip->extractTo('app/');
+					$zip->close();
+					rename('app/camila-php-framework-app-template-'.$template.'-main', 'app/'.$slug);
+					unlink('app/'.$zipFile);
+					$this->success('App ' . $options->getArgs()[0] . ' created!');
+					//echo shell_exec('cd app && cd ' . $slug . ' && php cli.php init-app ' . $lang);
+				} else {
+					$this->error('Error extracting template zip file');
+				}
 			} else {
-				$this->error('Error extracting template zip file');
-			}
+					$this->error('Error downloading template zip file ' . $templateSrc);
+				}
+			
 		}
 	}
 }
