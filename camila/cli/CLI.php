@@ -1,5 +1,15 @@
 <?php
 
+use splitbrain\phpcli\CLI;
+use splitbrain\phpcli\Options;
+
+require __DIR__. './camila/cli/Exception.php';
+require __DIR__. './camila/cli/TableFormatter.php';
+require __DIR__. './camila/cli/Options.php';
+require __DIR__. './camila/cli/Base.php';
+require __DIR__. './camila/cli/Colors.php';
+require __DIR__. './camila/cli/CLI.php';
+
 /**
  * Class CLI
  *
