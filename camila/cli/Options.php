@@ -487,8 +487,10 @@ class Options
     {
         global $argv;
 		global $_CAMILA;
-		if (isset($_REQUEST['cmd'])) {
-			$argv = explode(' ', 'php ' . $_REQUEST['cmd']);
+		
+		if (getenv('REQUEST_METHOD') == 'POST' || (array_key_exists('REQUEST_METHOD',$_SERVER) && $_SERVER['REQUEST_METHOD']==='POST')) {
+			$p = json_decode(file_get_contents('php://input'), true);
+			$argv = explode(' ', 'php ' . $p['cmd']);
 			//print_r($argv);
 			$_CAMILA['cli'] = true;
 		} else {
