@@ -3,6 +3,7 @@
 namespace splitbrain\phpcli;
 
 use ZipArchive;
+use CamilaApp;
 
 
 /**
