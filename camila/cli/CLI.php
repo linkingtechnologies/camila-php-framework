@@ -2,11 +2,11 @@
 
 use splitbrain\phpcli\Options;
 
-require __DIR__. './camila/cli/Exception.php';
-require __DIR__. './camila/cli/TableFormatter.php';
-require __DIR__. './camila/cli/Options.php';
-require __DIR__. './camila/cli/Base.php';
-require __DIR__. './camila/cli/Colors.php';
+require __DIR__. './Exception.php';
+require __DIR__. './TableFormatter.php';
+require __DIR__. './Options.php';
+require __DIR__. './Base.php';
+require __DIR__. './Colors.php';
 
 /**
  * Class CLI
