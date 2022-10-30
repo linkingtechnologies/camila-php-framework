@@ -1,6 +1,5 @@
 <?php
 
-use splitbrain\phpcli\CLI;
 use splitbrain\phpcli\Options;
 
 require __DIR__. './camila/cli/Exception.php';
