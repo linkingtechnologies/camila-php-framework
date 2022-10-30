@@ -48,7 +48,7 @@ $smartMenusTheme = 'sm-camila';
   $camila_time_start = camila_microtime_float();
   $camila_auth_fail = false;
 
-  if (get_magic_quotes_gpc()) {
+  if (function_exists('get_magic_quotes_gpc') && get_magic_quotes_gpc()) {
       camila_stripslashes_array($_GET);
       camila_stripslashes_array($_POST);
       camila_stripslashes_array($_REQUEST);
