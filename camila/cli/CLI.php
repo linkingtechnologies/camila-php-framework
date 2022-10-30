@@ -153,8 +153,7 @@ abstract class CLI extends Base
                 break;
             default:
                 $this->error('No known command was called, we show the default help instead:');
-        
-        echo $options->help();
+                echo $options->help();
                 exit;
         }
 	}
@@ -166,6 +165,10 @@ abstract class CLI extends Base
 		$options->registerCommand('install-plugin', 'Install plugin');
         $options->registerArgument('name', 'Plugin name', true, 'install-plugin');
 		$options->registerArgument('lang', 'Plugin language', true, 'install-plugin');
+
+		$options->registerCommand('init-plugin', 'Init plugin');
+        $options->registerArgument('name', 'Plugin name', true, 'init-plugin');
+		$options->registerArgument('lang', 'Plugin language', true, 'init-plugin');
 		
 		$options->registerCommand('set-config-var', 'Set config var');
         $options->registerArgument('name', 'Config var name', true, 'set-config-var');
@@ -182,6 +185,9 @@ abstract class CLI extends Base
                 break;
 			case 'install-plugin':
 				$this->installPlugin($options);
+                break;
+			case 'init-plugin':
+				$this->initPlugin($options);
                 break;
 			case 'set-config-var':
 				$this->setConfigVar($options);
@@ -208,12 +214,12 @@ abstract class CLI extends Base
 		$c = array('cmd' => $cmd);
 		$content = json_encode($c);
 		$curl = curl_init($url);
+		//curl_setopt($curl, CURLOPT_VERBOSE, 1);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_HEADER, false);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-type: application/json"));
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		//curl_setopt($curl, CURLOPT_VERBOSE, 1);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($curl, CURLOPT_POST, true);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
 		$response = curl_exec($curl);
@@ -317,11 +323,23 @@ abstract class CLI extends Base
 				fwrite($myfile, $txt);
 				fclose($myfile);
 				global $_CAMILA;
-				CamilaPlugins::install($_CAMILA['db'], $lang, $name);
+				//CamilaPlugins::install($_CAMILA['db'], $lang, $name);
 				$this->success('Plugin ' . $options->getArgs()[0] . ' installed!');
 			} else {
 				$this->error('Error extracting template zip file');
 			}
+		}
+	}
+
+	protected function initPlugin(Options $options) {
+		$name = $options->getArgs()[0];
+		$lang = $options->getArgs()[1];
+		if (!is_dir('plugins/'.$name)) {
+			$this->error('Plugin ' . $name . ' not installed!');
+		} else {
+			global $_CAMILA;
+			CamilaPlugins::install($_CAMILA['db'], $lang, $name);
+			$this->success('Plugin ' . $options->getArgs()[0] . ' initialized!');
 		}
 	}
 	
