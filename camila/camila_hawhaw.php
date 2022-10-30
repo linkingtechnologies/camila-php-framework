@@ -2095,7 +2095,7 @@ class CHAW_linkset extends HAW_linkset
             echo "</ul>\n";
           }
           else*/
-          {
+          else {
             //while (list($key, $val) = each($this->element))
 			foreach ($this->element as $key => $val)
             {
