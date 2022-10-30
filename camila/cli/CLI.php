@@ -153,7 +153,8 @@ abstract class CLI extends Base
                 break;
             default:
                 $this->error('No known command was called, we show the default help instead:');
-                echo $options->help();
+        
+        echo $options->help();
                 exit;
         }
 	}
@@ -210,6 +211,9 @@ abstract class CLI extends Base
 		curl_setopt($curl, CURLOPT_HEADER, false);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-type: application/json"));
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		//curl_setopt($curl, CURLOPT_VERBOSE, 1);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($curl, CURLOPT_POST, true);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
 		$response = curl_exec($curl);
