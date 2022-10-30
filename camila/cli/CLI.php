@@ -1,12 +1,9 @@
 <?php
 
-use splitbrain\phpcli\Options;
+namespace splitbrain\phpcli;
 
-require __DIR__. './Exception.php';
-require __DIR__. './TableFormatter.php';
-require __DIR__. './Options.php';
-require __DIR__. './Base.php';
-require __DIR__. './Colors.php';
+use ZipArchive;
+
 
 /**
  * Class CLI
