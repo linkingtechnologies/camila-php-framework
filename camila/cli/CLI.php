@@ -1,7 +1,5 @@
 <?php
 
-namespace splitbrain\phpcli;
-
 /**
  * Class CLI
  *
