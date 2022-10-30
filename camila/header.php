@@ -404,12 +404,20 @@ $smartMenusTheme = 'sm-camila';
   ksort($f);
   reset($f);
   $count = 0;
-  while (list($k, $v) = each($f)) {
+  /*while (list($k, $v) = each($f)) {
       $fmt.=$v;
       if ($count<2) {
           $fmt.=camila_get_translation('camila.dateformat.separator');
       }
   $count++;
+  }*/
+
+  foreach ($f as $k => $v) {
+	  $fmt.=$v;
+      if ($count<2) {
+          $fmt.=camila_get_translation('camila.dateformat.separator');
+      }
+	  $count++;
   }
 
   $_CAMILA['date_format'] = $fmt;
