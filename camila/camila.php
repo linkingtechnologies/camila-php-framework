@@ -219,7 +219,7 @@ require_once('i18n.inc.php');
       ksort($f);
       reset($f);
       $count = 0;
-      while (list($k, $v) = each($f)) {
+	  foreach ($f as $k => $v) {
           $tFormat.=camila_get_translation('camila.dateformat.placeholder.'.$v);
           if ($count<2) {
               $tFormat.=camila_get_translation('camila.date.separator');
@@ -244,7 +244,7 @@ require_once('i18n.inc.php');
       ksort($f);
       reset($f);
       $count = 0;
-      while (list($k, $v) = each($f)) {
+	  foreach ($f as $k => $v) {
           $fmt.=$v;
           $tFormat.=camila_get_translation('camila.dateformat.placeholder.'.$v);
           if ($count<2) {
