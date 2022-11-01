@@ -84,7 +84,7 @@ class selectform {
   // filter support
   var $filter;
 
-    function selectform($table, $keys, $fields, $order, $orderdirection='asc', $whereclause='', $candelete=false, $caninsert=false)
+    function __construct($table, $keys, $fields, $order, $orderdirection='asc', $whereclause='', $candelete=false, $caninsert=false)
     {
         $this->table = $table;
         $this->keys = explode(',', $keys);

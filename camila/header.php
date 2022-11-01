@@ -795,7 +795,7 @@ $smartMenusTheme = 'sm-camila';
       $camila_linkset_sep = new CHAW_text(' ' . CAMILA_LINKSET_SEPARATOR . ' ');
       $camila_linkset_sep->set_br(0);
 
-      $camila_temp_text = new CHAW_text(camila_get_translation(camila.youarein), HAW_TEXTFORMAT_SMALL | HAW_TEXTFORMAT_ITALIC);
+      $camila_temp_text = new CHAW_text(camila_get_translation('camila.youarein'), HAW_TEXTFORMAT_SMALL | HAW_TEXTFORMAT_ITALIC);
       $camila_temp_text->set_br(0);
       if ($_CAMILA['user_loggedin']) {
           $_CAMILA['page']->add_text($camila_temp_text);

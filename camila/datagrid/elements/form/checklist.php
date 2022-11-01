@@ -28,14 +28,14 @@
       var $checked = 0;
       var $cols = 2;
 
-      function form_checklist(&$form, $field, $title, $labels, $values, $required = false, $validation = false)
+      function __construct(&$form, $field, $title, $labels, $values, $required = false, $validation = false)
       {
           //new form_hidden ($form, $field.'_labels');
           for ($i=0; $i<count($labels); $i++)
               new form_hidden($form, $field.'_labels_'.$i, $labels[$i]);
           new form_hidden($form, $field.'_count', count($labels));
 
-          $this->form_field($form, $field, $title, $required, $validation);
+          parent::__construct($form, $field, $title, $required, $validation);
           $this->labels = $labels;
           $this->values = $values;
           $form->add($this);

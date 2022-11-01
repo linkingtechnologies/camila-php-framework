@@ -169,7 +169,7 @@ class report
 	var $bootstrapbuttonsize = CAMILA_UI_DEFAULT_BTN_SIZE;
     
     
-    function report($stmt, $title, $orderby = '', $direction = 'asc', $mapping = '', $ordermapping = null, $keys = '', $defaultfields = '', $filter = '', $canupdate = true, $candelete = false)
+    function __construct($stmt, $title, $orderby = '', $direction = 'asc', $mapping = '', $ordermapping = null, $keys = '', $defaultfields = '', $filter = '', $canupdate = true, $candelete = false)
     {
         
         global $_CAMILA;
@@ -740,7 +740,9 @@ class report
         
         reset($this->fields);
         $noprint = 0;
-        while ($fld = each($this->fields)) {
+        //while ($fld = each($this->fields)) {
+		foreach ($this->fields as $key => $val) {
+			$fld = [$key, $val];
             if (!$fld[1]->print)
                 $noprint++;
         }
@@ -753,7 +755,9 @@ class report
         
         $count = 0;
         reset($this->fields);
-        while ($fld = each($this->fields)) {
+        //while ($fld = each($this->fields)) {
+		foreach ($this->fields as $key => $val) {
+			$fld = [$key, $val];
             if ($fld[1]->print && !($_CAMILA['page']->camila_exporting() && $fld[1]->dummy) && !($_CAMILA['page']->camila_exporting() && !(strpos($fld[1]->field, 'camilakey_') === false))) {
                 if (( /*isset($_REQUEST['d']) && $_REQUEST['d'] == 0*/ $this->direction == 'asc') && ($fld[1]->field == $orderby))
                     $fld[1]->draw_header($myRow, basename($_SERVER['PHP_SELF']) . $this->urlappendnoorder . '&d=1&f0=' . urlencode($fld[1]->field));
@@ -773,7 +777,9 @@ class report
             $row = $this->res->fields;
             
             reset($this->fields);
-            while ($fld = each($this->fields)) {
+            //while ($fld = each($this->fields)) {
+			foreach ($this->fields as $key => $val) {
+				$fld = [$key, $val];
                 $this->fields[$fld[1]->field]->row = $line;
                 if ($this->fields[$fld[1]->field]->type == 'dummy')
                     continue;
@@ -799,7 +805,9 @@ class report
         $currval = '';
         
         reset($this->fields);
-        while ($fld = each($this->fields)) {
+        //while ($fld = each($this->fields)) {
+		foreach ($this->fields as $key => $val) {
+			$fld = [$key, $val];
             if ($fld[1]->print && !($_CAMILA['page']->camila_exporting() && $fld[1]->dummy) && !($_CAMILA['page']->camila_exporting() && (!(strpos($fld[1]->field, 'camilakey_') === false)))) {
                 $fld[1]->draw($myRow, $this->fields);
                 
@@ -1140,7 +1148,9 @@ class report
 			
             reset($this->fields);
 			//print_r($_REQUEST);
-            while ($fld = each($this->fields)) {
+            //while ($fld = each($this->fields)) {
+			foreach ($this->fields as $key => $val) {
+				$fld = [$key, $val];
                 if ($fld[1]->print && $fld[1]->onprint == '' && substr($fld[1]->field, 0, 10) != 'camilakey_' && substr($fld[1]->field, 0, 8) != 'cf_bool_' && substr($fld[1]->field, 0, 11) != 'cf_formula_' && substr($fld[1]->field, 0, 11) != 'cf_query_' && !($fld[1]->field == 'count(*)' && ($this->gbyconditionpresent))) {
 					//print_r($fld);
 					$fieldname = '_' . $fld[1]->metatype . '_' . $fld[1]->field;
@@ -1329,7 +1339,9 @@ class report
 			
             reset($this->fields);
 			//print_r($_REQUEST);
-            while ($fld = each($this->fields)) {
+            //while ($fld = each($this->fields)) {
+			foreach ($this->fields as $key => $val) {
+				$fld = [$key, $val];
                 if ($fld[1]->print && $fld[1]->onprint == '' && substr($fld[1]->field, 0, 10) != 'camilakey_' && substr($fld[1]->field, 0, 8) != 'cf_bool_' && substr($fld[1]->field, 0, 11) != 'cf_formula_' && substr($fld[1]->field, 0, 11) != 'cf_query_' && !($fld[1]->field == 'count(*)' && ($this->gbyconditionpresent))) {
 					//print_r($fld);
 					$fieldname = '_' . $fld[1]->metatype . '_' . $fld[1]->field;
