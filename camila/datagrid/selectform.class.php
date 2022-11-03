@@ -95,8 +95,9 @@ class selectform {
         $this->candelete = $candelete;
         $this->caninsert = $caninsert;
 
-        reset($this->keys );
-        reset($this->fields );
+        reset($this->keys);
+		if (is_array($this->fields))
+			reset($this->fields);
     }
 
     // process input from selection

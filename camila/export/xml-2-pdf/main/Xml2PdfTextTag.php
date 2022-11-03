@@ -359,7 +359,7 @@ Class Xml2PdfTextTag extends Xml2PdfTag {
                 $foo = '';
                 $indent = 0;
                 for($i=0 ; $i<$lineLength ; $i++) {
-                    $char = $tmp{$i}; 
+                    $char = $tmp[$i]; 
                     if($char == " ") {
                         $spacePos = $i;
                         $foo .= " ";

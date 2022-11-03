@@ -69,7 +69,7 @@
                   $text = new CHAW_text($this->labels[$count]);
                   $form->add_text($text);
               } else {
-                  if (in_array($fields[$count], $this->value)) {
+                  if ($this->value != null && in_array($fields[$count], $this->value)) {
                       $myCheckbox = new CHAW_checkbox($this->key . '_'.$count, $this->values[$count], $this->labels[$count], HAW_SELECTED);
                   } else
                       $myCheckbox = new CHAW_checkbox($this->key . '_'.$count, $this->values[$count], $this->labels[$count]);

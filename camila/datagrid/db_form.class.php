@@ -320,8 +320,9 @@ $(document).ready(function(){
               if (isset($_REQUEST['camila_print']))
                   $this->fields[$afield[1]->field]->updatable = false;
               if (!$afield[1]->dummy && $afield[1]->field != '') {
-                  $val = each($vals);
-                  $this->fields[$afield[1]->field]->value = $val[1];
+                  //$val = each($vals);
+				  //$this->fields[$afield[1]->field]->value = $val[1];
+				  $this->fields[$afield[1]->field]->value = $vals[$afield[1]->field];
               }
           }
 
@@ -526,19 +527,19 @@ $(document).ready(function(){
 
       function draw_header()
       {
-          phpform::draw_header();
-          phpform::add_hidden($this->table . '_sess_key', serialize($this->keyvalue));
-          phpform::add_hidden($this->table . '_sess_mode', $this->mode);
+          parent::draw_header();
+          parent::add_hidden($this->table . '_sess_key', serialize($this->keyvalue));
+          parent::add_hidden($this->table . '_sess_mode', $this->mode);
           if (isset($_REQUEST['camila_returl']) && ($_REQUEST['camila_returl'] != ''))
-              phpform::add_hidden('camila_returl', $_REQUEST['camila_returl']);
+              parent::add_hidden('camila_returl', $_REQUEST['camila_returl']);
           if (isset($_REQUEST['camila_preferences']) )
-              phpform::add_hidden('camila_preferences', $_REQUEST['camila_preferences']);
+              parent::add_hidden('camila_preferences', $_REQUEST['camila_preferences']);
 		  
 		  $this->insert_suggest_modal();
 
       }
 
-      function draw()
+      function draw($drawSubmit=true)
       {
           if ($this->mapping != '')
               $this->selform->mapping = $this->mappingseparator.$this->mapping.$this->mappingseparator;
@@ -593,11 +594,11 @@ $(document).ready(function(){
 	          }
 
               //if (!$this->_data_inserted && !$this->_data_updated)
-              phpform::draw();
+              parent::draw();
           }
       }
 
-      function process()
+      function process($force=false)
       {
           if ($this->mapping != '')
               $this->selform->mapping = $this->mappingseparator.$this->mapping.$this->mappingseparator;
@@ -640,7 +641,10 @@ $(document).ready(function(){
               // If there was no selform, or selform selected nothing
               // try to see if the user has set keyvalue
               // how user can set keyvalue? using $form->keyvalue = "xxx,xxx"
-              if (!$selected && count($this->keyvalue) > 0)
+			  //PHP8 compatibility
+			  if ($this->keyvalue == null || is_bool($this->keyvalue))
+				  $selected = true;
+              elseif (!$selected && count($this->keyvalue) > 0)
                   $selected = true;
 
               // Something filled keyvalue, try loading the values into phpdbform

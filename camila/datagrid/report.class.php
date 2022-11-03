@@ -270,7 +270,7 @@ class report
             $b                    = $a + 1;
             $this->stmtfields[$a] = str_replace('___CAMILA_COMMA___', ',', $this->stmtfields[$a]);
 
-            if (isset($_REQUEST['camila_xml2pdf']) || ($_CAMILA['page']->camila_exporting() && $_REQUEST['camila_visible_cols_only'] != 'y') || (((!isset($_REQUEST['count']) && !isset($_REQUEST['camila_count'])) && $this->defaultfields != '' && strpos(',' . $this->defaultfields . ',', ',' . $this->stmtfields[$a] . ',') !== false) || ((isset($_REQUEST['f' . $b]) && $_REQUEST['f' . $b] == 'y')) || (in_array('f' . $b, $_REQUEST['camila_f'])) || ((isset($_REQUEST['camila_f' . $b]) && $_REQUEST['camila_f' . $b] == 'y')))) {
+            if (isset($_REQUEST['camila_xml2pdf']) || ($_CAMILA['page']->camila_exporting() && $_REQUEST['camila_visible_cols_only'] != 'y') || (((!isset($_REQUEST['count']) && !isset($_REQUEST['camila_count'])) && $this->defaultfields != '' && strpos(',' . $this->defaultfields . ',', ',' . $this->stmtfields[$a] . ',') !== false) || ((isset($_REQUEST['f' . $b]) && $_REQUEST['f' . $b] == 'y')) || ($_REQUEST['camila_f'] != null && in_array('f' . $b, $_REQUEST['camila_f'])) || ((isset($_REQUEST['camila_f' . $b]) && $_REQUEST['camila_f' . $b] == 'y')))) {
                 $arr = unserialize($_COOKIE[$this->editcolumscookiename]);
                 //print_r($arr);
  
@@ -370,7 +370,7 @@ class report
             $this->urlappend = '?count=' . $this->stmtnumoffields;
         
         for ($b = 1; $b <= $this->stmtnumoffields; $b++) {
-            if (((!isset($_REQUEST['count']) && !isset($_REQUEST['camila_count'])) && $this->defaultfields != '' && strpos(',' . $this->defaultfields . ',', ',' . $this->stmtfields[$b - 1] . ',') !== false) || ((isset($_REQUEST['f' . $b]) && $_REQUEST['f' . $b] == 'y')) || (in_array('f' . $b, $_REQUEST['camila_f'])) || ((isset($_REQUEST['camila_f' . $b]) && $_REQUEST['camila_f' . $b] == 'y'))) {
+            if (((!isset($_REQUEST['count']) && !isset($_REQUEST['camila_count'])) && $this->defaultfields != '' && strpos(',' . $this->defaultfields . ',', ',' . $this->stmtfields[$b - 1] . ',') !== false) || ((isset($_REQUEST['f' . $b]) && $_REQUEST['f' . $b] == 'y')) || ($_REQUEST['camila_f'] != null && in_array('f' . $b, $_REQUEST['camila_f'])) || ((isset($_REQUEST['camila_f' . $b]) && $_REQUEST['camila_f' . $b] == 'y'))) {
                 $this->urlappend .= '&f' . $b . '=' . 'y';
                 //echo $afields[$b-1];
             }
@@ -386,7 +386,7 @@ class report
             $this->orderby = $oby;
             
             
-            if ((array_key_exists($oby, $this->order_mapping)))
+            if ($this->order_mapping != null && (array_key_exists($oby, $this->order_mapping)))
                 $this->orderby = /*$_CAMILA['db']->Quote(*/ $this->order_mapping[$oby] /*)*/ ;
         }
         $count = 1;
@@ -1337,7 +1337,8 @@ class report
 			if ($this->filternum == 0)
                 $this->filternum = 1;
 			
-            reset($this->fields);
+            if ($this->fields != null)
+				reset($this->fields);
 			//print_r($_REQUEST);
             //while ($fld = each($this->fields)) {
 			foreach ($this->fields as $key => $val) {

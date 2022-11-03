@@ -183,7 +183,7 @@ Class Pdf extends FPDF {
      *
      * @return void
      */
-	public function AddPage($orientation='', $size = '') {
+	public function AddPage($orientation='', $size = '', $rotation = 0) {
         parent::AddPage($orientation, $size);
         foreach($this->filigree as $o) {
             if(is_a($o, 'xml2pdf_tag_filigree')) {
