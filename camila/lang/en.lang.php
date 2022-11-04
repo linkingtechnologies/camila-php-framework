@@ -43,7 +43,7 @@ camila.wizard.prev = Previous
 camila.wizard.skip = skip this step
 camila.wizard.or = Or
 
-camila.wizard.choosexlsfile = Please choose Excel file which contains data and/or structure of the new File Card and then click 'Upload'. Only .xls files are supported!
+camila.wizard.choosexlsfile = Please choose Excel file which contains data and/or structure of the new File Card and then click 'Upload'. Only .xls and .xlsx files are supported!
 camila.wizard.filecardcreated = The File Card has been successfully created. Click 'Next' to proceed with configuration.
 camila.wizard.choosedescandtitle = Please type title and description for the new File Card.
 camila.wizard.choosesheetnum = Please choose Excel Sheet number which contains File Card data.
