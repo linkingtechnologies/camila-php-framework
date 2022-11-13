@@ -19,6 +19,10 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
         array (
             'ZipStream\\' => 10,
         ),
+        'W' => 
+        array (
+            'Wizaplace\\Etl\\' => 14,
+        ),
         'S' => 
         array (
             'Symfony\\Polyfill\\Mbstring\\' => 26,
@@ -35,6 +39,10 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
             'MyCLabs\\Enum\\' => 13,
             'Matrix\\' => 7,
         ),
+        'F' => 
+        array (
+            'Flow\\JSONPath\\' => 14,
+        ),
         'C' => 
         array (
             'Complex\\' => 8,
@@ -45,6 +53,10 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
         'ZipStream\\' => 
         array (
             0 => __DIR__ . '/..' . '/maennchen/zipstream-php/src',
+        ),
+        'Wizaplace\\Etl\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wizaplace/php-etl/src',
         ),
         'Symfony\\Polyfill\\Mbstring\\' => 
         array (
@@ -74,6 +86,10 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
         'Matrix\\' => 
         array (
             0 => __DIR__ . '/..' . '/markbaker/matrix/classes/src',
+        ),
+        'Flow\\JSONPath\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/softcreatr/jsonpath/src',
         ),
         'Complex\\' => 
         array (

@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "adodb/adodb-php",
-            "version": "v5.22.3",
-            "version_normalized": "5.22.3.0",
+            "version": "v5.22.4",
+            "version_normalized": "5.22.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ADOdb/ADOdb.git",
-                "reference": "b937df7f7efde5c98c501f6fc472ec3ab276c3c9"
+                "reference": "bb87e83338c99038986878ac78f680becf9e8091"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ADOdb/ADOdb/zipball/b937df7f7efde5c98c501f6fc472ec3ab276c3c9",
-                "reference": "b937df7f7efde5c98c501f6fc472ec3ab276c3c9",
+                "url": "https://api.github.com/repos/ADOdb/ADOdb/zipball/bb87e83338c99038986878ac78f680becf9e8091",
+                "reference": "bb87e83338c99038986878ac78f680becf9e8091",
                 "shasum": ""
             },
             "require": {
@@ -21,7 +21,7 @@
             "require-dev": {
                 "phpunit/phpunit": "^8.5"
             },
-            "time": "2022-09-06T10:02:30+00:00",
+            "time": "2022-10-28T17:34:17+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -791,18 +791,90 @@
             "install-path": "../rospdf/pdf-php"
         },
         {
-            "name": "symfony/polyfill-mbstring",
-            "version": "v1.26.0",
-            "version_normalized": "1.26.0.0",
+            "name": "softcreatr/jsonpath",
+            "version": "0.7.6",
+            "version_normalized": "0.7.6.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "9344f9cb97f3b19424af1a21a3b0e75b0a7d8d7e"
+                "url": "https://github.com/SoftCreatR/JSONPath.git",
+                "reference": "e04c02cb78bcc242c69d17dac5b29436bf3e1076"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/9344f9cb97f3b19424af1a21a3b0e75b0a7d8d7e",
-                "reference": "9344f9cb97f3b19424af1a21a3b0e75b0a7d8d7e",
+                "url": "https://api.github.com/repos/SoftCreatR/JSONPath/zipball/e04c02cb78bcc242c69d17dac5b29436bf3e1076",
+                "reference": "e04c02cb78bcc242c69d17dac5b29436bf3e1076",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=7.1,<8.0"
+            },
+            "replace": {
+                "flow/jsonpath": "*"
+            },
+            "require-dev": {
+                "phpunit/phpunit": ">=7.0",
+                "roave/security-advisories": "dev-latest",
+                "squizlabs/php_codesniffer": "^3.5"
+            },
+            "time": "2022-09-27T09:27:12+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Flow\\JSONPath\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Stephen Frank",
+                    "email": "stephen@flowsa.com",
+                    "homepage": "https://prismaticbytes.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Sascha Greuel",
+                    "email": "hello@1-2.dev",
+                    "homepage": "https://1-2.dev",
+                    "role": "Developer"
+                }
+            ],
+            "description": "JSONPath implementation for parsing, searching and flattening arrays",
+            "support": {
+                "email": "hello@1-2.dev",
+                "forum": "https://github.com/SoftCreatR/JSONPath/discussions",
+                "issues": "https://github.com/SoftCreatR/JSONPath/issues",
+                "source": "https://github.com/SoftCreatR/JSONPath"
+            },
+            "funding": [
+                {
+                    "url": "https://ecologi.com/softcreatr?r=61212ab3fc69b8eb8a2014f4",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/softcreatr",
+                    "type": "github"
+                }
+            ],
+            "install-path": "../softcreatr/jsonpath"
+        },
+        {
+            "name": "symfony/polyfill-mbstring",
+            "version": "v1.27.0",
+            "version_normalized": "1.27.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-mbstring.git",
+                "reference": "8ad114f6b39e2c98a8b0e3bd907732c207c2b534"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/8ad114f6b39e2c98a8b0e3bd907732c207c2b534",
+                "reference": "8ad114f6b39e2c98a8b0e3bd907732c207c2b534",
                 "shasum": ""
             },
             "require": {
@@ -814,11 +886,11 @@
             "suggest": {
                 "ext-mbstring": "For best performance"
             },
-            "time": "2022-05-24T11:49:31+00:00",
+            "time": "2022-11-03T14:55:06+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.26-dev"
+                    "dev-main": "1.27-dev"
                 },
                 "thanks": {
                     "name": "symfony/polyfill",
@@ -858,7 +930,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.26.0"
+                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.27.0"
             },
             "funding": [
                 {
@@ -922,6 +994,87 @@
                 "source": "https://github.com/Skrol29/tinybutstrong/tree/v3.14.0"
             },
             "install-path": "../tinybutstrong/tinybutstrong"
+        },
+        {
+            "name": "wizaplace/php-etl",
+            "version": "2.2",
+            "version_normalized": "2.2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wizaplace/php-etl.git",
+                "reference": "d35f42335ca7be8e2ae94a0e8576ee658828a1f3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wizaplace/php-etl/zipball/d35f42335ca7be8e2ae94a0e8576ee658828a1f3",
+                "reference": "d35f42335ca7be8e2ae94a0e8576ee658828a1f3",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~7.4|~8.0",
+                "softcreatr/jsonpath": "^0.7.2"
+            },
+            "require-dev": {
+                "ext-json": "*",
+                "ext-pdo": "*",
+                "ext-pdo_sqlite": "*",
+                "ext-xmlreader": "*",
+                "friendsofphp/php-cs-fixer": "^2.17",
+                "infection/infection": ">=0.15",
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^0.12.18",
+                "phpstan/phpstan-deprecation-rules": "^0.12.2",
+                "phpstan/phpstan-strict-rules": "^0.12.2",
+                "phpunit/phpunit": ">=8",
+                "squizlabs/php_codesniffer": "^3.5"
+            },
+            "suggest": {
+                "ext-PDO": "Required for various extractors and loaders. Most users will want this.",
+                "ext-json": "Required for JSON extractor and JSON Encode/Decode transformers.",
+                "ext-pdo_mysql": "Required to work with MySQL databases.",
+                "ext-pdo_pgsql": "Required to work with PostgreSQL databases.",
+                "ext-pdo_sqlite": "Required to work with SQLite databases.",
+                "ext-pdo_sqlsrv": "Required to work with MS SQL Server databases.",
+                "ext-xmlreader": "Required for XML extractor."
+            },
+            "time": "2022-03-09T13:35:55+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Wizaplace\\Etl\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Wizaplace DevTeam",
+                    "email": "dev@wizacha.com"
+                },
+                {
+                    "name": "Leonardo Marquine",
+                    "email": "leonardomarquine@gmail.com"
+                }
+            ],
+            "description": "Extract, Transform and Load data using this PHP written migration library.",
+            "keywords": [
+                "data",
+                "etl",
+                "extract",
+                "extraction",
+                "load",
+                "symfony",
+                "transform",
+                "transformation"
+            ],
+            "support": {
+                "issues": "https://github.com/wizaplace/php-etl/issues",
+                "source": "https://github.com/wizaplace/php-etl/tree/2.2"
+            },
+            "install-path": "../wizaplace/php-etl"
         }
     ],
     "dev": true,
