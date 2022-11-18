@@ -230,7 +230,7 @@ class ADODB_pdo extends ADOConnection {
 	function Concat()
 	{
 		$args = func_get_args();
-		if($this->_driver instanceof ADODB_pdo && method_exists($this->_driver, 'Concat')) {
+		if(method_exists($this->_driver, 'Concat')) {
 			return call_user_func_array(array($this->_driver, 'Concat'), $args);
 		}
 
@@ -248,7 +248,7 @@ class ADODB_pdo extends ADOConnection {
 	public function param($name,$type='C') {
 
 		$args = func_get_args();
-		if($this->_driver instanceof ADODB_pdo && method_exists($this->_driver, 'param')) {
+		if(method_exists($this->_driver, 'param')) {
 			// Return the driver specific entry, that mimics the native driver
 			return call_user_func_array(array($this->_driver, 'param'), $args);
 		}
@@ -441,14 +441,14 @@ class ADODB_pdo extends ADOConnection {
 	 */
 	function SetAutoCommit($auto_commit)
 	{
-		if($this->_driver instanceof ADODB_pdo && method_exists($this->_driver, 'SetAutoCommit')) {
+		if(method_exists($this->_driver, 'SetAutoCommit')) {
 			$this->_driver->SetAutoCommit($auto_commit);
 		}
 	}
 
 	function SetTransactionMode($transaction_mode)
 	{
-		if($this->_driver instanceof ADODB_pdo && method_exists($this->_driver, 'SetTransactionMode')) {
+		if(method_exists($this->_driver, 'SetTransactionMode')) {
 			return $this->_driver->SetTransactionMode($transaction_mode);
 		}
 
@@ -457,7 +457,7 @@ class ADODB_pdo extends ADOConnection {
 
 	function beginTrans()
 	{
-		if($this->_driver instanceof ADODB_pdo && method_exists($this->_driver, 'beginTrans')) {
+		if(method_exists($this->_driver, 'beginTrans')) {
 			return $this->_driver->beginTrans();
 		}
 
@@ -477,7 +477,7 @@ class ADODB_pdo extends ADOConnection {
 	function commitTrans($ok=true)
 	{
 
-		if($this->_driver instanceof ADODB_pdo && method_exists($this->_driver, 'commitTrans')) {
+		if(method_exists($this->_driver, 'commitTrans')) {
 			return $this->_driver->commitTrans($ok);
 		}
 
@@ -502,7 +502,7 @@ class ADODB_pdo extends ADOConnection {
 
 	function RollbackTrans()
 	{
-		if($this->_driver instanceof ADODB_pdo && method_exists($this->_driver, 'RollbackTrans')) {
+		if(method_exists($this->_driver, 'RollbackTrans')) {
 			return $this->_driver->RollbackTrans();
 		}
 
@@ -544,7 +544,7 @@ class ADODB_pdo extends ADOConnection {
 
 	public function createSequence($seqname='adodbseq',$startID=1)
 	{
-		if($this->_driver instanceof ADODB_pdo && method_exists($this->_driver, 'createSequence')) {
+		if(method_exists($this->_driver, 'createSequence')) {
 			return $this->_driver->createSequence($seqname, $startID);
 		}
 
@@ -553,7 +553,7 @@ class ADODB_pdo extends ADOConnection {
 
 	function DropSequence($seqname='adodbseq')
 	{
-		if($this->_driver instanceof ADODB_pdo && method_exists($this->_driver, 'DropSequence')) {
+		if(method_exists($this->_driver, 'DropSequence')) {
 			return $this->_driver->DropSequence($seqname);
 		}
 
@@ -562,7 +562,7 @@ class ADODB_pdo extends ADOConnection {
 
 	function GenID($seqname='adodbseq',$startID=1)
 	{
-		if($this->_driver instanceof ADODB_pdo && method_exists($this->_driver, 'GenID')) {
+		if(method_exists($this->_driver, 'GenID')) {
 			return $this->_driver->GenID($seqname, $startID);
 		}
 
