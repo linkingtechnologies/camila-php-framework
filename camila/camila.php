@@ -681,6 +681,6 @@ function camila_worktable_get_table_id($name)
 
   
   if (!$_CAMILA['db'])
-    camila_error_page("DB ".CAMILA_DB_DSN." NOT AVAILABLE... ".$_CAMILA['db_error']);
+    camila_error_page("DB NOT AVAILABLE... ".$_CAMILA['db_error']);
 
 ?>
