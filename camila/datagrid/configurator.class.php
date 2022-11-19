@@ -1033,7 +1033,7 @@ class configurator
         //    $result = $this->db->Execute('select * from ' . CAMILA_TABLE_WORKC . ' where wt_id='.$this->db->qstr($id) . ' and applied_to_database = ' . $this->db->qstr('n') . ' order by sequence');
         
         if ($result === false)
-            camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
+            camila_error_page(camila_get_translation('camila.sqlerror') . ' (!) ' . $this->db->ErrorMsg());
         
         while (!$result->EOF) {
             $schema .= $this->get_xml_schema_tag($result->fields);
@@ -1043,7 +1043,7 @@ class configurator
         $schema .= "</table>\n";
         $schema .= "</schema>\n";
 		
-		echo $schema;
+		//echo $schema;
         
         $filename = CAMILA_TMP_DIR . '/' . CAMILA_TABLE_WORKP . $id . '.xml';
         $f        = fopen($filename, 'w');
