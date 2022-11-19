@@ -510,12 +510,12 @@ class configurator
                 for ($j = 1; $j <= $data->rowcount($sheetnum); $j++) {
                     $curr = $data->type($j, $i, $sheetnum);
 					//echo $curr;
-					try {
+					//FIX ME
+					/*try {
 						if ($data->sheets[$sheetnum]['cellsInfo'][$j][$i]['hyperlink']['link'] != '')
 							$curr = 'hyperlink';
 					} catch (Exception $e) {
-						//Fix me
-					}
+					}*/
 					//PHPSpreadsheet						
 					$reflector = new ReflectionClass(get_class($data));
 					if ($this->ends_with($reflector->getFileName(),'excel_reader_wrapper.php')) {
