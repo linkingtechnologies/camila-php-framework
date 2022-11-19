@@ -632,7 +632,7 @@ class configurator
 							camila_information_text(camila_get_translation('camila.worktable.db.error'));
 						else
 							echo ($this->camila_get_translation('camila.worktable.db.error'));
-						print_r($record);
+						//print_r($record);
                         echo "1.3";
 						$success = false; 
                     }
