@@ -21,6 +21,7 @@
 		<field name="caninsert" type="C" size="1"></field>
 		<field name="candelete" type="C" size="1"></field>
 		<field name="sequence" type="I">
+		</field>
 		<field name="category" type="C" size="50"></field>
 		<field name="category_scriptname" type="C" size="50"></field>
 		<field name="filter" type="C" size="250"></field>
@@ -35,5 +36,7 @@
 		</field>
 		<field name="share_candelete" type="C" size="3">
 		</field>
+
+		
 	</table>
 </schema>
