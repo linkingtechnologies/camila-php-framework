@@ -66,6 +66,10 @@ function camila_autoloader($class) {
 		case 'CamilaTemplate':
 			include(CAMILA_DIR . 'template.class.inc.php');
 			break;
+		
+		case 'CamilaAppCli':
+			include(CAMILA_DIR . 'cli.app.inc.php');
+			break;
 
 		default:
 			if (substr($class, 0, 5) === 'form_') {

@@ -2,6 +2,10 @@
 
 namespace splitbrain\phpcli;
 
+require '../../vendor/autoload.php';
+require '../../vendor/adodb/adodb-php/adodb-xmlschema03.inc.php';
+
+
 use ZipArchive;
 use CamilaApp;
 use CamilaPlugins;
@@ -141,9 +145,18 @@ abstract class CLI extends Base
         $options->registerArgument('slug', 'App slug', true, 'create-app');
 		$options->registerArgument('template', 'App template', true, 'create-app');
 		$options->registerArgument('lang', 'App language', true, 'create-app');
+		
+		$options->registerCommand('execute-schema', 'Execute AXMLS schema');
+		$options->registerArgument('dbplatform', '', true, 'execute-schema');
+		$options->registerArgument('dbhost', '', true, 'execute-schema');
+		$options->registerArgument('dbname', '', true, 'execute-schema');
+		$options->registerArgument('dbuser', '', true, 'execute-schema');
+		$options->registerArgument('dbpass', '', true, 'execute-schema');
+		$options->registerArgument('xmlschema', '', true, 'execute-schema');
 	}
 	
 	public function handleMasterCommands(Options $options) {
+		error_reporting(E_ERROR | E_PARSE);
 	    switch ($options->getCmd()) {
             case 'create-app':
 				$this->createApp($options);
@@ -151,7 +164,10 @@ abstract class CLI extends Base
 			case 'exe-remote-cmd':
 				$this->executeRemoteCommand($options);
                 break;
-            default:
+            case 'execute-schema':
+				$this->executeSchema($options);
+                break;
+			default:
                 $this->error('No known command was called, we show the default help instead:');
                 echo $options->help();
                 exit;
@@ -377,6 +393,33 @@ abstract class CLI extends Base
 			$this->error('Var ' . $name . ' not found!');
 			unlink('var/1270014001.inc.php.tmp');
 		}
+	}
+	
+	protected function executeSchema(Options $options) {
+		$dbPlatform = $options->getArgs()[0];
+		$dbHost = $options->getArgs()[1];
+		$dbName = $options->getArgs()[2];
+		$dbUser = $options->getArgs()[3];
+		$dbPass = $options->getArgs()[4];
+		$xmlSchema = $options->getArgs()[5];
+		
+		$db = \ADONewConnection($dbPlatform);
+		$db->debug = true;
+		$db->connect($dbHost, $dbUser, $dbPass, $dbName);
+		if ($db->isConnected()) {
+			$this->info("Connected!");
+			$schema = new \adoSchema($db);
+			$sql = $schema->parseSchemaFile($xmlSchema);
+			$this->debug(print_r($sql,true));
+			//$schema->printSQL('TEXT');
+			$result = $schema->executeSchema();
+			$this->info("Result code: " . $result);
+			
+		} else {
+			$this->error("Not connected!");
+		}
+
+
 	}
 
 	protected function getRepositoryInfo($name) {
