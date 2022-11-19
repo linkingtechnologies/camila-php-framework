@@ -151,7 +151,7 @@ class csv_bv
 	  * @param str $escape - Only one character is allowed (optional) 
 	  * @access public
 	  */
-	Function csv_bv($file, $seperator = ',', $enclose = '"', $escape = ''){
+	Function __construct($file, $seperator = ',', $enclose = '"', $escape = ''){
 		
 		$this->mFldSeperator = $seperator;
 		$this->mFldEnclosure = $enclose;
