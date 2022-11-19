@@ -35,7 +35,5 @@
 		</field>
 		<field name="share_candelete" type="C" size="3">
 		</field>
-
-		</field>
 	</table>
 </schema>
