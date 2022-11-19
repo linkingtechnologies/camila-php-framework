@@ -1003,7 +1003,7 @@ class configurator
         require_once(CAMILA_DIR . 'db/schema.inc.php');
 
         $schema = "<?xml version=\"1.0\"?>\n";
-        $schema .= "<schema version=\"0.2\">\n";
+        $schema .= "<schema version=\"0.3\">\n";
         $schema .= "<table name=\"" . CAMILA_TABLE_WORKP . "$id\">\n";
         $schema .= "<field name=\"id\" type=\"I\">\n";
         $schema .= "<KEY/>\n";
