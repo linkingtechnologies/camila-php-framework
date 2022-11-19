@@ -18,9 +18,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 
 define( 'XMLS_PREFIX_MAXLEN', 20);
-
 require_once(CAMILA_VENDOR_DIR . '/adodb/adodb-php/adodb-xmlschema03.inc.php');
-//require(CAMILA_LIB_DIR . '/adodb5/adodb-xmlschema.inc.php');
 
 
 function create_table($schemaFile, $prefix, $db, $drop=true) {
