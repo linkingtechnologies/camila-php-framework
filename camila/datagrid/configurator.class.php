@@ -2043,7 +2043,7 @@ class configurator
             camila_information_text(camila_get_translation('camila.worktable.db.importedrows') . ': ' . $successCount);
             camila_information_text(camila_get_translation('camila.worktable.db.skippedrows') . ': ' . $failCount);
             
-            @unlink(CAMILA_TMP_DIR . '/' . $filename);
+            ////@unlink(CAMILA_TMP_DIR . '/' . $filename);
             
         } else {
             $result = $_CAMILA['db']->Execute('select tablename, filename, sheetnum from ' . CAMILA_TABLE_WORKT . ' where id=' . $_CAMILA['db']->qstr($id));

@@ -49,7 +49,7 @@ function create_table($schemaFile, $prefix, $db, $drop=true) {
         $schema->setPrefix($prefix);
         $sql = $schema->ParseSchema($schemaFile);
 		
-		print_r($sql);
+		//print_r($sql);
 
     }
 
