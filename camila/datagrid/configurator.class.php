@@ -511,11 +511,11 @@ class configurator
                     $curr = $data->type($j, $i, $sheetnum);
 					//echo $curr;
 					//FIX ME
-					try {
+					/*try {
 						if ($data->sheets[$sheetnum]['cellsInfo'][$j][$i]['hyperlink']['link'] != '')
 							$curr = 'hyperlink';
 					} catch (Exception $e) {
-					}
+					}*/
 					//PHPSpreadsheet						
 					$reflector = new ReflectionClass(get_class($data));
 					if ($this->ends_with($reflector->getFileName(),'excel_reader_wrapper.php')) {
