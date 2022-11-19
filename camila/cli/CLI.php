@@ -2,6 +2,7 @@
 
 namespace splitbrain\phpcli;
 
+define( 'XMLS_PREFIX_MAXLEN', 20);
 require_once __DIR__ .'/../../vendor/adodb/adodb-php/adodb-xmlschema03.inc.php';
 
 

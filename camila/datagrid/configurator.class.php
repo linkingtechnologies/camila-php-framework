@@ -1061,7 +1061,7 @@ class configurator
                 camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
         }
         
-        $result = create_table($filename, 'segreteriacampo', $this->db, (($colsApplied > 0 && $this->db->databaseType != 'sqlite' && $this->db->databaseType != 'sqlite3') && !$rebuild) ? false : true);
+        $result = create_table($filename, '', $this->db, (($colsApplied > 0 && $this->db->databaseType != 'sqlite' && $this->db->databaseType != 'sqlite3') && !$rebuild) ? false : true);
         
         if ($result['result'] == 2) {
             $record                        = Array();
