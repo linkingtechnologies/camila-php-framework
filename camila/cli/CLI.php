@@ -2,8 +2,7 @@
 
 namespace splitbrain\phpcli;
 
-require '../../vendor/autoload.php';
-require '../../vendor/adodb/adodb-php/adodb-xmlschema03.inc.php';
+require __DIR__ .'/../../vendor/adodb/adodb-php/adodb-xmlschema03.inc.php';
 
 
 use ZipArchive;
