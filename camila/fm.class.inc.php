@@ -343,7 +343,7 @@ class CamilaFileManagement
 		return $files; 
 	} 
 
-	function listDirAux($dir, &$files, $recursive) { 
+	static function listDirAux($dir, &$files, $recursive) { 
 		$handle = opendir($dir); 
 		while (($file = readdir($handle)) !== false) { 
 			if ($file == '.' || $file == '..') { 
