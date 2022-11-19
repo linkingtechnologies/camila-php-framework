@@ -301,7 +301,7 @@ class configurator
 	
 	function camila_information_text($text)
 	{
-		if (function_exists(camila_information_text))
+		if (function_exists('camila_information_text'))
 			camila_information_text($text);
 		else
 			echo $text;
@@ -457,7 +457,7 @@ class configurator
         if ($result === false)
 		{
 			//echo 'select max(id) as id from ' . CAMILA_TABLE_WORKT;
-			if (function_exists(camila_error_page))
+			if (function_exists('camila_error_page'))
 				camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
 			else
 				echo ($this->camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
@@ -626,7 +626,7 @@ class configurator
 					$record['help']					  = $help;
                     $insertSQL = $this->db->AutoExecute(CAMILA_TABLE_WORKC, $record, 'INSERT');
                     if (!$insertSQL) {
-                        if (function_exists(camila_information_text))
+                        if (function_exists('camila_information_text'))
 							camila_information_text(camila_get_translation('camila.worktable.db.error'));
 						else
 							echo ($this->camila_get_translation('camila.worktable.db.error'));
@@ -1458,7 +1458,7 @@ class configurator
         $success3  = true;
         $updateSQL = $this->db->AutoExecute(CAMILA_TABLE_PAGES, $record, 'UPDATE', 'url=' . $this->db->qstr($resultTable->fields['scriptname']));
         if (!$updateSQL) {
-			if (function_exists(camila_information_text))
+			if (function_exists('camila_information_text'))
 				camila_information_text(camila_get_translation('camila.worktable.db.error'));
 			else
 				echo($this->camila_get_translation('camila.worktable.db.error'));
