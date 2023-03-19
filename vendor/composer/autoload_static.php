@@ -4,10 +4,9 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit53a81370871755f8d209560b0ef96d21
+class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
 {
     public static $files = array (
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '2cffec82183ee1cea088009cef9a6fc3' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier.composer.php',
         'bf9f5270ae66ac6fa0290b4bf47867b7' => __DIR__ . '/..' . '/adodb/adodb-php/adodb.inc.php',
         'd5fa61a7f6cbc1df09dd4df84549a2dc' => __DIR__ . '/..' . '/rospdf/pdf-php/src/Cpdf.php',
@@ -22,10 +21,6 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
         'W' => 
         array (
             'Wizaplace\\Etl\\' => 14,
-        ),
-        'S' => 
-        array (
-            'Symfony\\Polyfill\\Mbstring\\' => 26,
         ),
         'P' => 
         array (
@@ -47,6 +42,11 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
         array (
             'Complex\\' => 8,
         ),
+        'B' => 
+        array (
+            'BorderCloud\\SPARQL\\Tests\\' => 25,
+            'BorderCloud\\SPARQL\\' => 19,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -57,10 +57,6 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
         'Wizaplace\\Etl\\' => 
         array (
             0 => __DIR__ . '/..' . '/wizaplace/php-etl/src',
-        ),
-        'Symfony\\Polyfill\\Mbstring\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
         'Psr\\SimpleCache\\' => 
         array (
@@ -95,6 +91,14 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
         array (
             0 => __DIR__ . '/..' . '/markbaker/complex/classes/src',
         ),
+        'BorderCloud\\SPARQL\\Tests\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/bordercloud/sparql/tests',
+        ),
+        'BorderCloud\\SPARQL\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/bordercloud/sparql/src',
+        ),
     );
 
     public static $prefixesPsr0 = array (
@@ -118,10 +122,10 @@ class ComposerStaticInit53a81370871755f8d209560b0ef96d21
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit53a81370871755f8d209560b0ef96d21::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit53a81370871755f8d209560b0ef96d21::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit53a81370871755f8d209560b0ef96d21::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit53a81370871755f8d209560b0ef96d21::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958::$classMap;
 
         }, null, ClassLoader::class);
     }

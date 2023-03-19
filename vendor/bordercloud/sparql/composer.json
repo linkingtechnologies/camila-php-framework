@@ -1,0 +1,46 @@
+{
+	"name" : "bordercloud/sparql",
+	"type" : "library",
+	"description" : "Lib PHP very easy for SPARQL 1.1",
+	"keywords" : [
+		"SPARQL",
+		"RDF"
+	],
+	"homepage" : "https://github.com/BorderCloud/SPARQL",
+	"license" : "CC-BY-SA-4.0",
+	"version" : "2.1.0",
+	"authors" : [{
+			"name" : "Karima Rafes",
+			"email" : "karima.rafes@bordercloud.com",
+			"homepage" : "http://www.bordercloud.com/",
+			"role" : "Developer"
+		}
+	],
+	"require" : {
+		"php" : ">=7.1",
+    "ext-xml": "*",
+    "ext-json": "*",
+    "ext-curl": "*"
+  },
+	"repositories" : [{
+			"type" : "vcs",
+			"url" : "https://github.com/BorderCloud/SPARQL"
+		}
+	],
+	"autoload" : {
+		"psr-4" : {
+			"BorderCloud\\SPARQL\\" : "src/",
+      "BorderCloud\\SPARQL\\Tests\\" : "tests/"
+		}
+	},
+  "bin" : [
+    "bin/query"
+  ],
+  "config" : {
+    "bin-dir" : "bin"
+  },
+	"require-dev": {
+		"phpunit/phpunit": "^9.5",
+		"clean/phpdoc-md": "^0.19.1"
+	}
+}

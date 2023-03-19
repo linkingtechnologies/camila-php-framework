@@ -8,7 +8,6 @@ $baseDir = dirname($vendorDir);
 return array(
     'ZipStream\\' => array($vendorDir . '/maennchen/zipstream-php/src'),
     'Wizaplace\\Etl\\' => array($vendorDir . '/wizaplace/php-etl/src'),
-    'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'Psr\\SimpleCache\\' => array($vendorDir . '/psr/simple-cache/src'),
     'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-factory/src', $vendorDir . '/psr/http-message/src'),
     'Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
@@ -17,4 +16,6 @@ return array(
     'Matrix\\' => array($vendorDir . '/markbaker/matrix/classes/src'),
     'Flow\\JSONPath\\' => array($vendorDir . '/softcreatr/jsonpath/src'),
     'Complex\\' => array($vendorDir . '/markbaker/complex/classes/src'),
+    'BorderCloud\\SPARQL\\Tests\\' => array($vendorDir . '/bordercloud/sparql/tests'),
+    'BorderCloud\\SPARQL\\' => array($vendorDir . '/bordercloud/sparql/src'),
 );
