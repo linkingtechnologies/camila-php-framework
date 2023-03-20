@@ -20,9 +20,9 @@
             'dev_requirement' => false,
         ),
         'adodb/adodb-php' => array(
-            'pretty_version' => 'v5.22.2',
-            'version' => '5.22.2.0',
-            'reference' => '876bc2287171ea96a571f84c23845e44a759d9a0',
+            'pretty_version' => 'v5.22.4',
+            'version' => '5.22.4.0',
+            'reference' => 'bb87e83338c99038986878ac78f680becf9e8091',
             'type' => 'library',
             'install_path' => __DIR__ . '/../adodb/adodb-php',
             'aliases' => array(),
