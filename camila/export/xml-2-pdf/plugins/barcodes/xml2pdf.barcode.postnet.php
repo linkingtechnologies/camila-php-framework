@@ -114,7 +114,7 @@ class xml2pdf_barcode_postnet {
         for($i = 0; $i < 5; $i++)
         {
             xml2pdf_barcode_postnet::DrawDigitBars($x, $y, $BarSpacing, $HalfBarHeight,
-                $FullBarHeight, $BarDefinitionsArray, $zipcode{$i}, $pdf);
+                $FullBarHeight, $BarDefinitionsArray, $zipcode[$i], $pdf);
             $x += $FiveBarSpacing;
         }
         // draw more digit bars if 10 digit zip code
@@ -123,7 +123,7 @@ class xml2pdf_barcode_postnet {
             for($i = 6; $i < 10; $i++)
             {
                 xml2pdf_barcode_postnet::DrawDigitBars($x, $y, $BarSpacing, $HalfBarHeight,
-                    $FullBarHeight, $BarDefinitionsArray, $zipcode{$i}, $pdf);
+                    $FullBarHeight, $BarDefinitionsArray, $zipcode[$i], $pdf);
                 $x += $FiveBarSpacing;
             }
         }
@@ -174,21 +174,21 @@ class xml2pdf_barcode_postnet {
                 case 1:
                 case 2:
                 case 3:
-                    if ( is_numeric($stringToParse{$i}) ) {
+                    if ( is_numeric($stringToParse[$i]) ) {
                         $zipcodeLength += 1;
-                        $zipcode .= $stringToParse{$i};
+                        $zipcode .= $stringToParse[$i];
                     } else {
                         $zipcodeLength = 0;
                         $zipcode = "";
                     }
                     break;
                 case 4:
-                    if ( $stringToParse{$i} == "-" ) {
+                    if ( $stringToParse[$i] == "-" ) {
                         $zipcodeLength += 1;
-                        $zipcode .= $stringToParse{$i};
-                    } elseif ( is_numeric($stringToParse{$i}) ) {
+                        $zipcode .= $stringToParse[$i];
+                    } elseif ( is_numeric($stringToParse[$i]) ) {
                         $zipcodeLength += 1;
-                        $zipcode .= $stringToParse{$i};
+                        $zipcode .= $stringToParse[$i];
                         break 2;
                     } else {
                         $zipcodeLength = 0;
@@ -199,18 +199,18 @@ class xml2pdf_barcode_postnet {
                 case 6:
                 case 7:
                 case 8:
-                    if ( is_numeric($stringToParse{$i}) ) {
+                    if ( is_numeric($stringToParse[$i]) ) {
                         $zipcodeLength = $zipcodeLength + 1;
-                        $zipcode = $zipcode . $stringToParse{$i};
+                        $zipcode = $zipcode . $stringToParse[$i];
                     } else {
                         $zipcodeLength = 0;
                         $zipcode = "";
                     }
                     break;
                 case 9:
-                    if ( is_numeric($stringToParse{$i}) ) {
+                    if ( is_numeric($stringToParse[$i]) ) {
                         $zipcodeLength = $zipcodeLength + 1;
-                        $zipcode = $zipcode . $stringToParse{$i};
+                        $zipcode = $zipcode . $stringToParse[$i];
                         break;
                     } else {
                         $zipcodeLength = 0;
@@ -262,7 +262,7 @@ class xml2pdf_barcode_postnet {
         if ( strlen($zipcode) == 5 ) {
             // check that all characters are numeric
             for ( $i = 0; $i < 5; $i++ ) {
-                if ( is_numeric( $zipcode{$i} ) == false ) {
+                if ( is_numeric( $zipcode[$i] ) == false ) {
                     trigger_error($functionname.
                         "5 digit zip code contains non-numeric character.",
                         E_USER_ERROR);
@@ -277,7 +277,7 @@ class xml2pdf_barcode_postnet {
             }
             // check that all characters are numeric
             for ( $i = 0; $i < 10; $i++ ) {
-                if ( is_numeric($zipcode{$i}) == false && $i != 5 ) {
+                if ( is_numeric($zipcode[$i]) == false && $i != 5 ) {
                     trigger_error($functionname.
                         "10 digit zip code contains non-numeric character.",
                         E_USER_ERROR);

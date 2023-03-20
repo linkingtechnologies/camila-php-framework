@@ -89,7 +89,7 @@ class xml2pdf_barcode_interleaved25 {
 
         for($i=0; $i<strlen($code); $i=$i+2){
             // choose next pair of digits
-            $charBar = $code{$i};
+            $charBar = $code[$i];
             $charSpace = $code{$i+1};
             // check whether it is a valid digit
             if(!isset($barChar[$charBar])){

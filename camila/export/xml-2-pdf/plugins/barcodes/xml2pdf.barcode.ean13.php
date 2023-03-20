@@ -90,14 +90,14 @@ class xml2pdf_barcode_ean13 {
         $code = '101';
         $p = $parities[$txt{0}];
         for($i=1 ; $i<=6 ; $i++)
-            $code .= $codes[$p[$i-1]][$txt{$i}];
+            $code .= $codes[$p[$i-1]][$txt[$i]];
         $code .= '01010';
         for($i=7 ; $i<=12 ; $i++)
-            $code .= $codes['C'][$txt{$i}];
+            $code .= $codes['C'][$txt[$i]];
         $code .= '101';
         //Dessine les barres
         for($i=0 ; $i<strlen($code) ; $i++) {
-            if($code{$i} == '1')
+            if($code[$i] == '1')
                 $barcode->pdf->Rect($barcode->x+$i*$width, $barcode->y,
                     $width, $height, 'F');
         }
