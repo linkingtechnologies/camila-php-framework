@@ -194,7 +194,7 @@ class xml2pdf_barcode_code39 {
         //encodage
         $encode = '';
         for ($i = 0; $i< strlen($code); $i++) {
-            $encode .= $encoding[$code{$i}].$gap;
+            $encode .= $encoding[$code[$i]].$gap;
         }
 
         //dessin
@@ -223,7 +223,7 @@ class xml2pdf_barcode_code39 {
             'W', 'X', 'Y', 'Z', '-', '.', ' ', '$', '/', '+', '%');
         $sum = 0;
         for ($i=0 ; $i<strlen($code); $i++) {
-            $a = array_keys($chars, $code{$i});
+            $a = array_keys($chars, $code[$i]);
             $sum += $a[0];
         }
         $r = $sum % 43;
@@ -277,10 +277,10 @@ class xml2pdf_barcode_code39 {
 
         $code_ext = '';
         for ($i = 0 ; $i<strlen($code); $i++) {
-            if (ord($code{$i}) > 127) {
-                $pdf->Error('Invalid character: '.$code{$i});
+            if (ord($code[$i]) > 127) {
+                $pdf->Error('Invalid character: '.$code[$i]);
             }
-            $code_ext .= $encode[$code{$i}];
+            $code_ext .= $encode[$code[$i]];
         }
         return $code_ext;
     }
@@ -303,7 +303,7 @@ class xml2pdf_barcode_code39 {
         $pdf->SetDrawColor(0,0,0);
         $pdf->SetFillColor(0,0,0);
         for($i=0; $i<strlen($code); $i++) {
-            if($code{$i} == '1') {
+            if($code[$i] == '1') {
                 $pdf->Rect($x+$i*$w, $y, $w, $h, 'F');
             }
         }

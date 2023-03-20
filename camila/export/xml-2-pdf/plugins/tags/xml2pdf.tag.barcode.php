@@ -159,9 +159,9 @@ class xml2pdf_tag_barcode extends Xml2PdfTag  {
         //Calcule le chiffre de contrôle
         $sum=0;
         for($i=1;$i<=11;$i+=2)
-            $sum+=3*$barcode{$i};
+            $sum+=3*$barcode[$i];
         for($i=0;$i<=10;$i+=2)
-            $sum+=$barcode{$i};
+            $sum+=$barcode[$i];
         $r=$sum%10;
         if($r>0)
             $r=10-$r;
@@ -181,10 +181,10 @@ class xml2pdf_tag_barcode extends Xml2PdfTag  {
         //Vérifie le chiffre de contrôle
         $sum=0;
         for($i=1;$i<=11;$i+=2)
-            $sum+=3*$barcode{$i};
+            $sum+=3*$barcode[$i];
         for($i=0;$i<=10;$i+=2)
-            $sum+=$barcode{$i};
-        return ($sum+$barcode{12})%10==0;
+            $sum+=$barcode[$i];
+        return ($sum+$barcode[12])%10==0;
     }
     
     // }}}
