@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2022 Umberto Bresciani
+    Copyright (C) 2006-2023 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -854,7 +854,9 @@ class report
         if ($this->totalrows > 0) {
             $i   = 0;
             $arr = array();
-            reset($this->keys);
+			if ($this->keys != null && is_array($this->keys)) {
+				reset($this->keys);
+			}
             foreach ($this->keys as $afield) {
                 if (strpos($afield, '.') !== false)
                     $field = substr($afield, 0, strpos($afield, '.')) . '__' . substr($afield, strpos($afield, '.') + 1);

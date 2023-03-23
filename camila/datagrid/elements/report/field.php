@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2023 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -150,7 +150,7 @@ class report_field {
 
         $text->metatype = $this->metatype;
 
-        if (!in_array($this->field, $this->report->keys) && $this->report->inline_editing) {
+        if ($this->report->keys != null && !in_array($this->field, $this->report->keys) && $this->report->inline_editing) {
             $text->set_css_class('cf_editText');
         }
 
