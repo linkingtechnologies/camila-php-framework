@@ -1214,7 +1214,7 @@ class report
                         if (substr($split[1], 0, 1) == '_' && substr($split[1], 2, 1) == '_')
                             $field = (substr($split[1], 3));
 
-                        if ((!in_array($field, $this->fields)) && strpos($options, $field . ';') == false) {
+                        if ($this->fields != null && (!in_array($field, $this->fields)) && strpos($options, $field . ';') == false) {
                             $options .= $split[1] . ';' . $this->map($field) . ',';
                             $options_array[$count][0] = $split[1];
                             $options_array[$count][1] = $this->map($field);
@@ -1405,7 +1405,7 @@ class report
                         if (substr($split[1], 0, 1) == '_' && substr($split[1], 2, 1) == '_')
                             $field = (substr($split[1], 3));
 
-                        if ((!in_array($field, $this->fields)) && strpos($options, $field . ';') == false) {
+                        if ($this->fields != null && (!in_array($field, $this->fields)) && strpos($options, $field . ';') == false) {
                             $options .= $split[1] . ';' . $this->map($field) . ',';
                             $options_array[$count][0] = $split[1];
                             $options_array[$count][1] = $this->map($field);
