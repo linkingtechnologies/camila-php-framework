@@ -1510,7 +1510,7 @@ class report
         for ($a = 0; $a < $this->stmtnumoffields; $a++) {
             $b = $a + 1;
             
-            if ($_COOKIE[$this->editcolumscookiename] == '') {
+            if (is_array($_COOKIE[$this->editcolumscookiename]) && $_COOKIE[$this->editcolumscookiename] == '') {
                 if ((((isset($_REQUEST['f' . $b]) && $_REQUEST['f' . $b] == 'y')) || (in_array('f' . $b, $_REQUEST['camila_f'])) || ((isset($_REQUEST['camila_f' . $b]) && $_REQUEST['camila_f' . $b] == 'y'))))
                     $myCheckbox = new CHAW_checkbox('camila_f' . '[' . $b . ']', 'f' . $b, $this->map($this->stmtfields[$a]), HAW_SELECTED);
                 else
