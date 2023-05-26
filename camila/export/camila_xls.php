@@ -120,6 +120,7 @@ class CAMILA_XLS_deck extends CHAW_deck
                                                 $date->setDate(intval(substr($text, $y, 4)), intval(substr($text, $m, 2)), intval(substr($text, $d, 2)));
                                                 $date->setTime(0,0,0,0);
 												$excelDateValue = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date);
+												//echo $excelDateValue;
 												if ($isExcel) {
 													$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, $excelDateValue);
 												} else {
@@ -127,11 +128,18 @@ class CAMILA_XLS_deck extends CHAW_deck
 												}
                                                 $spreadsheet->getActiveSheet()->getStyleByColumnAndRow($b + 1, $a + 1)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DDMMYYYY);
                                             }
-										/*case 'T':
+											break;
+										case 'T':
                                             if ($text != '') {
+												
                                                 $date = new DateTime();
                                                 $date->setDate(intval(substr($text, $y, 4)), intval(substr($text, $m, 2)), intval(substr($text, $d, 2)));
-                                                $date->setTime(0,0,0,0);
+                                                if (strlen($text) == 19) {
+
+													$date->setTime(intval(substr($text, 11, 2)),intval(substr($text, 14, 2)),intval(substr($text, 17, 2)),0);
+												} else {
+													$date->setTime(0,0,0,0);
+												}
 												$excelDateValue = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date);
 												if ($isExcel) {
 													$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, $excelDateValue);
@@ -140,7 +148,7 @@ class CAMILA_XLS_deck extends CHAW_deck
 												}
                                                 $spreadsheet->getActiveSheet()->getStyleByColumnAndRow($b + 1, $a + 1)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DDMMYYYY);
                                             }
-                                            break;*/
+                                            break;
                                         
                                         default:
                                             $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, ($text));

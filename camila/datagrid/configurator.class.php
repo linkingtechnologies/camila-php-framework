@@ -1840,7 +1840,7 @@ class configurator
 			$filename = $form3->fields['filename']->value[0];
 			if (!file_exists(CAMILA_TMP_DIR . '/' .$filename)) {
 				
-				echo "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkko+". $filename;;
+				echo "KO... ". $filename;;
 			}
             $sheetnum = $form3->fields['sheetnum']->value;
 			
@@ -1871,10 +1871,12 @@ class configurator
                 
                 $i = 0;
                 while ($data->val(1, $i + 1, $sheetnum) != '') {
-                    $name              = $data->val(1, $i + 1, $sheetnum);
+                    $name = $data->val(1, $i + 1, $sheetnum);
                     $excelColNames[$i] = camila_strtoupper_utf8(isUTF8($name) ? $name : utf8_encode($name));
                     $i++;
                 }
+				
+				//print_r($excelColNames);
                 
                 $result = $_CAMILA['db']->Execute('select * from ' . CAMILA_TABLE_WORKC . ' where (wt_id=' . $_CAMILA['db']->qstr($id) . ' and is_deleted<>' . $_CAMILA['db']->qstr('y') . ') order by sequence');
                 if ($result === false)
@@ -1903,7 +1905,16 @@ class configurator
                     $count++;
                     $result->MoveNext();
                 }
-                
+
+				$fieldMapping['created'] = 'DATA CREAZIONE';				
+				$fieldMapping['created_by'] = 'UTENTE CREAZ.';
+                $fieldMapping['created_by_surname'] = 'COGNOME UTENTE CREAZ.';
+                $fieldMapping['created_by_name'] = 'NOME UTENTE CREAZ.';
+                $fieldMapping['last_upd'] = 'ULTIMO AGGIORNAMENTO';
+                $fieldMapping['last_upd_by'] = 'UTENTE ULT. AGG.';
+                $fieldMapping['last_upd_by_surname'] = 'COGNOME UTENTE ULT. AGG.';
+                $fieldMapping['last_upd_by_name'] = 'NOME UTENTE ULT. AGG.';
+
                 $successCount = 0;
                 $failCount    = 0;
 				$totalRowCount = $data->rowcount($sheetnum);
@@ -1922,18 +1933,24 @@ class configurator
                     $emptyrow = true;
                     
                     //db fields
+					//print_r($fields);
+					$fields[] = 'created';
+					$fields[] = 'last_upd';
                     reset($fields);
+					//print_r($fields);
                     foreach ($fields as $k => $v) {
                         
                         //k  Field position into database
                         //k2 Position in Excel file
                         $k2 = array_search($fieldMapping[$v], $excelColNames);
-                        
+
                         //Is it in Excel file?
                         if ($k2 !== false) {
-                            
-                            $excelColName     = camila_strtoupper_utf8($data->value(1, $k2 + 1, $sheetnum));
-                            //$excelColName = $v;
+							
+
+                            $excelColName = camila_strtoupper_utf8($data->value(1, $k2 + 1, $sheetnum));
+//echo $excelColName;
+							//$excelColName = $v;
                             $worktableColName = array_search($excelColName, $fieldMapping);
                             $worktableColName = $v;
                             
@@ -1965,16 +1982,26 @@ class configurator
                                     //$record[$worktableColName] = '<a href="' . $data->hyperlink($i, $k2+1, $sheetnum) . '" target="_blank">' . $data->value($i, $k2+1, $sheetnum) . '</a>';
                                     $record[$worktableColName] = $data->hyperlink($i, $k2 + 1, $sheetnum);
                                 }
-								elseif ($types[$k] == 'datetime' && $data->value($i, $k2 + 1, $sheetnum) != '' && strlen($data->value($i, $k2 + 1, $sheetnum))==19) {
+								elseif (($worktableColName == 'last_upd' || $worktableColName == 'created' || $types[$k] == 'datetime') && $data->value($i, $k2 + 1, $sheetnum) != '') {
+
 									$value = $data->value($i, $k2 + 1, $sheetnum);
-									$mm = substr($value, camila_get_translation('camila.dateformat.monthpos'), 2);
-									$dd = substr($value, camila_get_translation('camila.dateformat.daypos'), 2);
-									$yyyy = substr($value, camila_get_translation('camila.dateformat.yearpos'), 4);
-									$h = substr($value, 11, 2);
-									$m = substr($value, 14, 2);
-									$s = substr($value, 17, 2);
-									$dbVal = $_CAMILA['db']->BindTimeStamp($yyyy.'-'.$mm.'-'.$dd.' '.$h.':'.$m.':'.$s);									
-									$record[$worktableColName] = $dbVal;
+									if (strlen($value)==19)
+									{
+										$mm = substr($value, camila_get_translation('camila.dateformat.monthpos'), 2);
+										$dd = substr($value, camila_get_translation('camila.dateformat.daypos'), 2);
+										$yyyy = substr($value, camila_get_translation('camila.dateformat.yearpos'), 4);
+										$h = substr($value, 11, 2);
+										$m = substr($value, 14, 2);
+										$s = substr($value, 17, 2);
+										$dbVal = $_CAMILA['db']->BindTimeStamp($yyyy.'-'.$mm.'-'.$dd.' '.$h.':'.$m.':'.$s);									
+										$record[$worktableColName] = $dbVal;
+									} else {
+										if ($this->ends_with($reflector->getFileName(),'excel_reader_wrapper.php')) {
+											$dt = $data->excelToDateTimeObject($data->value($i, $k2 + 1, $sheetnum));
+											//echo $dt->format('Y-m-d H:i:s');
+											$record[$worktableColName] = $_CAMILA['db']->BindTimeStamp($dt->format('Y-m-d H:i:s'));
+										}
+									}
                                 }
 								else
                                     $record[$worktableColName] = $data->value($i, $k2 + 1, $sheetnum);
@@ -1996,6 +2023,7 @@ class configurator
                         }
                         
                     }
+					//print_r($record);
                     
                     if (!$emptyrow) {
 
@@ -2005,22 +2033,38 @@ class configurator
                         foreach ($record as $k => $v)
                             $record[$k] = str_replace('_camila_seq_num_', $id, $v);
 
-                        $record['id']                  = $id;
+                        $record['id'] = $id;
 						//echo '<'.$record['id'].'>';
-                        $record['created']             = $now;
-                        $record['created_by']          = $_CAMILA['user'];
-                        $record['created_src']         = 'import';
-                        $record['created_by_surname']  = $_CAMILA['user_surname'];
-                        $record['created_by_name']     = $_CAMILA['user_name'];
-                        $record['last_upd']            = $now;
-                        $record['last_upd_by']         = $_CAMILA['user'];
-                        $record['last_upd_src']        = 'import';
-                        $record['last_upd_by_surname'] = $_CAMILA['user_surname'];
-                        $record['last_upd_by_name']    = $_CAMILA['user_name'];
-                        $record['mod_num']             = 0;
-                        
+						//print_r($record);
+                        if (!array_key_exists('created',$record)) {
+							$record['created'] = $now;
+						}
+						if (!array_key_exists('created_by',$record)) {
+							$record['created_by'] = $_CAMILA['user'];
+                        }
+						$record['created_src'] = 'import';
+                        if (!array_key_exists('created_by_surname',$record)) {
+							$record['created_by_surname'] = $_CAMILA['user_surname'];
+                        }
+						if (!array_key_exists('created_by_name',$record)) {
+							$record['created_by_name'] = $_CAMILA['user_name'];
+                        }
+						if (!array_key_exists('last_upd',$record)) {
+							$record['last_upd'] = $now;
+                        }
+						if (!array_key_exists('last_upd_by',$record)) {
+							$record['last_upd_by'] = $_CAMILA['user'];
+						}
+                        $record['last_upd_src'] = 'import';
+						if (!array_key_exists('last_upd_by_surname',$record)) {
+							$record['last_upd_by_surname'] = $_CAMILA['user_surname'];
+                        }
+						if (!array_key_exists('last_upd_by_name',$record)) {
+							$record['last_upd_by_name'] = $_CAMILA['user_name'];
+                        }
+						$record['mod_num'] = 0;
                         $insertSQL = $_CAMILA['db']->AutoExecute($table, $record, 'INSERT');
-                        
+
                         if (!$insertSQL) {
                             //camila_information_text(camila_get_translation('camila.worktable.db.importerror'));
                             $failCount++;
