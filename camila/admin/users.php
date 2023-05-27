@@ -34,7 +34,7 @@ new form_textbox($form, 'id', camila_get_translation('camila.worktable.field.id'
 
 new form_textbox($form, 'username', camila_get_translation('camila.login.username'), true, 50, 50);
 new form_textbox($form, 'surname', camila_get_translation('camila.login.surname'), false, 50, 50);
-new form_textbox($form, 'name', camila_get_translation('camila.login.name'), false, 50);
+new form_textbox($form, 'name', camila_get_translation('camila.login.name'), false, 50, 50);
 new form_password($form, 'password', camila_get_translation('camila.login.password'));
 //new form_static_listbox($form, 'grp', camila_get_translation('camila.login.group'), camila_get_translation('camila.login.options.group'));
 new form_textbox($form, 'grp', camila_get_translation('camila.login.group'), false, 20);
