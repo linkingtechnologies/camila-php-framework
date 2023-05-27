@@ -468,10 +468,21 @@ class report
                         $where .= ' '.$likeOp.' ';
                     if ($cond == 'notlike')
                         $where .= ' NOT '.$likeOp.' ';
-                    if ($cond == 'empty')
-                        $where .= ' IS NULL or ' . $field . ' = ' . $_CAMILA['db']->qstr('');
-                    if ($cond == 'notempty')
-                        $where .= ' IS NOT NULL and ' . $field . ' <> ' . $_CAMILA['db']->qstr('');
+                    if ($cond == 'empty') {
+						if ($type == 'D' || $type == 'T') {
+							$where .= ' IS NULL';
+						} else {
+							$where .= ' IS NULL or ' . $field . ' = ' . $_CAMILA['db']->qstr('');
+						}
+					}
+                    
+					if ($cond == 'notempty') {
+						if ($type == 'D' || $type == 'T') {
+							$where .= ' IS NOT NULL';
+						} else {
+							$where .= ' IS NOT NULL and ' . $field . ' <> ' . $_CAMILA['db']->qstr('');
+						}
+					}
                     if ($cond != 'empty' && $cond != 'notempty') {
                         if ($cond == 'like' || $cond == 'notlike')
                             $where .= $_CAMILA['db']->qstr('%' . $value . '%');
@@ -483,6 +494,7 @@ class report
                     $where .= ')';
                 }
             }
+			//echo $where;
             $count++;
         }
         
