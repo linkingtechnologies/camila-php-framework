@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2023 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,30 +26,7 @@
 
           global $_CAMILA;
 
-
           $mySelect = new CHAW_select($this->key);
-
-          /*if (is_dir($this->basedir)) {
-              if ($dh = opendir($this->basedir)) {
-                  while (($file = readdir($dh)) !== false) {
-                      if ($file != '.' && $file != '..' && !is_dir($this->basedir . '/' . $file)) {
-                           $ext = $this->_find_extension($file);
-                           if (strlen($ext)>0)
-                               $filename = substr($file, 0, -strlen($ext)-1);
-                           else
-                               $filename = $file;
-
-                           //if ($file == $this->value)
-                           //    $mySelect->add_option($filename, $file, HAW_SELECTED);
-                           //else
-//							   echo substr(strtolower($file), 0, strlen($_CAMILA['page_short_title'])).'_';
-			   if (substr(strtolower($file), 0, strlen($_CAMILA['page_short_title'])+1) == strtolower($_CAMILA['page_short_title'] . '_'))
-                               $mySelect->add_option(substr($filename, strlen($_CAMILA['page_short_title']) + 1), $file);
-                      }
-                  }
-              closedir($dh);
-              }
-          }*/
 		  
 			if (is_dir($this->basedir)) {
 				$dir = $this->basedir;
@@ -58,7 +35,6 @@
 					$files[] = $filename;
 				}
 			}
-			
 			
 
 			$pDir = CAMILA_APP_PATH . '/plugins/';
@@ -76,25 +52,28 @@
 				}
 			}
 
-
 			sort($files);
 			
 			foreach ($files as $name => $file)
 			{
 				if ($file != '.' && $file != '..' && !is_dir($this->basedir . '/' . $file)) {
-                           $ext = $this->_find_extension($file);
-                           if (strlen($ext)>0)
-                               $filename = substr($file, 0, -strlen($ext)-1);
-                           else
-                               $filename = $file;
+				   $ext = $this->_find_extension($file);
+				   if (strlen($ext)>0)
+					   $filename = substr($file, 0, -strlen($ext)-1);
+				   else
+					   $filename = $file;
 
-			   if (substr(strtolower($file), 0, strlen($_CAMILA['page_short_title'])+1) == strtolower($_CAMILA['page_short_title'] . '_'))
-                               $mySelect->add_option(substr($filename, strlen($_CAMILA['page_short_title']) + 1), $file);
-                      }
+					if ($ext == 'xml' && substr(strtolower($file), 0, strlen($_CAMILA['page_short_title'])+1) == strtolower($_CAMILA['page_short_title'] . '_')) {
+						$mySelect->add_option('PDF - ' . substr($filename, strlen($_CAMILA['page_short_title']) + 1), $file);
+					}
+					
+					if ($ext == 'json' && substr(strtolower($file), 0, strlen($_CAMILA['page_short_title'])+1) == strtolower($_CAMILA['page_short_title'] . '_')) {
+						$mySelect->add_option('Excel - ' . substr($filename, strlen($_CAMILA['page_short_title']) + 1), $file);
+					}
+				}
 			}	  
 			//print_r($files);
-			
-			
+
 			return $mySelect;
       }
 

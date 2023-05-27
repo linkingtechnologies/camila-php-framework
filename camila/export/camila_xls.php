@@ -52,7 +52,7 @@ class CAMILA_XLS_deck extends CHAW_deck
         $spreadsheet->setActiveSheetIndex(0);
         
 		$maxlength = 31;
-		$i18nStr = ' - ' . camila_get_translation('camila.worktable.worksheet.data');			
+		$i18nStr = ' - ' . camila_get_translation('camila.worktable.worksheet.data');
         $spreadsheet->getActiveSheet()->setTitle(substr($_CAMILA['page_short_title'],0,$maxlength-strlen($i18nStr)) . ' - ' . camila_get_translation('camila.worktable.worksheet.data'));
         
         $i = 0;
