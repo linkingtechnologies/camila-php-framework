@@ -168,6 +168,9 @@ class report
     var $queries = Array();
 	
 	var $bootstrapbuttonsize = CAMILA_UI_DEFAULT_BTN_SIZE;
+	
+	var $isThereGroupBy;
+	var $isThereGroupByOrder;
     
     
     function __construct($stmt, $title, $orderby = '', $direction = 'asc', $mapping = '', $ordermapping = null, $keys = '', $defaultfields = '', $filter = '', $canupdate = true, $candelete = false)
@@ -329,15 +332,15 @@ class report
         
         reset($this->tables);
 
-		$isThereGroupBy = false;
-		$isThereGroupByOrder = '';
+		$this->isThereGroupBy = false;
+		$this->isThereGroupByOrder = '';
 		$count = 1;
 		while (isset($_REQUEST['camila_w' . $count . 'f']) || isset($_REQUEST['camila_w' . $count . 'f'])) {
             //if ($_REQUEST['camila_w' . $count . 'f'] != '-' && $_REQUEST['camila_w' . $count . "v"] != "-") {
                 //echo $_REQUEST['camila_w' . $count . 'c'];
                 if ($_REQUEST['camila_w' . $count . 'c'] == 'gby') {
-					$isThereGroupBy = true;
-					$isThereGroupByOrder = substr($_REQUEST['camila_w' . $count . 'f'],3);
+					$this->isThereGroupBy = true;
+					$this->isThereGroupByOrder = substr($_REQUEST['camila_w' . $count . 'f'],3);
                 }
             //}
 			//echo $where;
@@ -378,7 +381,7 @@ class report
                 $count++;
             }
 			
-			if ($isThereGroupBy) {
+			if ($this->isThereGroupBy) {
 				$kf = '';
 				$this->keys = Array();
 			}
@@ -655,9 +658,9 @@ class report
         if ($this->orderby != '' /*&& strpos($stmt,$this->orderby)!==false*/ ) {
             if (strpos($this->orderby, '__') !== false)
                 $this->orderby = substr($this->orderby, 0, strpos($this->orderby, '__')) . '.' . substr($this->orderby, strpos($this->orderby, '__') + 2);
-            
-            if ($isThereGroupBy) {
-				$this->orderBy = $isThereGroupByOrder;
+
+            if ($this->isThereGroupBy) {
+				$this->orderby = $this->isThereGroupByOrder;
 			}
 
 			$stmt = $stmt . ' order by ' . $this->orderby;
@@ -671,6 +674,7 @@ class report
                 $stmt .= ' desc';
                 $this->direction = 'desc';
             }
+			
         }
         
         global $_CAMILA;
