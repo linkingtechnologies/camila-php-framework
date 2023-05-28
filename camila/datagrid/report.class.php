@@ -46,6 +46,7 @@ function camila_formupdatelink(&$field, &$row, $fields)
             $arr[$kf]  = $key->value;
         }
     }
+
     
     $reqs = 'camila_update=' . urlencode(serialize($arr)) . '&camila_token=' . camila_token(serialize($arr));
     if (isset($_REQUEST['camila_custom']))
@@ -327,6 +328,32 @@ class report
         }
         
         reset($this->tables);
+
+		$isThereGroupBy = false;
+		$isThereGroupByOrder = '';
+		$count = 1;
+		while (isset($_REQUEST['camila_w' . $count . 'f']) || isset($_REQUEST['camila_w' . $count . 'f'])) {
+            //if ($_REQUEST['camila_w' . $count . 'f'] != '-' && $_REQUEST['camila_w' . $count . "v"] != "-") {
+                //echo $_REQUEST['camila_w' . $count . 'c'];
+                if ($_REQUEST['camila_w' . $count . 'c'] == 'gby') {
+					$isThereGroupBy = true;
+					$isThereGroupByOrder = substr($_REQUEST['camila_w' . $count . 'f'],3);
+                }
+            //}
+			//echo $where;
+            $count++;
+        }
+
+
+
+
+
+
+
+
+
+
+
         
         if ($keys != '') {
             $this->keys = explode(',', $keys);
@@ -350,6 +377,11 @@ class report
                 $kf .= ', ';
                 $count++;
             }
+			
+			if ($isThereGroupBy) {
+				$kf = '';
+				$this->keys = Array();
+			}
             
             reset($this->keys);
             
@@ -391,7 +423,7 @@ class report
         }
         $count = 1;
         $where = '';
-        
+
         
         while (isset($_REQUEST['camila_w' . $count . 'f']) || isset($_REQUEST['camila_w' . $count . 'f'])) {
             if ($_REQUEST['camila_w' . $count . 'f'] != '-' && $_REQUEST['camila_w' . $count . "v"] != "-") {
@@ -624,7 +656,11 @@ class report
             if (strpos($this->orderby, '__') !== false)
                 $this->orderby = substr($this->orderby, 0, strpos($this->orderby, '__')) . '.' . substr($this->orderby, strpos($this->orderby, '__') + 2);
             
-            $stmt = $stmt . ' order by ' . $this->orderby;
+            if ($isThereGroupBy) {
+				$this->orderBy = $isThereGroupByOrder;
+			}
+
+			$stmt = $stmt . ' order by ' . $this->orderby;
             
             if (!isset($_REQUEST['d']))
                 $stmt .= ' ' . $this->direction;
@@ -879,7 +915,9 @@ class report
                     $this->fields['camilakey_' . $field]->print = false;
                 } else {
                     //                      if ($this->canupdate)
-                    $this->fields['camilakey_' . $field]->onprint = $this->formupdatefunction;
+					//if ($this->fields['camilakey_' . $field] != null) {
+						$this->fields['camilakey_' . $field]->onprint = $this->formupdatefunction;
+					//}
                     if ($this->candelete)
                         $this->fields['camilakey_del_' . $field]->onprint = "camila_formdeletelink";
                 }
