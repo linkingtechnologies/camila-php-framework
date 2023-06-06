@@ -81,6 +81,13 @@
 			}
 			//exit();
 			
+			$sheet = $spreadsheet->getActiveSheet();
+			$cellIterator = $sheet->getRowIterator()->current()->getCellIterator();
+			$cellIterator->setIterateOnlyExistingCells(true);
+			foreach ($cellIterator as $cell) {
+				$sheet->getColumnDimension($cell->getColumn())->setAutoSize(true);
+			}
+			
 			$filename = str_replace('.json', '.xlsx', $_REQUEST['camila_xml2pdf']);
 
 			// Redirect output to a client’s web browser (Xls)
