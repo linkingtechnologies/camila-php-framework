@@ -332,7 +332,14 @@ class CAMILA_XLS_deck extends CHAW_deck
         }
 		
 		$spreadsheet->setActiveSheetIndex(0);
-        
+
+		$sheet = $spreadsheet->getActiveSheet();
+		$cellIterator = $sheet->getRowIterator()->current()->getCellIterator();
+		$cellIterator->setIterateOnlyExistingCells(true);
+		foreach ($cellIterator as $cell) {
+			$sheet->getColumnDimension($cell->getColumn())->setAutoSize(true);
+		}
+
         //$workbook->close();
         
         if ($_REQUEST['camila_export_action'] == '' || $_REQUEST['camila_export_action'] == 'download') {
