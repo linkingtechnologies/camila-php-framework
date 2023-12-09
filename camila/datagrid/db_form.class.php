@@ -544,7 +544,7 @@ $(document).ready(function(){
           if ($this->mapping != '')
               $this->selform->mapping = $this->mappingseparator.$this->mapping.$this->mappingseparator;
 
-          if ($this->formupdatelinktext != '')
+          if ($this->formupdatelinktext != '' && gettype($this->selform) != 'integer')
               $this->selform->formupdatelinktext = $this->formupdatelinktext;
 
           if ($this->_data_inserted == true) {
