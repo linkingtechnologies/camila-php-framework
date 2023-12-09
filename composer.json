@@ -1,9 +1,15 @@
 {
     "require": {
-        "adodb/adodb-php": "5.22.3",
-		"splitbrain/php-cli": "1.2.0",
+        "adodb/adodb-php": "5.22.7",
 		"rospdf/pdf-php": "0.12.63",
 		"phpoffice/phpspreadsheet": "1.25.2",
-		"tinybutstrong/tinybutstrong": "3.14.0"
-	}
+		"tinybutstrong/tinybutstrong": "3.14.0",
+		"wizaplace/php-etl": "2.2",
+		"bordercloud/sparql": "2.1.0"
+	},
+	"config": {
+        "platform": {
+            "php": "8.1"
+        }
+    }
 }
