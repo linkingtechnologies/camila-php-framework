@@ -43,7 +43,7 @@ camila.wizard.prev = Indietro
 camila.wizard.skip = salta questo passaggio
 camila.wizard.or = Oppure
 
-camila.wizard.choosexlsfile = Seleziona il file Excel che contiene dati e/o struttura della nuova Scheda Dati e clicca 'Carica'. Sono attualmente supportati solo file con estensione .xls.
+camila.wizard.choosexlsfile = Seleziona il file Excel che contiene dati e/o struttura della nuova Scheda Dati e clicca 'Carica'.
 camila.wizard.filecardcreated = La nuova Scheda Dati è stata creata con successo. Clicca su 'Avanti' per procedere con la configurazione.
 camila.wizard.choosedescandtitle = Inserisci un titolo ed una descrizione per la nuova Scheda Dati.
 camila.wizard.choosesheetnum = Seleziona il numero del foglio del file Excel contenente i dati della nuova Scheda Dati.
