@@ -1,14 +1,18 @@
 <?php
-
 namespace splitbrain\phpcli;
+
 
 define( 'XMLS_PREFIX_MAXLEN', 20);
 require_once __DIR__ .'/../../vendor/adodb/adodb-php/adodb-xmlschema03.inc.php';
+require __DIR__ . '/../../vendor/autoload.php';
 
 
 use ZipArchive;
 use CamilaApp;
 use CamilaPlugins;
+
+use lebedevsergey\ODT2XHTML\Helpers\FilesHelper;
+use lebedevsergey\ODT2XHTML\ODT2XHTML;
 
 
 /**
@@ -192,6 +196,9 @@ abstract class CLI extends Base
 		
 		$options->registerCommand('show-plugin-info', 'Show plugin info');
         $options->registerArgument('name', 'Plugin name', true, 'show-plugin-info');
+		
+		$options->registerCommand('generate-plugin-docs', 'Generate plugin docs');
+        $options->registerArgument('name', 'Plugin name', true, 'generate-plugin-docs');
 	}
 	
 	public function handleAppCommands(Options $options) {
@@ -210,6 +217,9 @@ abstract class CLI extends Base
                 break;
 			case 'show-plugin-info':
 				$this->showPluginInfo($options);
+                break;
+			case 'generate-plugin-docs':
+				$this->generatePluginDocs($options);
                 break;
 			case 'exe-remote-cmd':
 				$this->executeRemoteCommand($options);
@@ -362,7 +372,7 @@ abstract class CLI extends Base
 	protected function showPluginInfo(Options $options) {
 		$name = $options->getArgs()[0];
 		$this->info($this->getRepositoryInfo($name));
-	}	
+	}
 
 	protected function setConfigVar(Options $options) {
 		$name = $options->getArgs()[0];
@@ -435,4 +445,20 @@ abstract class CLI extends Base
 		curl_close($ch);
 		return $result;
 	}
+	
+	protected function generatePluginDocs(Options $options) {
+		$name = $options->getArgs()[0];
+		$lang = $options->getArgs()[1];
+
+		$ODTFIleName = 'manual.odt';
+		$ODTFilePath = 'plugins/'.$name .'/docs/'.$lang.'/'.$ODTFIleName;
+		$ODTHTMLPath = 'plugins/'.$name .'/docs/'.$lang.'/html/';
+
+		FilesHelper::deleteDirRecursive($ODTHTMLPath); // delete previous HTML
+		(new ODT2XHTML)->convert($ODTFilePath, $ODTHTMLPath, true);
+		
+		$this->info('HTML files generated');
+
+	}
+
 }
