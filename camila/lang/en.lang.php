@@ -50,7 +50,7 @@ camila.wizard.choosesheetnum = Please choose Excel Sheet number which contains F
 camila.wizard.choosesheetnumdescandtitle = Please choose Excel Sheet number which contains File Card structure. Then type title and description for the new File Card.
 camila.wizard.configurecolumns = Now configure the characteristics of each field.
 camila.wizard.configurationapplied = The configuration has been successfully applied to the database.
-camila.wizard.choosefileforimport = Please choose Excel file and Sheet number which will be used to import data. Only .xls files are supported!
+camila.wizard.choosefileforimport = Please choose Excel file and Sheet number which will be used to import data.
 
 camila.worktable.worksheet.conf = Conf
 camila.worktable.worksheet.data = Data
