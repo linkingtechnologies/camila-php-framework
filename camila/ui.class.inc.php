@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2022 Umberto Bresciani
+    Copyright (C) 2006-2023 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,12 +32,16 @@ class CamilaUserInterface
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
 	}
 
-	function insertTitle($text, $icon){
+	function insertTitle($text, $icon=''){
 		global $_CAMILA;
-		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<h3><span class="glyphicon glyphicon-'.$icon.'"></span> '.$text.'</h3>'));
+		$raw = '<h3>';
+		if ($icon != '')
+			$raw .= '<span class="glyphicon glyphicon-'.$icon.'"></span> ';
+		$raw .= $text.'</h3>';
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $raw));
 	}
 	
-	function insertSubTitle($text, $icon){
+	function insertSubTitle($text, $icon = ''){
 		global $_CAMILA;
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<h4><span class="glyphicon glyphicon-'.$icon.'"></span> '.$text.'</h4>'));
 	}
