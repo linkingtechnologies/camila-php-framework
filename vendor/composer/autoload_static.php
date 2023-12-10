@@ -14,6 +14,11 @@ class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
     );
 
     public static $prefixLengthsPsr4 = array (
+        'l' => 
+        array (
+            'lebedevsergey\\ODT2XHTML\\Helpers\\' => 32,
+            'lebedevsergey\\ODT2XHTML\\' => 24,
+        ),
         'Z' => 
         array (
             'ZipStream\\' => 10,
@@ -50,6 +55,14 @@ class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
     );
 
     public static $prefixDirsPsr4 = array (
+        'lebedevsergey\\ODT2XHTML\\Helpers\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/lebedevsergey/odt2xhtml/src/Helpers',
+        ),
+        'lebedevsergey\\ODT2XHTML\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/lebedevsergey/odt2xhtml/src',
+        ),
         'ZipStream\\' => 
         array (
             0 => __DIR__ . '/..' . '/maennchen/zipstream-php/src',

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "81605c7b8eeac5b83cf35e8cb81d938e",
+    "content-hash": "14d604b763fb8b6e61e11dfe4b51aaee",
     "packages": [
         {
             "name": "adodb/adodb-php",
@@ -185,6 +185,55 @@
                 "source": "https://github.com/ezyang/htmlpurifier/tree/v4.17.0"
             },
             "time": "2023-11-17T15:01:25+00:00"
+        },
+        {
+            "name": "lebedevsergey/odt2xhtml",
+            "version": "v1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lebedevsergey/odt2xhtml.git",
+                "reference": "07d0083f15385d41fa2f898ab34acdf981c868ea"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lebedevsergey/odt2xhtml/zipball/07d0083f15385d41fa2f898ab34acdf981c868ea",
+                "reference": "07d0083f15385d41fa2f898ab34acdf981c868ea",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-fileinfo": "*",
+                "ext-xsl": "*",
+                "ext-zip": "*",
+                "php": ">=5.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "lebedevsergey\\ODT2XHTML\\": "src/",
+                    "lebedevsergey\\ODT2XHTML\\Helpers\\": "src/Helpers"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sergey Lebedev",
+                    "email": "diacomltd@mail.ru"
+                }
+            ],
+            "description": "A small library for converting documents in Open Document Format to HTML. Based on the code from https://github.com/hucste/Odt2Xhtml",
+            "keywords": [
+                "html",
+                "odf"
+            ],
+            "support": {
+                "issues": "https://github.com/lebedevsergey/odt2xhtml/issues",
+                "source": "https://github.com/lebedevsergey/odt2xhtml/tree/v1.0"
+            },
+            "time": "2021-02-12T09:47:28+00:00"
         },
         {
             "name": "maennchen/zipstream-php",

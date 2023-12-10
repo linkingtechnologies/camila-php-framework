@@ -1,0 +1,26 @@
+{
+  "name": "lebedevsergey/odt2xhtml",
+  "description": "A small library for converting documents in Open Document Format to HTML. Based on the code from https://github.com/hucste/Odt2Xhtml",
+  "authors": [
+    {
+      "name": "Sergey Lebedev",
+      "email": "diacomltd@mail.ru"
+    }
+  ],
+  "license": "MIT",
+  "keywords": ["odf","html"],
+  "type": "library",
+  "require": {
+    "php": ">=5.6",
+    "ext-xsl": "*",
+    "ext-dom": "*",
+    "ext-zip": "*",
+    "ext-fileinfo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "lebedevsergey\\ODT2XHTML\\": "src/",
+      "lebedevsergey\\ODT2XHTML\\Helpers\\": "src/Helpers"
+    }
+  }
+}

@@ -6,6 +6,8 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'lebedevsergey\\ODT2XHTML\\Helpers\\' => array($vendorDir . '/lebedevsergey/odt2xhtml/src/Helpers'),
+    'lebedevsergey\\ODT2XHTML\\' => array($vendorDir . '/lebedevsergey/odt2xhtml/src'),
     'ZipStream\\' => array($vendorDir . '/maennchen/zipstream-php/src'),
     'Wizaplace\\Etl\\' => array($vendorDir . '/wizaplace/php-etl/src'),
     'Psr\\SimpleCache\\' => array($vendorDir . '/psr/simple-cache/src'),

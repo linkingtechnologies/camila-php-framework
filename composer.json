@@ -5,7 +5,8 @@
 		"phpoffice/phpspreadsheet": "1.25.2",
 		"tinybutstrong/tinybutstrong": "3.14.0",
 		"wizaplace/php-etl": "2.2",
-		"bordercloud/sparql": "2.1.0"
+		"bordercloud/sparql": "2.1.0",
+		"lebedevsergey/odt2xhtml": "1.0"
 	},
 	"config": {
         "platform": {

@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '7dd6ff798442caef281be64fa8c98964a0ba0f7b',
+        'reference' => '42a09ec3881e7f8784f741790303a503b15b1a1d',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '__root__' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '7dd6ff798442caef281be64fa8c98964a0ba0f7b',
+            'reference' => '42a09ec3881e7f8784f741790303a503b15b1a1d',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -51,6 +51,15 @@
             'replaced' => array(
                 0 => '*',
             ),
+        ),
+        'lebedevsergey/odt2xhtml' => array(
+            'pretty_version' => 'v1.0',
+            'version' => '1.0.0.0',
+            'reference' => '07d0083f15385d41fa2f898ab34acdf981c868ea',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../lebedevsergey/odt2xhtml',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'maennchen/zipstream-php' => array(
             'pretty_version' => 'v2.4.0',
