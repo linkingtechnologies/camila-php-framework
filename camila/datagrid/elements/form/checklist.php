@@ -31,9 +31,11 @@
       function __construct(&$form, $field, $title, $labels, $values, $required = false, $validation = false)
       {
           //new form_hidden ($form, $field.'_labels');
-          for ($i=0; $i<count($labels); $i++)
+		  if ($labels !== null) {
+			for ($i=0; $i<count($labels); $i++)
               new form_hidden($form, $field.'_labels_'.$i, $labels[$i]);
-          new form_hidden($form, $field.'_count', count($labels));
+			new form_hidden($form, $field.'_count', count($labels));
+		  }
 
           parent::__construct($form, $field, $title, $required, $validation);
           $this->labels = $labels;
@@ -49,7 +51,7 @@
           if (!empty($this->title))
               $form->add_text($text);
 
-          if (count($this->labels) > 1) {
+          if ($this->labels !== null && count($this->labels) > 1) {
               $select_all = new CHAW_js('<div class="camilacheckall" id="camilacheckall"><a id="CheckAll_'.$this->key.'" href="">'.camila_get_translation('camila.form.checkall').'</a> '.camila_get_translation('camila.form.checkallseparator').' <a id="UncheckAll_'.$this->key.'" href="">'.camila_get_translation('camila.form.uncheckall').'</a></div>');
               $form->add_userdefined($select_all);
           }
