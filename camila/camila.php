@@ -671,7 +671,7 @@ function camila_worktable_get_table_id($name)
   
   function camila_session_cookie_name() {
 	  //return preg_replace('/\s+/', '', CAMILA_APPLICATION_NAME);
-	  return preg_replace('/[^a-z0-9]/', '', CAMILA_APPLICATION_NAME);
+	  return preg_replace('/[^a-zA-Z0-9]/', '', CAMILA_APPLICATION_NAME);
   }
 
 
