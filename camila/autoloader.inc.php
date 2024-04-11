@@ -70,6 +70,14 @@ function camila_autoloader($class) {
 		case 'CamilaAppCli':
 			include(CAMILA_DIR . 'cli.app.inc.php');
 			break;
+		
+		case 'CamilaRunnerCli':
+			include(CAMILA_DIR . 'cli.runner.inc.php');
+			break;
+		
+		case 'CamilaEtlPipeline':
+			include(CAMILA_DIR . 'etl.pipeline.inc.php');
+			break;
 
 		default:
 			if (substr($class, 0, 5) === 'form_') {

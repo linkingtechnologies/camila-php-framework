@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU General Public License
     along with Camila PHP Framework. If not, see <http://www.gnu.org/licenses/>. */
-
+	
 require_once 'cli/Exception.php';
 require_once 'cli/TableFormatter.php';
 require_once 'cli/Options.php';
@@ -26,17 +26,41 @@ use splitbrain\phpcli\CLI;
 use splitbrain\phpcli\Options;
 //use splitbrain\phpcli\Exception;
 
-class CamilaAppCli extends CLI
+class CamilaRunnerCli extends CamilaAppCli
 {
+
+	public function __construct($autocatch = true) {
+		parent::__construct($autocatch);
+	}
+	
 	protected function setup(Options $options)
     {
-		$this->registerDefaultCommands($options);
-		$this->registerAppCommands($options);
+		$methods = get_class_methods($this);
+		foreach ($methods as $method) {
+			if (strlen($method)>3 && strpos($method, 'run') === 0) {
+				$options->registerCommand(substr($method,3), 'Execute method ' . $method);
+			}
+		}
+
+		parent::setup($options);
     }
 
     protected function main(Options $options)
     {
-		$this->handleAppCommands($options);
+		$methods = get_class_methods($this);
+		foreach ($methods as $method) {
+			if (strlen($method)>3 && strpos($method, 'run') === 0) {
+				if ('run'.$options->getCmd() == $method) {
+					$this->$method();
+					exit;
+				}
+			}
+		}
+
+		parent::main($options);
     }
+
 }
+
+
 ?>
