@@ -149,3 +149,5 @@
 "cf_worktable_wizard_step4.php","en","Step 4 - Data import","DATA IMPORT"
 "cf_rest_controller.php","en","REST API","REST API"
 "cf_rest_controller.php","it","REST API","REST API"
+"cf_api.php","en","REST API","REST API"
+"cf_api.php","it","REST API","REST API"
