@@ -8444,40 +8444,9 @@ namespace Tqdev\PhpCrudApi\Middleware {
 
         private function getValidUsername(string $username, string $password): string
         {
-            //$passwords = $this->readPasswords($passwordFile);
             $valid = $this->hasCorrectPassword($username, $password);
-			//$this->writePasswords($passwordFile, $passwords);
             return ($this->camilaAuth->getUserLevelFromUsername($username)==1 && $valid) ? $username : '';
         }
-
-        /*private function readPasswords(string $passwordFile): array
-        {
-            $passwords = [];
-            $passwordLines = file($passwordFile);
-            foreach ($passwordLines as $passwordLine) {
-                if (strpos($passwordLine, ':') !== false) {
-                    list($username, $hash) = explode(':', trim($passwordLine), 2);
-                    if (strlen($hash) > 0 && $hash[0] != '$') {
-                        $hash = password_hash($hash, PASSWORD_DEFAULT);
-                    }
-                    $passwords[$username] = $hash;
-                }
-            }
-            return $passwords;
-        }*/
-
-        /*private function writePasswords(string $passwordFile, array $passwords): bool
-        {
-            $success = false;
-            $passwordFileContents = '';
-            foreach ($passwords as $username => $hash) {
-                $passwordFileContents .= "$username:$hash\n";
-            }
-            if (file_get_contents($passwordFile) != $passwordFileContents) {
-                $success = file_put_contents($passwordFile, $passwordFileContents) !== false;
-            }
-            return $success;
-        }*/
 
         private function getAuthorizationCredentials(ServerRequestInterface $request): string
         {
@@ -8523,7 +8492,6 @@ namespace Tqdev\PhpCrudApi\Middleware {
                 if (strpos($credentials, ':') !== false) {
                     list($username, $password) = explode(':', $credentials, 2);
                 }
-                //$passwordFile = $this->getProperty('passwordFile', '.htpasswd');
 				$validUser = $this->getValidUsername($username, $password);
                 $_SESSION['api_username'] = $validUser;
                 if (!$validUser) {
