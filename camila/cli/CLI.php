@@ -234,11 +234,11 @@ abstract class CLI extends Base
 	public function executeRemoteCommand(Options $options) {
 		$url = $options->getArgs()[0];
 		$cmd = $options->getArgs()[1];
-		$url = $url.'/cf_api-php/cli';
+		$url = $url.'/cf_api.php/cli';
 		$c = array('command' => $cmd);
 		$content = json_encode($c);
 		$curl = curl_init($url);
-		//curl_setopt($curl, CURLOPT_VERBOSE, 1);
+		curl_setopt($curl, CURLOPT_VERBOSE, 1);
 		curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -246,8 +246,7 @@ abstract class CLI extends Base
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($curl, CURLOPT_POST, true);
 		curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
-		curl_setopt($curl, CURLOPT_HTTPHEADER, array('X-API-Key: ' . CAMILA_CLI_REMOTE_KEY,'Content-Type: application/json',
-		'Content-Length: ' . strlen($content))); 
+		curl_setopt($curl, CURLOPT_HTTPHEADER, array('X-API-Key: ' . \CAMILA_CLI_REMOTE_KEY,'Content-Type: application/json')); 
 		$response = curl_exec($curl);
 		$status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 		if ($status != 201 && $status != 200) {
