@@ -84,7 +84,9 @@
 	  global $_CAMILA;
 	  if (php_sapi_name() == "cli" || $_CAMILA['cli']) {
 			echo $msg."\n";
-		} else {
+	  } else if (isset($_CAMILA['cli_args']) && $_CAMILA['cli_args'] != '') {
+			$_CAMILA['cli_output'] .= $msg."\n";
+	  }else {
       
 	  $myHtmlCode = '<div class="alert alert-success" role="alert">';
 	  $myDiv = new HAW_raw(HAW_HTML, $myHtmlCode);

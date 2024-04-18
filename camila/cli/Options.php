@@ -488,7 +488,10 @@ class Options
         global $argv;
 		global $_CAMILA;
 		
-		if (getenv('REQUEST_METHOD') == 'POST' || (array_key_exists('REQUEST_METHOD',$_SERVER) && $_SERVER['REQUEST_METHOD']==='POST')) {
+		if (isset($_CAMILA['cli_args']) && $_CAMILA['cli_args'] != '') {
+			$argv = explode(' ', 'cmd ' . $_CAMILA['cli_args']);
+		} 
+		else if (getenv('REQUEST_METHOD') == 'POST' || (array_key_exists('REQUEST_METHOD',$_SERVER) && $_SERVER['REQUEST_METHOD']==='POST')) {
 			$p = json_decode(file_get_contents('php://input'), true);
 			$argv = explode(' ', 'php ' . $p['cmd']);
 			//print_r($argv);

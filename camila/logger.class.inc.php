@@ -16,6 +16,8 @@ class CamilaLogger {
 		global $_CAMILA;
 		if (php_sapi_name() == "cli" || $_CAMILA['cli']) {
 			echo $value."\n";
+		} else if (isset($_CAMILA['cli_args']) && $_CAMILA['cli_args'] != '') {
+			$_CAMILA['cli_output'] .= $value."\n";
 		} else {
 			CamilaUserInterface::insertSuccess($value);
 		}

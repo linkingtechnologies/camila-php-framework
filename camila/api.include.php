@@ -12526,6 +12526,36 @@ namespace Tqdev\PhpCrudApi\Middleware {
     }
 }
 
+namespace Tqdev\PhpCrudApi {
+	use Psr\Http\Message\ResponseInterface;
+	use Psr\Http\Message\ServerRequestInterface;
+	use Tqdev\PhpCrudApi\Cache\Cache;
+	use Tqdev\PhpCrudApi\Column\ReflectionService;
+	use Tqdev\PhpCrudApi\Controller\Responder;
+	use Tqdev\PhpCrudApi\Database\GenericDB;
+	use Tqdev\PhpCrudApi\Middleware\Router\Router;
+
+	class CamilaCliController {
+
+		private $responder;
+
+		public function __construct(Router $router, Responder $responder, GenericDB $db, ReflectionService $reflection, Cache $cache)
+		{
+			$router->register('POST', '/cli', array($this, 'runCommand'));
+			$this->responder = $responder;
+		}
+
+		public function runCommand(ServerRequestInterface $request): ResponseInterface
+		{
+			global $_CAMILA;
+			$parsedBody = $request->getParsedBody();
+			$_CAMILA['cli_args'] = $parsedBody->command;
+			$cli = new \CamilaAppCli();
+			$cli->run();
+			return $this->responder->success(['output' => $_CAMILA['cli_output']]);
+		}
+	}
+}
 
 // file: src/Tqdev/PhpCrudApi/Api.php
 namespace Tqdev\PhpCrudApi {
@@ -12573,6 +12603,7 @@ namespace Tqdev\PhpCrudApi {
     use Tqdev\PhpCrudApi\Middleware\XsrfMiddleware;
     use Tqdev\PhpCrudApi\OpenApi\OpenApiService;
     use Tqdev\PhpCrudApi\Record\RecordService;
+	use Tqdev\PhpCrudApi\CamilaCliController;
 
     class Api implements RequestHandlerInterface
     {
@@ -13050,5 +13081,4 @@ namespace Tqdev\PhpCrudApi {
         }
     }
 }
-
 

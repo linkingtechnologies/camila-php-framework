@@ -15,6 +15,9 @@
     You should have received a copy of the GNU General Public License
     along with Camila PHP Framework. If not, see <http://www.gnu.org/licenses/>. */
 
+require_once('../../vendor/autoload.php');
+require_once('../../camila/autoloader.inc.php');
+
 require_once('../../camila/config.inc.php');
 require_once('../../camila/i18n.inc.php');
 require_once('../../camila/database.inc.php');
@@ -58,15 +61,18 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php') {
 	}
 
 	$conf['debug'] = false;
-	$conf['middlewares'] = 'camilaBasicAuth,authorization';
+	$conf['middlewares'] = 'camilaBasicAuth,authorization,apiKeyAuth';
 	$conf['authorization.tableHandler'] = function ($operation, $tableName) {
 		$ret = true;
 		if (str_ends_with($tableName,'_camila_users') || str_ends_with($tableName,'_camila_files'))
 			$ret = false;
-		if (!str_starts_with($tableName,CAMILA_APP_DIR))
-			$ret = false;
+		/*if (!str_starts_with($tableName,CAMILA_APP_DIR))
+			$ret = false;*/
 		return $ret;
 	};
+	$conf['mapping'] = 'segreteriacampo_worktable1=table1,segreteriacampo_worktable1.id=table1.III';
+	$conf['customControllers'] = 'Tqdev\PhpCrudApi\CamilaCliController';
+	$conf['apiKeyAuth.keys'] = CAMILA_APIKEYAUTH_KEYS;
 	$config = new Config($conf);
 
 	$request = RequestFactory::fromGlobals();

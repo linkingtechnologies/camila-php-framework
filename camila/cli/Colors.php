@@ -115,6 +115,10 @@ class Colors
 				echo(rtrim($line)."\n");
 			}
 		}
+		if (isset($_CAMILA['cli_args']) && $_CAMILA['cli_args'] != '') {
+			$_CAMILA['cli_output'] .= rtrim($line)."\n";
+		}
+			
 		$this->reset();
     }
 
