@@ -9,11 +9,16 @@ class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
     public static $files = array (
         '2cffec82183ee1cea088009cef9a6fc3' => __DIR__ . '/..' . '/ezyang/htmlpurifier/library/HTMLPurifier.composer.php',
         'bf9f5270ae66ac6fa0290b4bf47867b7' => __DIR__ . '/..' . '/adodb/adodb-php/adodb.inc.php',
+        'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
         'd5fa61a7f6cbc1df09dd4df84549a2dc' => __DIR__ . '/..' . '/rospdf/pdf-php/src/Cpdf.php',
         '2d15964294879de66053d54f6bde65d7' => __DIR__ . '/..' . '/rospdf/pdf-php/src/Cezpdf.php',
     );
 
     public static $prefixLengthsPsr4 = array (
+        'p' => 
+        array (
+            'phpseclib3\\' => 11,
+        ),
         'l' => 
         array (
             'lebedevsergey\\ODT2XHTML\\Helpers\\' => 32,
@@ -30,9 +35,16 @@ class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
         'P' => 
         array (
             'Psr\\SimpleCache\\' => 16,
+            'Psr\\Http\\Server\\' => 16,
             'Psr\\Http\\Message\\' => 17,
             'Psr\\Http\\Client\\' => 16,
             'PhpOffice\\PhpSpreadsheet\\' => 25,
+            'ParagonIE\\ConstantTime\\' => 23,
+        ),
+        'N' => 
+        array (
+            'Nyholm\\Psr7\\' => 12,
+            'Nyholm\\Psr7Server\\' => 18,
         ),
         'M' => 
         array (
@@ -55,6 +67,10 @@ class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
     );
 
     public static $prefixDirsPsr4 = array (
+        'phpseclib3\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib',
+        ),
         'lebedevsergey\\ODT2XHTML\\Helpers\\' => 
         array (
             0 => __DIR__ . '/..' . '/lebedevsergey/odt2xhtml/src/Helpers',
@@ -75,6 +91,11 @@ class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
         array (
             0 => __DIR__ . '/..' . '/psr/simple-cache/src',
         ),
+        'Psr\\Http\\Server\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/http-server-handler/src',
+            1 => __DIR__ . '/..' . '/psr/http-server-middleware/src',
+        ),
         'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-factory/src',
@@ -87,6 +108,18 @@ class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
         'PhpOffice\\PhpSpreadsheet\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet',
+        ),
+        'ParagonIE\\ConstantTime\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
+        ),
+        'Nyholm\\Psr7\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/nyholm/psr7/src',
+        ),
+        'Nyholm\\Psr7Server\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/nyholm/psr7-server/src',
         ),
         'MyCLabs\\Enum\\' => 
         array (

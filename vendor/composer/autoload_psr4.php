@@ -6,14 +6,19 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'phpseclib3\\' => array($vendorDir . '/phpseclib/phpseclib/phpseclib'),
     'lebedevsergey\\ODT2XHTML\\Helpers\\' => array($vendorDir . '/lebedevsergey/odt2xhtml/src/Helpers'),
     'lebedevsergey\\ODT2XHTML\\' => array($vendorDir . '/lebedevsergey/odt2xhtml/src'),
     'ZipStream\\' => array($vendorDir . '/maennchen/zipstream-php/src'),
     'Wizaplace\\Etl\\' => array($vendorDir . '/wizaplace/php-etl/src'),
     'Psr\\SimpleCache\\' => array($vendorDir . '/psr/simple-cache/src'),
+    'Psr\\Http\\Server\\' => array($vendorDir . '/psr/http-server-handler/src', $vendorDir . '/psr/http-server-middleware/src'),
     'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-factory/src', $vendorDir . '/psr/http-message/src'),
     'Psr\\Http\\Client\\' => array($vendorDir . '/psr/http-client/src'),
     'PhpOffice\\PhpSpreadsheet\\' => array($vendorDir . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet'),
+    'ParagonIE\\ConstantTime\\' => array($vendorDir . '/paragonie/constant_time_encoding/src'),
+    'Nyholm\\Psr7\\' => array($vendorDir . '/nyholm/psr7/src'),
+    'Nyholm\\Psr7Server\\' => array($vendorDir . '/nyholm/psr7-server/src'),
     'MyCLabs\\Enum\\' => array($vendorDir . '/myclabs/php-enum/src'),
     'Matrix\\' => array($vendorDir . '/markbaker/matrix/classes/src'),
     'Flow\\JSONPath\\' => array($vendorDir . '/softcreatr/jsonpath/src'),

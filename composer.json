@@ -6,7 +6,14 @@
 		"tinybutstrong/tinybutstrong": "3.14.0",
 		"wizaplace/php-etl": "2.2",
 		"bordercloud/sparql": "2.1.0",
-		"lebedevsergey/odt2xhtml": "1.0"
+		"lebedevsergey/odt2xhtml": "1.0",
+		"phpseclib/phpseclib" : "~3.0",
+		"psr/http-message": "*",
+		"psr/http-factory": "*",
+		"psr/http-server-handler": "*",
+		"psr/http-server-middleware": "*",
+		"nyholm/psr7": "*",
+		"nyholm/psr7-server": "*"
 	},
 	"config": {
         "platform": {
