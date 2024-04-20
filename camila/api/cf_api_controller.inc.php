@@ -42,6 +42,11 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
 if (basename($_SERVER['PHP_SELF']) == 'cf_api.php') {
 
 	global $_CAMILA;
+	
+	$camilaWT = new CamilaWorkTable();
+	$camilaWT->db = $_CAMILA['db'];
+	$mapping = $camilaWT->getWorktableColumnMapping();
+
 	$conf = [];
 	if ($_CAMILA['db']->databaseType == 'sqlite' || $_CAMILA['db']->databaseType == 'sqlite3') {
 		$conf = [
@@ -60,8 +65,8 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php') {
 		];	
 	}
 
-	$conf['debug'] = false;
-	$conf['middlewares'] = 'camilaBasicAuth,authorization,apiKeyAuth';
+	$conf['debug'] = true;
+	$conf['middlewares'] = 'apiKeyAuth,authorization';
 	$conf['authorization.tableHandler'] = function ($operation, $tableName) {
 		$ret = true;
 		if (str_ends_with($tableName,'_camila_users') || str_ends_with($tableName,'_camila_files'))
@@ -70,7 +75,7 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php') {
 			$ret = false;*/
 		return $ret;
 	};
-	$conf['mapping'] = 'segreteriacampo_worktable1=table1,segreteriacampo_worktable1.id=table1.III';
+	$conf['mapping'] = $mapping;
 	$conf['customControllers'] = 'Tqdev\PhpCrudApi\CamilaCliController';
 	$conf['apiKeyAuth.keys'] = CAMILA_APIKEYAUTH_KEYS;
 	$config = new Config($conf);

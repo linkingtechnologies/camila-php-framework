@@ -5321,7 +5321,7 @@ namespace Tqdev\PhpCrudApi\Controller {
             if (!$this->service->hasTable($table)) {
                 return $this->responder->error(ErrorCode::TABLE_NOT_FOUND, $table);
             }
-            return $this->responder->success($this->service->_list($table, $params));
+			return $this->responder->success($this->service->_list($table, $params));
         }
 
         public function read(ServerRequestInterface $request): ResponseInterface
@@ -6440,7 +6440,7 @@ namespace Tqdev\PhpCrudApi\Database {
 
         private function query(string $sql, array $parameters): \PDOStatement
         {
-            $stmt = $this->pdo->prepare($sql);
+			$stmt = $this->pdo->prepare($sql);
             //echo "- $sql -- " . json_encode($parameters, JSON_UNESCAPED_UNICODE) . "\n";
             $stmt->execute($parameters);
             return $stmt;
@@ -11415,7 +11415,7 @@ namespace Tqdev\PhpCrudApi\Record\Document {
                 } elseif (strpos(strtolower($exception->getMessage()), 'constraint') !== false) {
                     $document = new ErrorDocument(new ErrorCode(ErrorCode::DATA_INTEGRITY_VIOLATION), '', null);
                 } else {
-                    $message = $debug ? $exception->getMessage() : 'PDOException occurred (enable debug mode)';
+                    $message = $debug ? $exception->getTraceAsString() : 'PDOException occurred (enable debug mode)';
                     $document = new ErrorDocument(new ErrorCode(ErrorCode::ERROR_NOT_FOUND), $message, null);
                 }
             }
@@ -12026,6 +12026,7 @@ namespace Tqdev\PhpCrudApi\Record {
                 $limit = $this->pagination->getPageLimit($params);
                 $count = $this->db->selectCount($table, $condition);
             }
+			
             $records = $this->db->selectAll($table, $columnNames, $condition, $columnOrdering, $offset, $limit);
             $this->joiner->addJoins($table, $records, $params, $this->db);
             return new ListDocument($records, $count);

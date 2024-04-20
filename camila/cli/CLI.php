@@ -238,7 +238,7 @@ abstract class CLI extends Base
 		$c = array('command' => $cmd);
 		$content = json_encode($c);
 		$curl = curl_init($url);
-		curl_setopt($curl, CURLOPT_VERBOSE, 1);
+		curl_setopt($curl, CURLOPT_VERBOSE, false);
 		curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
