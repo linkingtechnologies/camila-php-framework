@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2024 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
   require_once(CAMILA_DIR.'datagrid/validator/Validator.php');
   require_once(CAMILA_DIR.'datagrid/elements/form/field.php');
 
+  use \ForceUTF8\Encoding;
 
   class phpform
   {
@@ -156,7 +157,7 @@
                   $key = str_replace('|', camila_get_translation('camila.and') . ' ', $key);
               }
               $errtext .= camila_get_translation('camila.preformfielderror');
-              $errtext .= isUTF8($this->fields[$key]->title) ? $this->fields[$key]->title . camila_get_translation('camila.postformfielderror') : utf8_encode($this->fields[$key]->title) . camila_get_translation('camila.postformfielderror');
+              $errtext .= \ForceUTF8\Encoding::toUTF8($this->fields[$key]->title) . camila_get_translation('camila.postformfielderror');
               $errtext .= ' ' . camila_get_translation('camila.formvalidationerror' . $value);
               $errtext .= "\n";
           } else {

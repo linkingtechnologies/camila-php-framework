@@ -170,15 +170,7 @@ function isUTF8($str)
        return @!((ord($enc[0]) != 239) && (ord($enc[1]) != 187) && (ord($enc[2]) != 191));
    }
    else
-   {
-//       return (utf8_encode(utf8_decode($string)) == $string);
-
-//         if (preg_match('!\S!u', $string))
-//             return true;
-//         else
-//             return false;
-			 
-			 
+   {		 
 $length = strlen($str);
  for ($i=0; $i < $length; $i++) {
   $c = ord($str[$i]);

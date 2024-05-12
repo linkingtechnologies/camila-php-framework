@@ -1836,7 +1836,6 @@ class configurator
                 $i = 0;
                 while ($data->val(1, $i + 1, $sheetnum) != '') {
                     $name              = $data->val(1, $i + 1, $sheetnum);
-                    //$excelColNames[$i] = camila_strtoupper_utf8(isUTF8($name) ? $name : utf8_encode($name));
 					$excelColNames[$i] = mb_strtoupper(\ForceUTF8\Encoding::toUTF8($name), 'UTF-8');
                     $i++;
                 }

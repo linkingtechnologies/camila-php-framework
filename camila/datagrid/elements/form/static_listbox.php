@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2024 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 
 
-
+use \ForceUTF8\Encoding;
 
 class form_static_listbox extends form_field {
 
@@ -101,7 +101,7 @@ class form_static_listbox extends form_field {
 		//echo $this->key;
 		//print_r($_REQUEST);
         if($this->updatable && isset($_REQUEST[$this->key])) {
-            $this->value = isUTF8($_REQUEST[$this->key]) ? $_REQUEST[$this->key] : utf8_encode($_REQUEST[$this->key]);
+            $this->value = \ForceUTF8\Encoding::toUTF8($_REQUEST[$this->key]);
         }
     }
 

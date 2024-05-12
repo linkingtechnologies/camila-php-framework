@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2024 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
 
 
 require_once('camila.php');
-
 
 require_once('autoloader.inc.php');
 
@@ -55,17 +54,10 @@ $smartMenusTheme = 'sm-camila';
       camila_stripslashes_array($_COOKIE);
   }
 
-  if (!camila_isUTF8($_GET))
-      camila_utf8_encode_array($_GET);
-
-  if (!camila_isUTF8($_POST))
-      camila_utf8_encode_array($_POST);
-
-  if (!camila_isUTF8($_REQUEST))
-      camila_utf8_encode_array($_REQUEST);
-
-  if (!camila_isUTF8($_COOKIE))
-      camila_utf8_encode_array($_COOKIE);
+  camila_utf8_encode_array($_GET);
+  camila_utf8_encode_array($_POST);
+  camila_utf8_encode_array($_REQUEST);
+  camila_utf8_encode_array($_COOKIE);
 
   if (isset($_REQUEST[camila_session_cookie_name()]))
       session_id($_REQUEST[camila_session_cookie_name()]);

@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-Copyright (C) 2006-2022 Umberto Bresciani
+Copyright (C) 2006-2024 Umberto Bresciani
 
 Camila PHP Framework is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with Camila PHP Framework; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 
+
+use \ForceUTF8\Encoding;
 
 class form_field
 {  
@@ -217,15 +219,13 @@ class form_field
     
     function strtoupper_utf8($string)
     {
-        if (!isUTF8($string))
-            $string = utf8_encode($string);
+		$string = \ForceUTF8\Encoding::toUTF8($string);
         return mb_strtoupper($string, 'UTF-8');
     }
     
     function strtolower_utf8($string)
     {
-        if (isUTF8($string))
-            $string = utf8_encode($string);
+        $string = \ForceUTF8\Encoding::toUTF8($string);
         return mb_strtolower($string, 'UTF-8');
     }
     

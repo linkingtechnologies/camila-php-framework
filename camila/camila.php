@@ -17,44 +17,17 @@
    along with Camila PHP Framework; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 
+use \ForceUTF8\Encoding;
+
 require_once('config.inc.php');
 require_once('i18n.inc.php');
-  
 
-
-  //require(CAMILA_LIB_DIR.'phpolait/JSON.php');
-
-
-/*  function camila_logout() {
-      global $_CAMILA;
-	  
-	  $sessionLogin = CAMILA_APPLICATION_NAME . '_logged_user';
-	  $_SESSION[$sessionLogin] = '';
-		  
-
-      $result = $_CAMILA['db']->Execute('UPDATE '. CAMILA_TABLE_USERS . ' SET session_id=? WHERE id=?', Array('',$_CAMILA['user_id']));
-      if ($result === false)
-          camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
-  }*/
-
-
-
-  function camila_utf8_decode_array(&$arr)
-  {
-      foreach (array_keys($arr) as $k) {
-          if (!is_array($arr[$k]))
-              $arr[$k] = utf8_decode($arr[$k]);
-          else
-              camila_utf8_decode_array($arr[$k]);
-      }
-  }
 
   function camila_utf8_encode_array(&$arr)
   {
       foreach (array_keys($arr) as $k) {
           if (!is_array($arr[$k])) {
-              if (!isUTF8($arr[$k]))
-                  $arr[$k] = utf8_encode($arr[$k]);
+			  $arr[$k] = \ForceUTF8\Encoding::toUTF8($arr[$k]);
           }
           else
               camila_utf8_encode_array($arr[$k]);
@@ -71,30 +44,12 @@ require_once('i18n.inc.php');
       }
   }
 
-  function camila_isUTF8($string)
-  {
-      if (is_array($string)) {
-          $enc = implode('', $string);
-          return @!((ord($enc[0]) != 239) && (ord($enc[1]) != 187) && (ord($enc[2]) != 191));
-       } else {
-          return (utf8_encode(utf8_decode($string)) == $string);
-      }
-   }
-
   function camila_strtoupper_utf8($string){
-      if(isUTF8($string))
-          $string=utf8_decode($string);
-      $string=strtoupper($string);
-      $string=utf8_encode($string);
-      return $string;
+	  return mb_strtoupper(\ForceUTF8\Encoding::toUTF8($string), 'UTF-8');
   }
 
   function camila_strtolower_utf8($string){
-      if(isUTF8($string))
-          $string=utf8_decode($string);
-      $string=strtolower($string);
-      $string=utf8_encode($string);
-      return $string;
+      return mb_strtolower(\ForceUTF8\Encoding::toUTF8($string), 'UTF-8');
   }
 
   function camila_get_export_link($type)

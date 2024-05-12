@@ -1,5 +1,7 @@
 <?php
   require_once(CAMILA_LIB_DIR.'m2translator/M2Translator.class.php');
+  
+  use \ForceUTF8\Encoding;
 
   function camila_translation_init($force=false) {
 
@@ -49,11 +51,7 @@
   {
       global $_CAMILA;
       if (is_object($_CAMILA['page'])) {
-          //if (camila_isUTF8($msg))
-          //    $msg=utf8_decode($msg);
-          if (!isUTF8($msg))
-              $msg=utf8_encode($msg);
-
+          $msg=\ForceUTF8\Encoding::toUTF8($msg);
           $text = new CHAW_text($msg, HAW_TEXTFORMAT_BOLD);
           //$text->set_color('red');
           //$text->set_br(2);
