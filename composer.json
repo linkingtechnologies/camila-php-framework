@@ -2,7 +2,7 @@
     "require": {
         "adodb/adodb-php": "5.22.7",
 		"rospdf/pdf-php": "0.12.67",
-		"phpoffice/phpspreadsheet": "1.29.0",
+		"phpoffice/phpspreadsheet": "1.25.2",
 		"tinybutstrong/tinybutstrong": "3.14.0",
 		"wizaplace/php-etl": "2.2",
 		"bordercloud/sparql": "2.1.0",
@@ -18,7 +18,7 @@
 	},
 	"config": {
         "platform": {
-            "php": "8.3"
+            "php": "8.2"
         }
     }
 }

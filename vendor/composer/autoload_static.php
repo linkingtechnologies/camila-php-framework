@@ -48,6 +48,7 @@ class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
         ),
         'M' => 
         array (
+            'MyCLabs\\Enum\\' => 13,
             'Matrix\\' => 7,
         ),
         'F' => 
@@ -97,8 +98,8 @@ class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -119,6 +120,10 @@ class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
         'Nyholm\\Psr7Server\\' => 
         array (
             0 => __DIR__ . '/..' . '/nyholm/psr7-server/src',
+        ),
+        'MyCLabs\\Enum\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/myclabs/php-enum/src',
         ),
         'Matrix\\' => 
         array (
@@ -161,6 +166,7 @@ class ComposerStaticInite9ec38edca5c39c4e8ad3ff4e61c2958
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Stringable' => __DIR__ . '/..' . '/myclabs/php-enum/stubs/Stringable.php',
         'clsTbsDataSource' => __DIR__ . '/..' . '/tinybutstrong/tinybutstrong/tbs_class.php',
         'clsTbsLocator' => __DIR__ . '/..' . '/tinybutstrong/tinybutstrong/tbs_class.php',
         'clsTinyButStrong' => __DIR__ . '/..' . '/tinybutstrong/tinybutstrong/tbs_class.php',
