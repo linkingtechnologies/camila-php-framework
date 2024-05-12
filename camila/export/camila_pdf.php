@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2024 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
    along with Camila PHP Framework; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 
+use \ForceUTF8\Encoding;
 
 require_once(CAMILA_VENDOR_DIR . 'rospdf/pdf-php/src/Cezpdf.php');
 
@@ -27,8 +28,6 @@ require_once(CAMILA_VENDOR_DIR . 'rospdf/pdf-php/src/Cezpdf.php');
       var $textpending = '';
 
       function create_page() {
-
-          //require_once(CAMILA_LIB_DIR . 'pdf-php/Cezpdf.php');
 
           if (isset($_REQUEST['camila_page_orient']) && $_REQUEST['camila_page_orient'] == "o")
               $this->pdf = new Cezpdf($_REQUEST['camila_page_dim'],'landscape');
@@ -64,7 +63,7 @@ require_once(CAMILA_VENDOR_DIR . 'rospdf/pdf-php/src/Cezpdf.php');
                                   $text = $form_element->label . ' ' . html_entity_decode($form_element->value);
                                   for ($ii = 0; $ii < $form_element->br; $ii++)
                                       $text .= "\n";
-                                  $this->pdf_text(isUTF8($text) ? utf8_decode($text) : $text);
+                                  $this->pdf_text(\ForceUTF8\Encoding::toUTF8($text));
                                   break;
                               }
 
@@ -89,7 +88,7 @@ require_once(CAMILA_VENDOR_DIR . 'rospdf/pdf-php/src/Cezpdf.php');
                                       $nl = $form_element->br;
                                   for ($ii = 0; $ii < $nl; $ii++)
                                       $text .= "\n";
-                                  $this->pdf_text(isUTF8($text) ? utf8_decode($text) : $text);
+                                  $this->pdf_text(\ForceUTF8\Encoding::toUTF8($text));
                                   break;
                               }
 
@@ -114,7 +113,7 @@ require_once(CAMILA_VENDOR_DIR . 'rospdf/pdf-php/src/Cezpdf.php');
                       for ($ii = 0; $ii < $link->br; $ii++)
                           $suffix .= "\n";
 
-                      $this->pdf_text(isUTF8($link->label) ? utf8_decode($link->label).$suffix : $link->label.$suffix);
+                      $this->pdf_text(\ForceUTF8\Encoding::toUTF8($link->label).$suffix);
 
                       break;
                   }
@@ -131,12 +130,12 @@ require_once(CAMILA_VENDOR_DIR . 'rospdf/pdf-php/src/Cezpdf.php');
 
                               if (is_object($column) && $column->get_elementtype() == HAW_PLAINTEXT) {
                                   $text = $column;
-                                  $cols[$b] = isUTF8($text->text) ? utf8_decode($text->text) : $text->text;
+                                  $cols[$b] = \ForceUTF8\Encoding::toUTF8($text->text);
                               }
 
                               if (is_object($column) && $column->get_elementtype() == HAW_LINK) {
                                   $link = $column;
-                                  $cols[$b] = isUTF8($link->label) ? utf8_decode($link->label) : $link->label;
+                                  $cols[$b] = \ForceUTF8\Encoding::toUTF8($link->label);
                               }
                           }
 
@@ -258,13 +257,10 @@ require_once(CAMILA_VENDOR_DIR . 'rospdf/pdf-php/src/Cezpdf.php');
 //              $suffix .= "\n";
 
             $this->textpending .= $this->pdf_html_from_text($text);
-//          $this->textpending .= isUTF8($text->text) ? $prefix.utf8_decode($text->text).$suffix : $prefix.$text->text.$suffix;
 
           if ($text->br > 0 || $forceflush) {
-              //$this->pdf->ezText(!isUTF8($this->textpending) ? utf8_decode($this->textpending) : $this->textpending);
               $this->pdf->ezText($this->textpending);
 
-//              $this->pdf->ezText($this->textpending);
               $this->textpending = '';
           } else {
               $suffix .= "\n";
@@ -309,7 +305,7 @@ require_once(CAMILA_VENDOR_DIR . 'rospdf/pdf-php/src/Cezpdf.php');
           for ($ii = 1; $ii < $text->br; $ii++)
               $suffix .= "\n";
 
-          $html = isUTF8($text->text) ? $prefix.utf8_decode($text->text).$suffix : $prefix.$text->text.$suffix;
+          $html = $prefix.\ForceUTF8\Encoding::toUTF8($text->text).$suffix;
 
           return $html;
 
@@ -320,7 +316,7 @@ require_once(CAMILA_VENDOR_DIR . 'rospdf/pdf-php/src/Cezpdf.php');
           for ($ii = 1; $ii < $link->br; $ii++)
               $suffix .= "\n";
 
-          $html = isUTF8($link->label) ? utf8_decode($link->label).$suffix : $link->label.$suffix;
+          $html = \ForceUTF8\Encoding::toUTF8($link->label).$suffix;
 
           return $html;
 
