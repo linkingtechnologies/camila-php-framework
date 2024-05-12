@@ -2689,6 +2689,7 @@ if (!defined('_ADODB_LAYER')) {
 				$this->outp_throw("AutoExecute: Unknown mode=$mode", 'AutoExecute');
 				return false;
 		}
+		//echo mb_detect_encoding(\ForceUTF8\Encoding::toUTF8($sql));
 		return $sql && $this->Execute($sql);
 	}
 

@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2022 Umberto Bresciani
+    Copyright (C) 2006-2024 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,28 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with Camila PHP Framework. If not, see <http://www.gnu.org/licenses/>. */
 
-//ini_set('display_errors', '1');
-//ini_set('display_startup_errors', '1');
-//error_reporting(E_ALL);
 
 require_once CAMILA_VENDOR_DIR . 'autoload.php';
-
-/*$dir = new RecursiveDirectoryIterator(CAMILA_LIB_DIR . 'PhpOffice/');
-foreach (new RecursiveIteratorIterator($dir) as $file) {
-    if (!is_dir($file)) {
-        if( fnmatch('*.php', $file) ) {
-		require_once $file;
-		}
-	}
-}*/
-
-
-//use PhpOffice\PhpSpreadsheet\Helper\Sample;
-//use PhpOffice\PhpSpreadsheet\IOFactory;
-//use PhpOffice\PhpSpreadsheet\Spreadsheet;
-//fix me
-//use PhpOffice\PhpSpreadsheet\Shared\Date;
-
 
 class Spreadsheet_Excel_Reader {
 	
@@ -144,7 +124,8 @@ class Spreadsheet_Excel_Reader {
 
 	function __construct($file='',$store_extended_info=true,$outputEncoding='') {
 		$reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
-		//$reader->setReadDataOnly(true);
+		//$reader->setInputEncoding('ISO-8859-2');
+		$reader->setReadDataOnly(true);
 		$spreadsheet = $reader->load($file);
 		$this->spreadsheet = $spreadsheet;
 		

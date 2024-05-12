@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2022 Umberto Bresciani
+    Copyright (C) 2006-2024 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,47 +15,9 @@
     You should have received a copy of the GNU General Public License
     along with Camila PHP Framework. If not, see <http://www.gnu.org/licenses/>. */
 
-/*
-$Id: Latin1UTF8.php 2007/07/09 $
+require_once CAMILA_VENDOR_DIR . 'autoload.php';
 
-Stefan Fischerländer <stefan@fischerlaender.de>
-http://www.fischerlaender.net
-
-A simple class that tries to sanitize text which contains parts in different encodings.
-
-*/
-
-//require_once(CAMILA_LIB_DIR . 'm2translator/M2Translator.class.php');
-
-
-class Latin1UTF8
-{
-    
-    var $latin1_to_utf8;
-    var $utf8_to_latin1;
-
-    function Latin1UTF8()
-    {
-        for ($i = 32; $i <= 255; $i++) {
-            $this->latin1_to_utf8[chr($i)]              = utf8_encode(chr($i));
-            $this->utf8_to_latin1[utf8_encode(chr($i))] = chr($i);
-        }
-    }
-    
-    function mixed_to_latin1($text)
-    {
-        foreach ($this->utf8_to_latin1 as $key => $val) {
-            $text = str_replace($key, $val, $text);
-        }
-        return $text;
-    }
-    
-    function mixed_to_utf8($text)
-    {
-        return utf8_encode($this->mixed_to_latin1($text));
-    }
-}
-
+use \ForceUTF8\Encoding;
 
 function camila_configurator_worktable_description_db_onupdate($lform)
 {
@@ -437,7 +399,7 @@ class configurator
     function xls_read($sequence = -1)
     {
         global $_CAMILA;
-        
+
         if ($this->interactive) {
             $filename = $_REQUEST['configurator_filename'];
             $sheetnum = $_REQUEST['configurator_sheet'] - 1;
@@ -462,7 +424,6 @@ class configurator
 			else
 				echo ($this->camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
 		}
-
         
         $id                    = intval($result->fields['id']) + 1;
         $record['id']          = $id;
@@ -567,25 +528,24 @@ class configurator
                     $fieldOptions                = $data->val(13, 2 + $i, $sheetnum + 1);
                     $autosuggestWorktableName    = $data->val(14, 2 + $i, $sheetnum + 1);
                     $autosuggestWorktableColName = $data->val(15, 2 + $i, $sheetnum + 1);
-					$help                        = $data->val(16, 2 + $i, $sheetnum + 1);
-                    
-                    
-                    $name                        = isUTF8($name) ? $name : utf8_encode($name);
-                    $sequence                    = isUTF8($sequence) ? $sequence : utf8_encode($sequence);
-                    $nameAbbrev                  = isUTF8($nameAbbrev) ? $nameAbbrev : utf8_encode($nameAbbrev);
-                    $type                        = isUTF8($type) ? $type : utf8_encode($type);
-                    $listboxOptions              = isUTF8($listboxOptions) ? $listboxOptions : utf8_encode($listboxOptions);
-                    $maxLength                   = isUTF8($maxLength) ? $maxLength : utf8_encode($maxLength);
-                    $required                    = isUTF8($required) ? $required : utf8_encode($required);
-                    $defaultValue                = isUTF8($defaultValue) ? $defaultValue : utf8_encode($defaultValue);
-                    $readonly                    = isUTF8($readonly) ? $readonly : utf8_encode($readonly);
-                    $visible                     = isUTF8($visible) ? $visible : utf8_encode($visible);
-                    $forceCase                   = isUTF8($forceCase) ? $forceCase : utf8_encode($forceCase);
-                    $mustBeUnique                = isUTF8($mustBeUnique) ? $mustBeUnique : utf8_encode($mustBeUnique);
-                    $fieldOptions                = isUTF8($fieldOptions) ? $fieldOptions : utf8_encode($fieldOptions);
-                    $autosuggestWorktableName    = isUTF8($autosuggestWorktableName) ? $autosuggestWorktableName : utf8_encode($autosuggestWorktableName);
-                    $autosuggestWorktableColName = isUTF8($autosuggestWorktableColName) ? $autosuggestWorktableColName : utf8_encode($autosuggestWorktableColName);
-					$help                        = isUTF8($help) ? $help : utf8_encode($help);
+					$help                        = $data->val(16, 2 + $i, $sheetnum + 1);					
+
+					$name = \ForceUTF8\Encoding::toUTF8($name);
+                    $sequence = \ForceUTF8\Encoding::toUTF8($sequence);
+					$nameAbbrev = \ForceUTF8\Encoding::toUTF8($nameAbbrev);
+                    $type = \ForceUTF8\Encoding::toUTF8($type);
+                    $listboxOptions = \ForceUTF8\Encoding::toUTF8($listboxOptions);
+                    $maxLength = \ForceUTF8\Encoding::toUTF8($maxLength);
+                    $required = \ForceUTF8\Encoding::toUTF8($required);
+                    $defaultValue = \ForceUTF8\Encoding::toUTF8($defaultValue);
+                    $readonly = \ForceUTF8\Encoding::toUTF8($readonly);
+                    $visible = \ForceUTF8\Encoding::toUTF8($visible);
+                    $forceCase = \ForceUTF8\Encoding::toUTF8($forceCase);
+                    $mustBeUnique = \ForceUTF8\Encoding::toUTF8($mustBeUnique);
+                    $fieldOptions = \ForceUTF8\Encoding::toUTF8($fieldOptions);
+                    $autosuggestWorktableName = \ForceUTF8\Encoding::toUTF8($autosuggestWorktableName);
+                    $autosuggestWorktableColName = \ForceUTF8\Encoding::toUTF8($autosuggestWorktableColName);
+					$help = \ForceUTF8\Encoding::toUTF8($help);
         
                     if ($this->interactive) {
                         $yesNoArr     = camila_get_translation_array('camila.worktable.options.noyes');
@@ -608,6 +568,7 @@ class configurator
                     $record['is_deleted']             = 'n';
                     //$record['orig_name'] = preg_replace("/[\n\r]/", "", $value);
                     //$record['orig_type'] = $types[$key];
+					
                     $record['type']                   = array_search($type, $fieldTypeArr);
                     $record['listbox_options']        = $listboxOptions;
                     $record['name']                   = preg_replace("/[\n\r]/", ' ', $name);
@@ -626,7 +587,10 @@ class configurator
                     $record['autosuggest_wt_name']    = $autosuggestWorktableName;
                     $record['autosuggest_wt_colname'] = $autosuggestWorktableColName;
 					$record['help']					  = $help;
+
+					//$this->db->Execute("PRAGMA encoding='UTF-8';");
                     $insertSQL = $this->db->AutoExecute(CAMILA_TABLE_WORKC, $record, 'INSERT');
+
                     if (!$insertSQL) {
                         if (function_exists('camila_information_text'))
 							camila_information_text(camila_get_translation('camila.worktable.db.error'));
@@ -649,14 +613,14 @@ class configurator
                 $canDelete  = $data->val(24, 2, $sheetnum + 1);
                 $category   = $data->val(25, 2, $sheetnum + 1);
                 
-                $shortTitle = isUTF8($shortTitle) ? $shortTitle : utf8_encode($shortTitle);
-                $fullTitle  = isUTF8($fullTitle) ? $fullTitle : utf8_encode($fullTitle);
-                $orderField = isUTF8($orderField) ? $orderField : utf8_encode($orderField);
-                $orderDir   = isUTF8($orderDir) ? $orderDir : utf8_encode($orderDir);
-                $canUpdate  = isUTF8($canUpdate) ? $canUpdate : utf8_encode($canUpdate);
-                $canInsert  = isUTF8($canInsert) ? $canInsert : utf8_encode($canInsert);
-                $canDelete  = isUTF8($canDelete) ? $canDelete : utf8_encode($canDelete);
-                $category   = isUTF8($category) ? $category : utf8_encode($category);
+                $shortTitle = \ForceUTF8\Encoding::toUTF8($shortTitle);
+                $fullTitle  = \ForceUTF8\Encoding::toUTF8($fullTitle);
+                $orderField = \ForceUTF8\Encoding::toUTF8($orderField);
+                $orderDir   = \ForceUTF8\Encoding::toUTF8($orderDir);
+                $canUpdate  = \ForceUTF8\Encoding::toUTF8($canUpdate);
+                $canInsert  = \ForceUTF8\Encoding::toUTF8($canInsert);
+                $canDelete  = \ForceUTF8\Encoding::toUTF8($canDelete);
+                $category   = \ForceUTF8\Encoding::toUTF8($category);
 
                 $record                = Array();
                 $record['id']          = $id;
@@ -682,10 +646,10 @@ class configurator
                 $j = 0;
                 while ($data->val(18 + $j, 3, $sheetnum + 1) != '') {
                     $title = $data->val(18 + $j, 3, $sheetnum + 1);
-                    $title = isUTF8($title) ? $title : utf8_encode($title);
+                    $title = \ForceUTF8\Encoding::toUTF8($title);
                     
                     $url = $data->val(18 + $j, 4, $sheetnum + 1);
-                    $url = isUTF8($url) ? $url : utf8_encode($url);
+                    $url = \ForceUTF8\Encoding::toUTF8($url);
                     
                     $record['id']       = $this->db->GenID(CAMILA_APPLICATION_PREFIX . 'bookmarkseq', 10000);
                     $record['title']    = $title;
@@ -727,7 +691,7 @@ class configurator
                     
                     $record['col_name']       = $this->get_field_name($value);
                     $name                     = preg_replace("/[\n\r]/", ' ', $value);
-                    $record['name']           = !isUTF8($name) ? utf8_encode($name) : $name;
+                    $record['name']           = \ForceUTF8\Encoding::toUTF8($name);
                     $record['name_abbrev']    = $record['name'];
                     $record['readonly']       = 'n';
                     $record['must_be_unique'] = 'n';
@@ -1446,11 +1410,12 @@ class configurator
         $t->generateOutputToString($output);
         //$t->generateOutputToFile(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $id . '.inc.php');
         
-        $trans = new Latin1UTF8();
+        //$trans = new Latin1UTF8();
         
         $fh = fopen(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $id . '.inc.php', 'wb');
-        fwrite($fh, $trans->mixed_to_utf8($output));
-        fclose($fh);
+        //fix me... fixUtf8?
+		fwrite($fh, \ForceUTF8\Encoding::toUTF8($output));
+        //fclose($fh);
 		
 		if (function_exists('opcache_reset'))
 			opcache_reset();
@@ -1799,7 +1764,7 @@ class configurator
     
     function xls_import($id, $returl = '')
     {
-        
+
         global $_CAMILA;
 
         require_once(CAMILA_DIR . 'datagrid/form.class.php');
@@ -1836,14 +1801,13 @@ class configurator
         if ($form3->process()) {
 			//echo(':'.$form3->value);
 
-			
 			$filename = $form3->fields['filename']->value[0];
 			if (!file_exists(CAMILA_TMP_DIR . '/' .$filename)) {
 				
-				echo "KO... ". $filename;;
+				echo "File does not exist: ". $filename;
 			}
             $sheetnum = $form3->fields['sheetnum']->value;
-			
+
             $result = $_CAMILA['db']->Execute('select short_title, scriptname, tablename, filename, sheetnum from ' . CAMILA_TABLE_WORKT . ' where id=' . $_CAMILA['db']->qstr($id));
             if ($result === false)
                 camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
@@ -1858,7 +1822,7 @@ class configurator
             }
 
             if ($filename != '') {
- 				
+ 
 				if ($this->ends_with($filename,'xlsx'))
 					require_once(CAMILA_DIR . 'datagrid/php-excel-reader/excel_reader_wrapper.php');
 			
@@ -1866,17 +1830,16 @@ class configurator
 					require_once(CAMILA_LIB_DIR . 'php-excel-reader/excel_reader2.php');
 			
                 $data = new Spreadsheet_Excel_Reader(CAMILA_TMP_DIR . '/' . $filename);
-                
+
                 $excelColNames = Array();
                 
                 $i = 0;
                 while ($data->val(1, $i + 1, $sheetnum) != '') {
-                    $name = $data->val(1, $i + 1, $sheetnum);
-                    $excelColNames[$i] = camila_strtoupper_utf8(isUTF8($name) ? $name : utf8_encode($name));
+                    $name              = $data->val(1, $i + 1, $sheetnum);
+                    //$excelColNames[$i] = camila_strtoupper_utf8(isUTF8($name) ? $name : utf8_encode($name));
+					$excelColNames[$i] = mb_strtoupper(\ForceUTF8\Encoding::toUTF8($name), 'UTF-8');
                     $i++;
                 }
-				
-				//print_r($excelColNames);
                 
                 $result = $_CAMILA['db']->Execute('select * from ' . CAMILA_TABLE_WORKC . ' where (wt_id=' . $_CAMILA['db']->qstr($id) . ' and is_deleted<>' . $_CAMILA['db']->qstr('y') . ') order by sequence');
                 if ($result === false)
@@ -1895,8 +1858,8 @@ class configurator
                 
                 while (!$result->EOF) {
                     $colName                = $result->fields['col_name'];
-                    $name                   = camila_strtoupper_utf8($result->fields['name']);
-                    $fieldMapping[$colName] = isUTF8($name) ? $name : utf8_encode($name);
+                    $name                   = mb_strtoupper(\ForceUTF8\Encoding::toUTF8($result->fields['name']), 'UTF-8');
+                    $fieldMapping[$colName] = \ForceUTF8\Encoding::toUTF8($name);
                     $fields[$count]         = $colName;
                     $types[$count]          = $result->fields['type'];
                     $orig_types[$count]     = $result->fields['orig_type'];
@@ -1905,23 +1868,13 @@ class configurator
                     $count++;
                     $result->MoveNext();
                 }
-
-				$fieldMapping['created'] = 'DATA CREAZIONE';				
-				$fieldMapping['created_by'] = 'UTENTE CREAZ.';
-                $fieldMapping['created_by_surname'] = 'COGNOME UTENTE CREAZ.';
-                $fieldMapping['created_by_name'] = 'NOME UTENTE CREAZ.';
-                $fieldMapping['last_upd'] = 'ULTIMO AGGIORNAMENTO';
-                $fieldMapping['last_upd_by'] = 'UTENTE ULT. AGG.';
-                $fieldMapping['last_upd_by_surname'] = 'COGNOME UTENTE ULT. AGG.';
-                $fieldMapping['last_upd_by_name'] = 'NOME UTENTE ULT. AGG.';
-
+                
                 $successCount = 0;
                 $failCount    = 0;
 				$totalRowCount = $data->rowcount($sheetnum);
 				//$trPending = false;
 				
-				$reflector = new ReflectionClass(get_class($data));
-					
+				$reflector = new ReflectionClass(get_class($data));					
 
                 //db fields
                 for ($i = 2; $i <= $totalRowCount; $i++) {
@@ -1933,24 +1886,18 @@ class configurator
                     $emptyrow = true;
                     
                     //db fields
-					//print_r($fields);
-					$fields[] = 'created';
-					$fields[] = 'last_upd';
                     reset($fields);
-					//print_r($fields);
                     foreach ($fields as $k => $v) {
                         
                         //k  Field position into database
                         //k2 Position in Excel file
                         $k2 = array_search($fieldMapping[$v], $excelColNames);
-
+                        
                         //Is it in Excel file?
                         if ($k2 !== false) {
-							
-
-                            $excelColName = camila_strtoupper_utf8($data->value(1, $k2 + 1, $sheetnum));
-//echo $excelColName;
-							//$excelColName = $v;
+                            
+                            $excelColName     = mb_strtoupper(\ForceUTF8\Encoding::toUTF8($data->value(1, $k2 + 1, $sheetnum)), 'UTF-8');
+                            //$excelColName = $v;
                             $worktableColName = array_search($excelColName, $fieldMapping);
                             $worktableColName = $v;
                             
@@ -1982,26 +1929,16 @@ class configurator
                                     //$record[$worktableColName] = '<a href="' . $data->hyperlink($i, $k2+1, $sheetnum) . '" target="_blank">' . $data->value($i, $k2+1, $sheetnum) . '</a>';
                                     $record[$worktableColName] = $data->hyperlink($i, $k2 + 1, $sheetnum);
                                 }
-								elseif (($worktableColName == 'last_upd' || $worktableColName == 'created' || $types[$k] == 'datetime') && $data->value($i, $k2 + 1, $sheetnum) != '') {
-
+								elseif ($types[$k] == 'datetime' && $data->value($i, $k2 + 1, $sheetnum) != '' && strlen($data->value($i, $k2 + 1, $sheetnum))==19) {
 									$value = $data->value($i, $k2 + 1, $sheetnum);
-									if (strlen($value)==19)
-									{
-										$mm = substr($value, camila_get_translation('camila.dateformat.monthpos'), 2);
-										$dd = substr($value, camila_get_translation('camila.dateformat.daypos'), 2);
-										$yyyy = substr($value, camila_get_translation('camila.dateformat.yearpos'), 4);
-										$h = substr($value, 11, 2);
-										$m = substr($value, 14, 2);
-										$s = substr($value, 17, 2);
-										$dbVal = $_CAMILA['db']->BindTimeStamp($yyyy.'-'.$mm.'-'.$dd.' '.$h.':'.$m.':'.$s);									
-										$record[$worktableColName] = $dbVal;
-									} else {
-										if ($this->ends_with($reflector->getFileName(),'excel_reader_wrapper.php')) {
-											$dt = $data->excelToDateTimeObject($data->value($i, $k2 + 1, $sheetnum));
-											//echo $dt->format('Y-m-d H:i:s');
-											$record[$worktableColName] = $_CAMILA['db']->BindTimeStamp($dt->format('Y-m-d H:i:s'));
-										}
-									}
+									$mm = substr($value, camila_get_translation('camila.dateformat.monthpos'), 2);
+									$dd = substr($value, camila_get_translation('camila.dateformat.daypos'), 2);
+									$yyyy = substr($value, camila_get_translation('camila.dateformat.yearpos'), 4);
+									$h = substr($value, 11, 2);
+									$m = substr($value, 14, 2);
+									$s = substr($value, 17, 2);
+									$dbVal = $_CAMILA['db']->BindTimeStamp($yyyy.'-'.$mm.'-'.$dd.' '.$h.':'.$m.':'.$s);									
+									$record[$worktableColName] = $dbVal;
                                 }
 								else
                                     $record[$worktableColName] = $data->value($i, $k2 + 1, $sheetnum);
@@ -2023,7 +1960,6 @@ class configurator
                         }
                         
                     }
-					//print_r($record);
                     
                     if (!$emptyrow) {
 
@@ -2033,38 +1969,22 @@ class configurator
                         foreach ($record as $k => $v)
                             $record[$k] = str_replace('_camila_seq_num_', $id, $v);
 
-                        $record['id'] = $id;
+                        $record['id']                  = $id;
 						//echo '<'.$record['id'].'>';
-						//print_r($record);
-                        if (!array_key_exists('created',$record)) {
-							$record['created'] = $now;
-						}
-						if (!array_key_exists('created_by',$record)) {
-							$record['created_by'] = $_CAMILA['user'];
-                        }
-						$record['created_src'] = 'import';
-                        if (!array_key_exists('created_by_surname',$record)) {
-							$record['created_by_surname'] = $_CAMILA['user_surname'];
-                        }
-						if (!array_key_exists('created_by_name',$record)) {
-							$record['created_by_name'] = $_CAMILA['user_name'];
-                        }
-						if (!array_key_exists('last_upd',$record)) {
-							$record['last_upd'] = $now;
-                        }
-						if (!array_key_exists('last_upd_by',$record)) {
-							$record['last_upd_by'] = $_CAMILA['user'];
-						}
-                        $record['last_upd_src'] = 'import';
-						if (!array_key_exists('last_upd_by_surname',$record)) {
-							$record['last_upd_by_surname'] = $_CAMILA['user_surname'];
-                        }
-						if (!array_key_exists('last_upd_by_name',$record)) {
-							$record['last_upd_by_name'] = $_CAMILA['user_name'];
-                        }
-						$record['mod_num'] = 0;
+                        $record['created']             = $now;
+                        $record['created_by']          = $_CAMILA['user'];
+                        $record['created_src']         = 'import';
+                        $record['created_by_surname']  = $_CAMILA['user_surname'];
+                        $record['created_by_name']     = $_CAMILA['user_name'];
+                        $record['last_upd']            = $now;
+                        $record['last_upd_by']         = $_CAMILA['user'];
+                        $record['last_upd_src']        = 'import';
+                        $record['last_upd_by_surname'] = $_CAMILA['user_surname'];
+                        $record['last_upd_by_name']    = $_CAMILA['user_name'];
+                        $record['mod_num']             = 0;
+                        
                         $insertSQL = $_CAMILA['db']->AutoExecute($table, $record, 'INSERT');
-
+                        
                         if (!$insertSQL) {
                             //camila_information_text(camila_get_translation('camila.worktable.db.importerror'));
                             $failCount++;
@@ -2199,10 +2119,10 @@ class configurator
     function is_configuration_sheet($data, $sheetnum)
     {
         
-        $confCell = utf8_encode($data->val(17, 1, $sheetnum));
+        $confCell = \ForceUTF8\Encoding::toUTF8($data->val(17, 1, $sheetnum));
         $text     = camila_get_translation('camila.worktable.configuration');
-        if (!isUTF8($text))
-            $text = utf8_encode($text);
+        //if (!isUTF8($text))
+        $text = \ForceUTF8\Encoding::toUTF8($text);
         
         return ($confCell == $text);
     }

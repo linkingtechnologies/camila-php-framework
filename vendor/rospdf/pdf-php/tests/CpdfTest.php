@@ -1,8 +1,8 @@
 <?php
 
-include_once 'src/Cezpdf.php';
+use PHPUnit\Framework\TestCase;
 
-class CpdfTest extends \PHPUnit_Framework_TestCase
+class CpdfTest extends TestCase
 {
     private $output;
     private $outDir = 'tests/out';
@@ -34,7 +34,7 @@ class CpdfTest extends \PHPUnit_Framework_TestCase
     public function test_CoreFontsPdf()
     {
         $pdf = new Cezpdf('a4', 'portrait');
-        
+
         $letters = implode('', range('A', 'Z'));
         $numbers = implode('', range(0, 9));
 
@@ -58,7 +58,10 @@ class CpdfTest extends \PHPUnit_Framework_TestCase
     {
         $pdf = new Cezpdf('a4', 'portrait');
         $pdf->ezText('');
-        $pdf->ezImage('ros.jpg');
+        $pdf->ezImage(__DIR__.'/../examples/images/bg.jpg');
+        $pdf->ezImage(__DIR__.'/../examples/images/test_alpha.png');
+        $pdf->ezImage(__DIR__.'/../examples/images/test_grayscaled.png');
+        $pdf->ezImage(__DIR__.'/../examples/images/test_alpha.gif');
 
         $this->output = $pdf->ezOutput();
 
@@ -79,7 +82,7 @@ class CpdfTest extends \PHPUnit_Framework_TestCase
 
         $this->output = $pdf->ezOutput(['compression' => 0]);
         //$this->output = $pdf->ezOutput();
-        
+
         $this->savePdf(__FUNCTION__ . '.pdf');
 
         $this->assertTrue($this->validate());
@@ -109,7 +112,7 @@ class CpdfTest extends \PHPUnit_Framework_TestCase
         $pdf->ezText("Hello World!\nHello Earth!", 30);
 
         $this->output = $pdf->ezOutput();
-        
+
         $this->savePdf(__FUNCTION__ . '.pdf');
 
         $this->assertTrue($this->validate());
@@ -127,7 +130,7 @@ class CpdfTest extends \PHPUnit_Framework_TestCase
         $pdf->ezText("Hello World!\nHello Earth!", 30);
 
         $this->output = $pdf->ezOutput();
-        
+
         $this->savePdf(__FUNCTION__ . '.pdf');
 
         $this->assertTrue($this->validate());
