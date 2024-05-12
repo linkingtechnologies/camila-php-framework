@@ -119,7 +119,7 @@ class form_static_listbox extends form_field {
         //while( $tok = each($this->options) ) {
 		foreach ($this->options as $key => $val) {
 			$tok = [$key, $val];
-            $curr = isUTF8($tok[1][0]) ? $tok[1][0] : utf8_encode($tok[1][0]);
+            $curr = \ForceUTF8\Encoding::toUTF8($tok[1][0]);
             if ($curr == $this->value)
                 $found = true;
 

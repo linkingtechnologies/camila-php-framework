@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2024 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
    along with Camila PHP Framework; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 
+use \ForceUTF8\Encoding;
 
 class CAMILA_CSV_deck extends CHAW_deck
 {
@@ -55,17 +56,17 @@ class CAMILA_CSV_deck extends CHAW_deck
 							if (is_object($column) && $column->get_elementtype()==HAW_PLAINTEXT)
 							{
 								$text = "\"".str_replace('"', '""', $column->get_text())."\"";
-								echo isUTF8($text) ? $text : utf8_encode($text);
+								echo \ForceUTF8\Encoding::toUTF8($text);
 							}
 							if (is_object($column) && $column->get_elementtype()==HAW_LINK)
 							{
 								$text = "\"".str_replace('"', '""', $column->get_label())."\"";
-								echo isUTF8($text) ? $text : utf8_encode($text);
+								echo \ForceUTF8\Encoding::toUTF8($text);
 							}
 							if ($b < $row->number_of_columns-1)
-							   echo utf8_encode(",");
+							   echo \ForceUTF8\Encoding::toUTF8(",");
 							else
-							   echo utf8_encode("\n");
+							   echo \ForceUTF8\Encoding::toUTF8("\n");
 						}
 					}
 				  break;

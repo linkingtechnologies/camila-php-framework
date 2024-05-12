@@ -1,6 +1,6 @@
 <?php
   /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2024 Umberto Bresciani
    
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
    along with Camila PHP Framework; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 
+use \ForceUTF8\Encoding;
 
   class CAMILA_INLINE_deck extends CHAW_deck
   {
@@ -42,7 +43,7 @@
                                   //for ($ii = 0; $ii < $form_element->br; $ii++)
                                   //    $text .= "\n";
                                   $_array['type'] = 'text';
-                                  $_array['value'] = !isUTF8($text) ? utf8_encode($text) : $text;
+                                  $_array['value'] = \ForceUTF8\Encoding::toUTF8($text);
                                   $_array['name'] = $form_element->name;
                                   $_array['size'] = $form_element->size;
                                   $_array['maxlength'] = $form_element->maxlength;
@@ -54,7 +55,7 @@
                                   //for ($ii = 0; $ii < $form_element->br; $ii++)
                                   //    $text .= "\n";
                                   $_array['type'] = 'textarea';
-                                  $_array['value'] = !isUTF8($text) ? utf8_encode($text) : $text;
+                                  $_array['value'] = \ForceUTF8\Encoding::toUTF8($text);
                                   $_array['name'] = $form_element->name;
                                   $_array['size'] = $form_element->size;
                                   $_array['maxlength'] = $form_element->maxlength;
@@ -62,14 +63,14 @@
                               }
                               case HAW_SELECT: {
                                   foreach ($form_element->options as $key => $value) {
-                                      $val = !isUTF8($value['value']) ? utf8_encode($value['value']) : $value['value'];
-                                      $label = !isUTF8($value['label']) ? utf8_encode($value['label']) : $value['label'];
+                                      $val = \ForceUTF8\Encoding::toUTF8($value['value']);
+                                      $label = \ForceUTF8\Encoding::toUTF8($value['label']);
                                       $_array['options'][$val] = $label;
                                   }
 
                                   $text = html_entity_decode($form_element->value);
                                   $_array['type'] = 'select';
-                                  $_array['value'] = !isUTF8($text) ? utf8_encode($text) : $text;
+                                  $_array['value'] = \ForceUTF8\Encoding::toUTF8($text);
                                   $_array['name'] = $form_element->name;
                                   //$_array['size'] = $form_element->size;
                                   //$_array['maxlength'] = $form_element->maxlength;
@@ -78,7 +79,7 @@
 
                               case HAW_HIDDEN: {
                                   $text = html_entity_decode($form_element->value);
-                                  $_array[$form_element->name] = !isUTF8($text) ? utf8_encode($text) : $text;
+                                  $_array[$form_element->name] = \ForceUTF8\Encoding::toUTF8($text);
                                   if (substr($form_element->name, strlen($form_element->name) - 13) == '_phpform_sent' && $_REQUEST[$form_element->name] == '1')
                                       $this->updating = true;
                                   break;
