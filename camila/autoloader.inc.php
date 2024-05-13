@@ -88,6 +88,11 @@ function camila_autoloader($class) {
 
 spl_autoload_register('camila_autoloader');
 
-require_once CAMILA_VENDOR_DIR . 'autoload.php';
+if (defined('CAMILA_VENDOR_DIR')) {
+    require_once CAMILA_VENDOR_DIR . 'autoload.php';
+} else {
+	require_once '../../vendor/autoload.php';
+}
+
 
 ?>
