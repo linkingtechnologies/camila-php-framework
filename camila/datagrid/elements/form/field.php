@@ -58,6 +58,8 @@ class form_field
     var $css_class;
     
     var $help;
+	
+	var $skip_validation = false;
     
     function __construct(&$form, $field, $title, $required = false, $validation = '')
     {
