@@ -655,8 +655,13 @@ class configurator
                     $record['title']    = $title;
                     $record['base_url'] = 'cf_worktable' . $id . '.php';
                     $record['url']      = $record['base_url'];
-                    if ($url != '')
-                        $record['url'] .= '?filter=' . urlencode($url);
+                    if ($url != '') {
+						if (str_starts_with($url, 'index.php')) {
+							$record['url'] = $url;
+						} else {
+							$record['url'] .= '?filter=' . urlencode($url);
+						}
+					}
                     $record['lang']     = $_CAMILA['worktable_configurator_force_lang'] != '' ? $_CAMILA['worktable_configurator_force_lang'] : $_REQUEST['lang'];
                     $record['sequence'] = $j + 1;
                     
