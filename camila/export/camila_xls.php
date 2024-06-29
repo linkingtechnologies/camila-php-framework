@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-Copyright (C) 2006-2022 Umberto Bresciani
+Copyright (C) 2006-2024 Umberto Bresciani
 
 Camila PHP Framework is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -309,6 +309,7 @@ class CAMILA_XLS_deck extends CHAW_deck
 
 				if (str_starts_with($result->fields['url'], 'index.php')) {
 					$url = $result->fields['url'];
+					$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(4, 17 + $i, ($url));
 				}
 
                 $result->MoveNext();
