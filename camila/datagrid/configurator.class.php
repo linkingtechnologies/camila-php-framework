@@ -1947,7 +1947,6 @@ class configurator
 								elseif ($types[$k] == 'datetime' && $data->value($i, $k2 + 1, $sheetnum) != '' && is_numeric($data->value($i, $k2 + 1, $sheetnum))) {									
 									$numValue = $data->value($i, $k2 + 1, $sheetnum);
                                     $unixDate = ($numValue - 25569) * 86400;
-									echo gmdate("d-m-Y H:i:s", $unixDate);
 									$dbVal = $_CAMILA['db']->BindTimeStamp(gmdate("Y-m-d H:i:s", $unixDate));									
 									$record[$worktableColName] = $dbVal;									
 								}
