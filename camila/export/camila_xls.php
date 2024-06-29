@@ -300,13 +300,17 @@ class CAMILA_XLS_deck extends CHAW_deck
                 
                 $text = $result->fields['title'];
                 $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(3, 17 + $i, ($text));
-                
+
                 $url  = parse_url($result->fields['url'], PHP_URL_QUERY);
                 $qArr = $this->parse_query_string($url);
                 
                 $text = $qArr['filter'];
                 $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(4, 17 + $i, ($text));
-                
+
+				if (str_starts_with($result->fields['url'], 'index.php')) {
+					$url = $result->fields['url'];
+				}
+
                 $result->MoveNext();
             }
             
