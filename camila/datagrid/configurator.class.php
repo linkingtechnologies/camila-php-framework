@@ -1944,8 +1944,17 @@ class configurator
 									$dbVal = $_CAMILA['db']->BindTimeStamp($yyyy.'-'.$mm.'-'.$dd.' '.$h.':'.$m.':'.$s);									
 									$record[$worktableColName] = $dbVal;
                                 }
-								else
+								elseif ($types[$k] == 'datetime' && $data->value($i, $k2 + 1, $sheetnum) != '' && is_numeric($data->value($i, $k2 + 1, $sheetnum))) {									
+									$numValue = $data->value($i, $k2 + 1, $sheetnum);
+                                    $unixDate = ($numValue - 25569) * 86400;
+									echo gmdate("d-m-Y H:i:s", $unixDate);
+									$dbVal = $_CAMILA['db']->BindTimeStamp(gmdate("Y-m-d H:i:s", $unixDate));									
+									$record[$worktableColName] = $dbVal;									
+								}
+								else {
                                     $record[$worktableColName] = $data->value($i, $k2 + 1, $sheetnum);
+								}
+
                                 
                                 if ($defVals[$k] != '' && $record[$worktableColName] == '')
                                     $record[$worktableColName] = camila_parse_default_expression($defVals[$k], '_camila_seq_num_', true);
