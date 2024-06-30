@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2022 Umberto Bresciani
+    Copyright (C) 2006-2024 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with Camila PHP Framework. If not, see <http://www.gnu.org/licenses/>. */
 
-//require_once(CAMILA_LIB_DIR.'adodb5/adodb.inc.php');
 require_once(CAMILA_VENDOR_DIR . '/adodb/adodb-php/adodb.inc.php');
 
 require_once('worktable.class.inc.php');
@@ -35,7 +34,7 @@ class CamilaIntegrity
 		return $conf;
 	}
 
-	function createGraph($name, $obj, $data) {
+	/*function createGraph($name, $obj, $data) {
 		require(CAMILA_DIR.'export/phpgraphlib/phpgraphlib.php');
 		require(CAMILA_DIR.'export/phpgraphlib/phpgraphlib_pie.php');
 		if (count($data)>0)
@@ -83,10 +82,8 @@ class CamilaIntegrity
 			$html .= '</table>';
 		}
 		return $html;
-	}
-	
-	
-	
+	}*/
+
 	function getChecks() {
 		$conf = $this->loadXmlFromFile();
 		return $conf->checks;
@@ -102,6 +99,7 @@ class CamilaIntegrity
 			$ret->code = (string)$obj->result->multi->code;
 			$ret->message = (string)$obj->result->multi->message;
 			$ret->count = $count;
+			$ret->fix = (string)$obj->fix;
 		}
 		else
 		{
