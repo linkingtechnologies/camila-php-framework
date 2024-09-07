@@ -66,9 +66,10 @@ class CamilaPlugins
 		$_CAMILA['worktable_configurator_force_lang'] = $lang;
 		$camilaApp->resetTables(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/tables');
 		$camilaApp->resetWorkTables(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/tables');
-		CamilaFileManagement::copyFiles(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/templates/'.$lang,CAMILA_TMPL_DIR.'/'.$lang,'txt',false);
-		CamilaFileManagement::copyFiles(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/templates/images/'.$lang,CAMILA_TMPL_DIR.'/images/'.$lang,'',false);
-		
+		if (is_dir(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/templates/'.$lang)) {
+			CamilaFileManagement::copyFiles(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/templates/'.$lang,CAMILA_TMPL_DIR.'/'.$lang,'txt',false);
+			CamilaFileManagement::copyFiles(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/templates/images/'.$lang,CAMILA_TMPL_DIR.'/images/'.$lang,'',false);
+		}
 		$record  = Array();
 		$record['id'] = $pluginId;
         $record['status'] = 'active';
