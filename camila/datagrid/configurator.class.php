@@ -1712,7 +1712,7 @@ class configurator
             
             require(CAMILA_DIR . 'datagrid/report.class.php');
             
-            $report_fields            = 'id as camila_worktable_delete,id as camila_worktable_reconfig,id as camila_worktable_import,id as camila_worktable_rebuild,sequence,short_title,full_title,category,share_key,share_caninsert,share_canupdate,share_candelete';
+            $report_fields            = 'id as camila_worktable_delete,id as camila_worktable_reconfig,id as camila_worktable_import,id as camila_worktable_rebuild,short_title,full_title,category,sequence,share_key,share_caninsert,share_canupdate,share_candelete';
             $default_fields           = $report_fields;
             $mapping                  = camila_get_translation('camila.worktable.mapping.worktable.admin');
             $stmt                     = 'select ' . $report_fields . ' from ' . CAMILA_TABLE_WORKT;
