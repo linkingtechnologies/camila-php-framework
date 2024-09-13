@@ -136,26 +136,12 @@ class ADODB_mssqlnative extends ADOConnection {
 		$this->mssql_version = $version;
 	}
 
-	function ServerInfo() {
-		global $ADODB_FETCH_MODE;
-		static $arr = false;
-		if (is_array($arr))
-			return $arr;
-		if ($this->fetchMode === false) {
-			$savem = $ADODB_FETCH_MODE;
-			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		} elseif ($this->fetchMode >=0 && $this->fetchMode <=2) {
-			$savem = $this->fetchMode;
-		} else
-			$savem = $this->SetFetchMode(ADODB_FETCH_NUM);
-
-		$arrServerInfo = sqlsrv_server_info($this->_connectionID);
-		$ADODB_FETCH_MODE = $savem;
-
-		$arr = array();
-		$arr['description'] = $arrServerInfo['SQLServerName'].' connected to '.$arrServerInfo['CurrentDatabase'];
-		$arr['version'] = $arrServerInfo['SQLServerVersion'];//ADOConnection::_findvers($arr['description']);
-		return $arr;
+	function serverInfo() {
+		$info = sqlsrv_server_info($this->_connectionID);
+		return array(
+			'description' => $info['SQLServerName'] . ' connected to ' . $info['CurrentDatabase'],
+			'version' => $info['SQLServerVersion'],
+		);
 	}
 
 	function IfNull( $field, $ifNull )
@@ -1053,15 +1039,6 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 	var $fieldOffset = 0;
 	// _mths works only in non-localised system
 
-	/**
-	 * @var bool True if we have retrieved the fields metadata
-	 */
-	private $fieldObjectsRetrieved = false;
-
-	/*
-	* Cross-reference the objects by name for easy access
-	*/
-	private $fieldObjectsIndex = array();
 
 	/*
 	 * Cross references the dateTime objects for faster decoding
@@ -1105,20 +1082,6 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 			 91  => 'date',
 			 93  => 'datetime'
 			);
-
-
-
-
-	function __construct($id,$mode=false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-
-		}
-		$this->fetchMode = $mode;
-		parent::__construct($id);
-	}
 
 
 	function _initrs()

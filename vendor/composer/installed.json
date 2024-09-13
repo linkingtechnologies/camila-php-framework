@@ -2,26 +2,27 @@
     "packages": [
         {
             "name": "adodb/adodb-php",
-            "version": "v5.22.7",
-            "version_normalized": "5.22.7.0",
+            "version": "dev-master",
+            "version_normalized": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ADOdb/ADOdb.git",
-                "reference": "e7150539d5707ae556172532e2b25ac4e88cb2a6"
+                "reference": "1e0e602ed72628f7a6665f5c925e93a80bdbd710"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ADOdb/ADOdb/zipball/e7150539d5707ae556172532e2b25ac4e88cb2a6",
-                "reference": "e7150539d5707ae556172532e2b25ac4e88cb2a6",
+                "url": "https://api.github.com/repos/ADOdb/ADOdb/zipball/1e0e602ed72628f7a6665f5c925e93a80bdbd710",
+                "reference": "1e0e602ed72628f7a6665f5c925e93a80bdbd710",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.0 || ^8.0"
+                "php": "^7.4 || ^8.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^8.5"
+                "phpunit/phpunit": "^9.5"
             },
-            "time": "2023-11-04T22:25:49+00:00",
+            "time": "2024-08-25T10:02:13+00:00",
+            "default-branch": true,
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -243,35 +244,38 @@
         },
         {
             "name": "maennchen/zipstream-php",
-            "version": "2.4.0",
-            "version_normalized": "2.4.0.0",
+            "version": "3.1.0",
+            "version_normalized": "3.1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/maennchen/ZipStream-PHP.git",
-                "reference": "3fa72e4c71a43f9e9118752a5c90e476a8dc9eb3"
+                "reference": "b8174494eda667f7d13876b4a7bfef0f62a7c0d1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/maennchen/ZipStream-PHP/zipball/3fa72e4c71a43f9e9118752a5c90e476a8dc9eb3",
-                "reference": "3fa72e4c71a43f9e9118752a5c90e476a8dc9eb3",
+                "url": "https://api.github.com/repos/maennchen/ZipStream-PHP/zipball/b8174494eda667f7d13876b4a7bfef0f62a7c0d1",
+                "reference": "b8174494eda667f7d13876b4a7bfef0f62a7c0d1",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
-                "myclabs/php-enum": "^1.5",
-                "php": "^8.0",
-                "psr/http-message": "^1.0"
+                "ext-zlib": "*",
+                "php-64bit": "^8.1"
             },
             "require-dev": {
                 "ext-zip": "*",
-                "friendsofphp/php-cs-fixer": "^3.9",
-                "guzzlehttp/guzzle": "^6.5.3 || ^7.2.0",
+                "friendsofphp/php-cs-fixer": "^3.16",
+                "guzzlehttp/guzzle": "^7.5",
                 "mikey179/vfsstream": "^1.6",
-                "php-coveralls/php-coveralls": "^2.4",
-                "phpunit/phpunit": "^8.5.8 || ^9.4.2",
+                "php-coveralls/php-coveralls": "^2.5",
+                "phpunit/phpunit": "^10.0",
                 "vimeo/psalm": "^5.0"
             },
-            "time": "2022-12-08T12:29:14+00:00",
+            "suggest": {
+                "guzzlehttp/psr7": "^2.4",
+                "psr/http-message": "^2.0"
+            },
+            "time": "2023-06-21T14:59:35+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -308,7 +312,7 @@
             ],
             "support": {
                 "issues": "https://github.com/maennchen/ZipStream-PHP/issues",
-                "source": "https://github.com/maennchen/ZipStream-PHP/tree/2.4.0"
+                "source": "https://github.com/maennchen/ZipStream-PHP/tree/3.1.0"
             },
             "funding": [
                 {
@@ -436,72 +440,6 @@
             "install-path": "../markbaker/matrix"
         },
         {
-            "name": "myclabs/php-enum",
-            "version": "1.8.4",
-            "version_normalized": "1.8.4.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/myclabs/php-enum.git",
-                "reference": "a867478eae49c9f59ece437ae7f9506bfaa27483"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/php-enum/zipball/a867478eae49c9f59ece437ae7f9506bfaa27483",
-                "reference": "a867478eae49c9f59ece437ae7f9506bfaa27483",
-                "shasum": ""
-            },
-            "require": {
-                "ext-json": "*",
-                "php": "^7.3 || ^8.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^9.5",
-                "squizlabs/php_codesniffer": "1.*",
-                "vimeo/psalm": "^4.6.2"
-            },
-            "time": "2022-08-04T09:53:51+00:00",
-            "type": "library",
-            "installation-source": "dist",
-            "autoload": {
-                "psr-4": {
-                    "MyCLabs\\Enum\\": "src/"
-                },
-                "classmap": [
-                    "stubs/Stringable.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "PHP Enum contributors",
-                    "homepage": "https://github.com/myclabs/php-enum/graphs/contributors"
-                }
-            ],
-            "description": "PHP Enum implementation",
-            "homepage": "http://github.com/myclabs/php-enum",
-            "keywords": [
-                "enum"
-            ],
-            "support": {
-                "issues": "https://github.com/myclabs/php-enum/issues",
-                "source": "https://github.com/myclabs/php-enum/tree/1.8.4"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/mnapoli",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/myclabs/php-enum",
-                    "type": "tidelift"
-                }
-            ],
-            "install-path": "../myclabs/php-enum"
-        },
-        {
             "name": "neitanod/forceutf8",
             "version": "v2.0.4",
             "version_normalized": "2.0.4.0",
@@ -547,17 +485,17 @@
         },
         {
             "name": "nyholm/psr7",
-            "version": "1.8.1",
-            "version_normalized": "1.8.1.0",
+            "version": "1.8.2",
+            "version_normalized": "1.8.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Nyholm/psr7.git",
-                "reference": "aa5fc277a4f5508013d571341ade0c3886d4d00e"
+                "reference": "a71f2b11690f4b24d099d6b16690a90ae14fc6f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Nyholm/psr7/zipball/aa5fc277a4f5508013d571341ade0c3886d4d00e",
-                "reference": "aa5fc277a4f5508013d571341ade0c3886d4d00e",
+                "url": "https://api.github.com/repos/Nyholm/psr7/zipball/a71f2b11690f4b24d099d6b16690a90ae14fc6f3",
+                "reference": "a71f2b11690f4b24d099d6b16690a90ae14fc6f3",
                 "shasum": ""
             },
             "require": {
@@ -577,7 +515,7 @@
                 "phpunit/phpunit": "^7.5 || ^8.5 || ^9.4",
                 "symfony/error-handler": "^4.4"
             },
-            "time": "2023-11-13T09:31:12+00:00",
+            "time": "2024-09-09T07:06:30+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -612,7 +550,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Nyholm/psr7/issues",
-                "source": "https://github.com/Nyholm/psr7/tree/1.8.1"
+                "source": "https://github.com/Nyholm/psr7/tree/1.8.2"
             },
             "funding": [
                 {
@@ -697,27 +635,27 @@
         },
         {
             "name": "paragonie/constant_time_encoding",
-            "version": "v2.7.0",
-            "version_normalized": "2.7.0.0",
+            "version": "v3.0.0",
+            "version_normalized": "3.0.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paragonie/constant_time_encoding.git",
-                "reference": "52a0d99e69f56b9ec27ace92ba56897fe6993105"
+                "reference": "df1e7fde177501eee2037dd159cf04f5f301a512"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paragonie/constant_time_encoding/zipball/52a0d99e69f56b9ec27ace92ba56897fe6993105",
-                "reference": "52a0d99e69f56b9ec27ace92ba56897fe6993105",
+                "url": "https://api.github.com/repos/paragonie/constant_time_encoding/zipball/df1e7fde177501eee2037dd159cf04f5f301a512",
+                "reference": "df1e7fde177501eee2037dd159cf04f5f301a512",
                 "shasum": ""
             },
             "require": {
-                "php": "^7|^8"
+                "php": "^8"
             },
             "require-dev": {
-                "phpunit/phpunit": "^6|^7|^8|^9",
-                "vimeo/psalm": "^1|^2|^3|^4"
+                "phpunit/phpunit": "^9",
+                "vimeo/psalm": "^4|^5"
             },
-            "time": "2024-05-08T12:18:48+00:00",
+            "time": "2024-05-08T12:36:18+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -820,17 +758,17 @@
         },
         {
             "name": "phpoffice/phpspreadsheet",
-            "version": "1.25.2",
-            "version_normalized": "1.25.2.0",
+            "version": "1.29.1",
+            "version_normalized": "1.29.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
-                "reference": "a317a09e7def49852400a4b3eca4a4b0790ceeb5"
+                "reference": "59ee38f7480904cd6487e5cbdea4d80ff2758719"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/a317a09e7def49852400a4b3eca4a4b0790ceeb5",
-                "reference": "a317a09e7def49852400a4b3eca4a4b0790ceeb5",
+                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/59ee38f7480904cd6487e5cbdea4d80ff2758719",
+                "reference": "59ee38f7480904cd6487e5cbdea4d80ff2758719",
                 "shasum": ""
             },
             "require": {
@@ -848,26 +786,26 @@
                 "ext-zip": "*",
                 "ext-zlib": "*",
                 "ezyang/htmlpurifier": "^4.15",
-                "maennchen/zipstream-php": "^2.1",
+                "maennchen/zipstream-php": "^2.1 || ^3.0",
                 "markbaker/complex": "^3.0",
                 "markbaker/matrix": "^3.0",
-                "php": "^7.3 || ^8.0",
+                "php": "^7.4 || ^8.0",
                 "psr/http-client": "^1.0",
                 "psr/http-factory": "^1.0",
                 "psr/simple-cache": "^1.0 || ^2.0 || ^3.0"
             },
             "require-dev": {
-                "dealerdirect/phpcodesniffer-composer-installer": "dev-master",
+                "dealerdirect/phpcodesniffer-composer-installer": "dev-main",
                 "dompdf/dompdf": "^1.0 || ^2.0",
                 "friendsofphp/php-cs-fixer": "^3.2",
-                "mitoteam/jpgraph": "10.2.4",
-                "mpdf/mpdf": "8.1.1",
+                "mitoteam/jpgraph": "^10.3",
+                "mpdf/mpdf": "^8.1.1",
                 "phpcompatibility/php-compatibility": "^9.3",
                 "phpstan/phpstan": "^1.1",
                 "phpstan/phpstan-phpunit": "^1.0",
                 "phpunit/phpunit": "^8.5 || ^9.0",
                 "squizlabs/php_codesniffer": "^3.7",
-                "tecnickcom/tcpdf": "6.5"
+                "tecnickcom/tcpdf": "^6.5"
             },
             "suggest": {
                 "dompdf/dompdf": "Option for rendering PDF with PDF Writer",
@@ -876,7 +814,7 @@
                 "mpdf/mpdf": "Option for rendering PDF with PDF Writer",
                 "tecnickcom/tcpdf": "Option for rendering PDF with PDF Writer"
             },
-            "time": "2022-09-25T17:21:01+00:00",
+            "time": "2024-09-03T00:55:32+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -922,27 +860,27 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
-                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.25.2"
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.29.1"
             },
             "install-path": "../phpoffice/phpspreadsheet"
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "3.0.37",
-            "version_normalized": "3.0.37.0",
+            "version": "3.0.41",
+            "version_normalized": "3.0.41.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpseclib/phpseclib.git",
-                "reference": "cfa2013d0f68c062055180dd4328cc8b9d1f30b8"
+                "reference": "621c73f7dcb310b61de34d1da4c4204e8ace6ceb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/cfa2013d0f68c062055180dd4328cc8b9d1f30b8",
-                "reference": "cfa2013d0f68c062055180dd4328cc8b9d1f30b8",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/621c73f7dcb310b61de34d1da4c4204e8ace6ceb",
+                "reference": "621c73f7dcb310b61de34d1da4c4204e8ace6ceb",
                 "shasum": ""
             },
             "require": {
-                "paragonie/constant_time_encoding": "^1|^2",
+                "paragonie/constant_time_encoding": "^1|^2|^3",
                 "paragonie/random_compat": "^1.4|^2.0|^9.99.99",
                 "php": ">=5.6.1"
             },
@@ -956,7 +894,7 @@
                 "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
                 "ext-openssl": "Install the OpenSSL extension in order to speed up a wide variety of cryptographic operations."
             },
-            "time": "2024-03-03T02:14:58+00:00",
+            "time": "2024-08-12T00:13:54+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -1021,7 +959,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpseclib/phpseclib/issues",
-                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.37"
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.41"
             },
             "funding": [
                 {
@@ -1154,27 +1092,27 @@
         },
         {
             "name": "psr/http-message",
-            "version": "1.1",
-            "version_normalized": "1.1.0.0",
+            "version": "2.0",
+            "version_normalized": "2.0.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/http-message.git",
-                "reference": "cb6ce4845ce34a8ad9e68117c10ee90a29919eba"
+                "reference": "402d35bcb92c70c026d1a6a9883f06b2ead23d71"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/http-message/zipball/cb6ce4845ce34a8ad9e68117c10ee90a29919eba",
-                "reference": "cb6ce4845ce34a8ad9e68117c10ee90a29919eba",
+                "url": "https://api.github.com/repos/php-fig/http-message/zipball/402d35bcb92c70c026d1a6a9883f06b2ead23d71",
+                "reference": "402d35bcb92c70c026d1a6a9883f06b2ead23d71",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.2 || ^8.0"
             },
-            "time": "2023-04-04T09:50:52+00:00",
+            "time": "2023-04-04T09:54:51+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.1.x-dev"
+                    "dev-master": "2.0.x-dev"
                 }
             },
             "installation-source": "dist",
@@ -1190,7 +1128,7 @@
             "authors": [
                 {
                     "name": "PHP-FIG",
-                    "homepage": "http://www.php-fig.org/"
+                    "homepage": "https://www.php-fig.org/"
                 }
             ],
             "description": "Common interface for HTTP messages",
@@ -1204,7 +1142,7 @@
                 "response"
             ],
             "support": {
-                "source": "https://github.com/php-fig/http-message/tree/1.1"
+                "source": "https://github.com/php-fig/http-message/tree/2.0"
             },
             "install-path": "../psr/http-message"
         },
@@ -1528,23 +1466,23 @@
         },
         {
             "name": "tinybutstrong/tinybutstrong",
-            "version": "v3.14.0",
-            "version_normalized": "3.14.0.0",
+            "version": "v3.15.2",
+            "version_normalized": "3.15.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Skrol29/tinybutstrong.git",
-                "reference": "3fd7b9a7c4a23993a401d24dc3eeae0174132ffa"
+                "reference": "c4344b3599570cdf283692b2ad0d4682dc85ae52"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Skrol29/tinybutstrong/zipball/3fd7b9a7c4a23993a401d24dc3eeae0174132ffa",
-                "reference": "3fd7b9a7c4a23993a401d24dc3eeae0174132ffa",
+                "url": "https://api.github.com/repos/Skrol29/tinybutstrong/zipball/c4344b3599570cdf283692b2ad0d4682dc85ae52",
+                "reference": "c4344b3599570cdf283692b2ad0d4682dc85ae52",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.0"
             },
-            "time": "2022-09-25T22:52:20+00:00",
+            "time": "2024-05-08T01:00:58+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -1569,27 +1507,27 @@
             ],
             "support": {
                 "issues": "https://github.com/Skrol29/tinybutstrong/issues",
-                "source": "https://github.com/Skrol29/tinybutstrong/tree/v3.14.0"
+                "source": "https://github.com/Skrol29/tinybutstrong/tree/v3.15.2"
             },
             "install-path": "../tinybutstrong/tinybutstrong"
         },
         {
             "name": "wizaplace/php-etl",
-            "version": "2.2",
-            "version_normalized": "2.2.0.0",
+            "version": "2.3.0",
+            "version_normalized": "2.3.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/wizaplace/php-etl.git",
-                "reference": "d35f42335ca7be8e2ae94a0e8576ee658828a1f3"
+                "url": "https://github.com/wizacode/php-etl.git",
+                "reference": "9ea73da38a1287b9857a2ee568c52d3192004ae9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wizaplace/php-etl/zipball/d35f42335ca7be8e2ae94a0e8576ee658828a1f3",
-                "reference": "d35f42335ca7be8e2ae94a0e8576ee658828a1f3",
+                "url": "https://api.github.com/repos/wizacode/php-etl/zipball/9ea73da38a1287b9857a2ee568c52d3192004ae9",
+                "reference": "9ea73da38a1287b9857a2ee568c52d3192004ae9",
                 "shasum": ""
             },
             "require": {
-                "php": "~7.4|~8.0",
+                "php": "~8.1",
                 "softcreatr/jsonpath": "^0.7.2"
             },
             "require-dev": {
@@ -1597,12 +1535,12 @@
                 "ext-pdo": "*",
                 "ext-pdo_sqlite": "*",
                 "ext-xmlreader": "*",
-                "friendsofphp/php-cs-fixer": "^2.17",
+                "friendsofphp/php-cs-fixer": "^3.4",
                 "infection/infection": ">=0.15",
                 "phpstan/extension-installer": "^1.0",
-                "phpstan/phpstan": "^0.12.18",
-                "phpstan/phpstan-deprecation-rules": "^0.12.2",
-                "phpstan/phpstan-strict-rules": "^0.12.2",
+                "phpstan/phpstan": "^0.12.100",
+                "phpstan/phpstan-deprecation-rules": "^0.12.6",
+                "phpstan/phpstan-strict-rules": "^0.12.11",
                 "phpunit/phpunit": ">=8",
                 "squizlabs/php_codesniffer": "^3.5"
             },
@@ -1615,7 +1553,7 @@
                 "ext-pdo_sqlsrv": "Required to work with MS SQL Server databases.",
                 "ext-xmlreader": "Required for XML extractor."
             },
-            "time": "2022-03-09T13:35:55+00:00",
+            "time": "2023-05-14T14:59:49+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -1649,8 +1587,8 @@
                 "transformation"
             ],
             "support": {
-                "issues": "https://github.com/wizaplace/php-etl/issues",
-                "source": "https://github.com/wizaplace/php-etl/tree/2.2"
+                "issues": "https://github.com/wizacode/php-etl/issues",
+                "source": "https://github.com/wizacode/php-etl/tree/2.3.0"
             },
             "install-path": "../wizaplace/php-etl"
         }

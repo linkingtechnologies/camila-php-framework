@@ -7,7 +7,6 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
-    'Stringable' => $vendorDir . '/myclabs/php-enum/stubs/Stringable.php',
     'clsTbsDataSource' => $vendorDir . '/tinybutstrong/tinybutstrong/tbs_class.php',
     'clsTbsLocator' => $vendorDir . '/tinybutstrong/tinybutstrong/tbs_class.php',
     'clsTinyButStrong' => $vendorDir . '/tinybutstrong/tinybutstrong/tbs_class.php',

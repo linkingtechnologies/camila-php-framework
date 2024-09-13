@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [3.15.2] - 2024-05-08
+
+### Fixed
+
+- OnData plug-ins are not triggered, because of a private property.
+
+### Added
+
+- New parameter « ope=debug_val » for debugging values.
+
+
+## [3.15.1] - 2024-01-25
+
+- PHP 8.2 compatibility improved
+
+## [3.15.0] - 2023-05-15
+
+### Enhancements
+
+- PHP 8.2 compatibility : utf8_encode is deprecated + creation of dynamic property is deprecated.
+
+### Fixed
+
+- Error message « invalid query XXX because VarRef item YYY is not found » when item YYY is stored in $GLOBALS. 
+- Error message « Undefined variable $NoDelim1 »
+- Error message « Error in field [onload...]: it doesn't have any subname. » when using subtemplates containing automatic fields.
+
+## [3.14.1] - 2022-11-01
+
+### Fixed
+
+- PHP error "Unsupported operand types" when using a TBS comparison (if/when) and one expression has no string delimiter and is not numerical.
+
 ## [3.14.0] - 2022-07-25
 
 ### Added

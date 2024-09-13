@@ -396,7 +396,7 @@ class ADODB_db2 extends ADOConnection {
 	{
 		if (empty($ts) && $ts !== 0) return 'null';
 		if (is_string($ts)) $ts = ADORecordSet::unixTimeStamp($ts);
-		return 'TO_DATE('.adodb_date($this->fmtTimeStamp,$ts).",'YYYY-MM-DD HH24:MI:SS')";
+		return 'TO_DATE('.date($this->fmtTimeStamp,$ts).",'YYYY-MM-DD HH24:MI:SS')";
 	}
 
 	/**
@@ -1831,17 +1831,6 @@ class ADORecordSet_db2 extends ADORecordSet {
 	var $databaseType = "db2";
 	var $dataProvider = "db2";
 	var $useFetchArray;
-
-	function __construct($id,$mode=false)
-	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-		$this->fetchMode = $mode;
-
-		$this->_queryID = $id;
-	}
 
 
 	// returns the field object

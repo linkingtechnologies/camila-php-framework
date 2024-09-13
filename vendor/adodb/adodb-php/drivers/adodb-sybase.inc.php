@@ -315,15 +315,11 @@ class ADORecordset_sybase extends ADORecordSet {
 	// _mths works only in non-localised system
 	var  $_mths = array('JAN'=>1,'FEB'=>2,'MAR'=>3,'APR'=>4,'MAY'=>5,'JUN'=>6,'JUL'=>7,'AUG'=>8,'SEP'=>9,'OCT'=>10,'NOV'=>11,'DEC'=>12);
 
-	function __construct($id,$mode=false)
+	function __construct($queryID, $mode=false)
 	{
-		if ($mode === false) {
-			global $ADODB_FETCH_MODE;
-			$mode = $ADODB_FETCH_MODE;
-		}
-		if (!$mode) $this->fetchMode = ADODB_FETCH_ASSOC;
-		else $this->fetchMode = $mode;
-		parent::__construct($id);
+		parent::__construct($queryID, $mode);
+
+		$this->fetchMode = $this->adodbFetchMode ?: ADODB_FETCH_ASSOC;
 	}
 
 	/*	Returns: an object containing field information.
@@ -412,7 +408,7 @@ class ADORecordSet_array_sybase extends ADORecordSet_array {
 		$themth = $ADODB_sybase_mths[$themth];
 		if ($themth <= 0) return false;
 		// h-m-s-MM-DD-YY
-		return  adodb_mktime(0,0,0,$themth,$rr[2],$rr[3]);
+		return mktime(0,0,0,$themth,$rr[2],$rr[3]);
 	}
 
 	static function UnixTimeStamp($v)
@@ -439,6 +435,6 @@ class ADORecordSet_array_sybase extends ADORecordSet_array {
 			break;
 		}
 		// h-m-s-MM-DD-YY
-		return  adodb_mktime($rr[4],$rr[5],0,$themth,$rr[2],$rr[3]);
+		return mktime($rr[4],$rr[5],0,$themth,$rr[2],$rr[3]);
 	}
 }

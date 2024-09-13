@@ -14,6 +14,71 @@ Older changelogs:
 
 --------------------------------------------------------------------------------
 
+## [5.23.0] - Unreleased
+
+### Added
+
+- oci8: support session_mode parameter
+  [#801](https://github.com/ADOdb/ADOdb/issues/801)
+- oci8: support setting the client identifier 
+  [#805](https://github.com/ADOdb/ADOdb/issues/805)
+- pdo: bind support both '?'-style and named parameters
+  [#880](https://github.com/ADOdb/ADOdb/issues/880)
+
+### Changed
+
+- Refactor debug functions
+  [#863](https://github.com/ADOdb/ADOdb/issues/863)
+- mssql: Simplify serverInfo()
+  [#830](https://github.com/ADOdb/ADOdb/pull/830#issuecomment-1119655907)
+- Code cleanup: PHPDoc, code style, whitespace, etc.
+
+### Removed
+
+- Compatibility with PHP < 7.4
+  [#868](https://github.com/ADOdb/ADOdb/issues/868)
+- Database Replication add-on
+  [#780](https://github.com/ADOdb/ADOdb/issues/780)
+- Date/Time Library
+  [#970](https://github.com/ADOdb/ADOdb/issues/970)
+- mysqli: legacy non-functional $optionFlags property
+  [#814](https://github.com/ADOdb/ADOdb/issues/814)
+- mysqli: remove obsolete, dead code
+  [#877](https://github.com/ADOdb/ADOdb/issues/877)
+- pgsql: Remove legacy workarounds for old PostgreSQL versions
+  [#950](https://github.com/ADOdb/ADOdb/issues/950)
+- session: remove legacy PHP 4 scripts
+  [#962](https://github.com/ADOdb/ADOdb/issues/962)
+
+### Fixed
+
+- oci8: silence deprecation warnings on PHP 8
+  [#883](https://github.com/ADOdb/ADOdb/issues/883)
+- pgsql: affected_rows() always returns false on PHP 8.1
+  [#833](https://github.com/ADOdb/ADOdb/issues/833)
+
+
+## [5.22.8] - Unreleased
+
+### Added
+
+- mysql: allow forcing use of emulated prepared statements
+  [#1028](https://github.com/ADOdb/ADOdb/issues/1028)
+  
+### Fixed
+
+- Backtrace output is not channeled through ADODB_OUTP
+  [#1018](https://github.com/ADOdb/ADOdb/issues/1018)
+- PHP 8 compatibility
+  [#1021](https://github.com/ADOdb/ADOdb/issues/1021)
+- Fix getAssoc() with ADODB_FETCH_DEFAULT mode
+  [#1023](https://github.com/ADOdb/ADOdb/issues/1023)
+- mysql: catch getAssoc() execution error in metaColumns()
+  [#1016](https://github.com/ADOdb/ADOdb/issues/1016)
+- ldap: PHP 8.2 error when $LDAP_CONNECT_OPTIONS not set
+  [#1009](https://github.com/ADOdb/ADOdb/issues/1009)
+
+
 ## [5.22.7] - 2023-11-04
 
 ### Fixed
@@ -1434,6 +1499,9 @@ Released together with [v4.95](changelog_v4.x.md#495---17-may-2007)
 - Adodb5 version,more error checking code now will use exceptions if available.
 
 
+[5.23.0]: https://github.com/adodb/adodb/compare/v5.22.6...master
+
+[5.22.8]: https://github.com/adodb/adodb/compare/v5.22.7...hotfix/5.22
 [5.22.7]: https://github.com/adodb/adodb/compare/v5.22.6...v5.22.7
 [5.22.6]: https://github.com/adodb/adodb/compare/v5.22.5...v5.22.6
 [5.22.5]: https://github.com/adodb/adodb/compare/v5.22.4...v5.22.5
