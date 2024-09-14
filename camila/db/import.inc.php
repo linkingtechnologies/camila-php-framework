@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2022 Umberto Bresciani
+    Copyright (C) 2006-2024 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,11 +63,9 @@ function CSV_import($file, $table, $db) {
             }
         }
 
-
         $m = 3;//camila_get_translation('camila.dateformat.monthpos');
         $d = 0;//camila_get_translation('camila.dateformat.daypos');
         $y = 6;//camila_get_translation('camila.dateformat.yearpos');
-
 
 		$db->beginTrans();
 		
@@ -92,8 +90,6 @@ function CSV_import($file, $table, $db) {
 	
 			if ($icount % 200 == 0)
 			{
-				//$date = date('m/d/Y h:i:s a', time());
-				//echo $date;
 				$db->commitTrans();
 				$db->beginTrans();
 			}
@@ -152,15 +148,16 @@ function XLS_import2($file, $table, $db) {
 	if ($_REQUEST['lang'] != '')
 		$lang = $_REQUEST['lang'];
 	
-
     $filename=basename($file);
-    $sequence = intval(substr($filename,0,strpos($filename,'_')));
-
+	$sequence = intval(substr($filename,0,strpos($filename,'_')));
+	
+	$currMode = $db->SetFetchMode(ADODB_FETCH_ASSOC);
     $res = $db->Execute('select id from ' . CAMILA_TABLE_WORKT . ' where filename='.$db->qstr($filename));
     if ($res === false)
         camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $db->ErrorMsg());
+	
+	$db->SetFetchMode($currMode);
     $id = $res->fields['id'];
-
     $result = Array();
 
     $configurator = new configurator();
@@ -175,7 +172,7 @@ function XLS_import2($file, $table, $db) {
 
     $record = Array();
 	//$record2 = Array();
-
+	$currMode = $db->SetFetchMode(ADODB_FETCH_ASSOC);
     $res = $db->Execute('select * from ' . CAMILA_TABLE_WORKT . ' where id='.$db->qstr($id));
     if ($res === false)
         camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $db->ErrorMsg());
@@ -250,6 +247,8 @@ function XLS_import2($file, $table, $db) {
     $result['result'] = 2; //success
     $result['processed'] = 1;
     $result['failed'] = 0;
+	
+	$db->SetFetchMode($currMode);
 
     return $result;
 

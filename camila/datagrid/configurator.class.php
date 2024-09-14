@@ -272,7 +272,6 @@ class configurator
     
     function camila_get_translation_array($options_string)
     {
-        
         $arr1 = explode(',', $this->camila_get_translation($options_string));
         
         $tr = Array();
@@ -528,7 +527,7 @@ class configurator
                     $fieldOptions                = $data->val(13, 2 + $i, $sheetnum + 1);
                     $autosuggestWorktableName    = $data->val(14, 2 + $i, $sheetnum + 1);
                     $autosuggestWorktableColName = $data->val(15, 2 + $i, $sheetnum + 1);
-					$help                        = $data->val(16, 2 + $i, $sheetnum + 1);					
+					$help                        = $data->val(16, 2 + $i, $sheetnum + 1);			
 
 					$name = \ForceUTF8\Encoding::toUTF8($name);
                     $sequence = \ForceUTF8\Encoding::toUTF8($sequence);
@@ -559,7 +558,6 @@ class configurator
                         $orderDirArr  = $this->camila_get_translation_array('camila.worktable.options.order.dir');
                     }
 					
-                    
                     $record = Array();
 					
 					$record['id']=$this->db->GenID(CAMILA_APPLICATION_PREFIX . 'worktablecolseq', 10000);
@@ -568,7 +566,7 @@ class configurator
                     $record['is_deleted']             = 'n';
                     //$record['orig_name'] = preg_replace("/[\n\r]/", "", $value);
                     //$record['orig_type'] = $types[$key];
-					
+
                     $record['type']                   = array_search($type, $fieldTypeArr);
                     $record['listbox_options']        = $listboxOptions;
                     $record['name']                   = preg_replace("/[\n\r]/", ' ', $name);
@@ -933,6 +931,8 @@ class configurator
         if ($this->interactive) {
             $this->db = $_CAMILA['db'];
         }
+		
+		$currMode = $this->db->SetFetchMode(ADODB_FETCH_ASSOC);
         
         if ($_REQUEST['camila_phpform_sent'] == 1 && !isset($_REQUEST['camila_worktable_op'])) {
             $record                = Array();
@@ -1124,6 +1124,8 @@ class configurator
             $form3->process();
             $form3->draw();
         }
+		
+		$this->db->SetFetchMode($currMode);
         
     }
     
@@ -1132,6 +1134,8 @@ class configurator
         
         global $_CAMILA;
         
+		$currMode = $this->db->SetFetchMode(ADODB_FETCH_ASSOC);
+		
         $this->menuitems_script = '';
         $this->formulas         = 'Array(';
         $this->queries          = 'Array(';
@@ -1238,7 +1242,6 @@ class configurator
                 $mapping .= 'cf_formula_' . $result->fields['col_name'] . '=' . $this->escape($result->fields['name']);
                 $mapping .= '#' . $result->fields['col_name'] . 'as cf_formula_' . $result->fields['col_name'] . '=' . $this->escape($result->fields['name']);
             }
-            
             
             $rcount++;
             $t->setVariable('form_element', $this->get_form_element($result->fields, CAMILA_TABLE_WORKP . $id, $forceReadonly));
@@ -1439,6 +1442,7 @@ class configurator
             $success3 = false;
         }
         
+		$this->db->SetFetchMode($currMode);
         return $success3;
     }
     

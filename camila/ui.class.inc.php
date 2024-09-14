@@ -53,7 +53,11 @@ class CamilaUserInterface
 	
 	public static function insertSuccess($text){
 		global $_CAMILA;
-		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="alert alert-success" role="success">'.$text.'</div>'));
+		if ($_CAMILA['page'] !== null) {
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="alert alert-success" role="success">'.$text.'</div>'));
+		} else {
+			echo('<p>'.$text."</p>\n");
+		}
 	}
 
 	function insertDivider(){
