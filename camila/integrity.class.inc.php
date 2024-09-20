@@ -34,56 +34,6 @@ class CamilaIntegrity
 		return $conf;
 	}
 
-	/*function createGraph($name, $obj, $data) {
-		require(CAMILA_DIR.'export/phpgraphlib/phpgraphlib.php');
-		require(CAMILA_DIR.'export/phpgraphlib/phpgraphlib_pie.php');
-		if (count($data)>0)
-		{
-			if ((string)$obj->type == 'pie')
-			{
-				$graph = new PHPGraphLibPie((int)$obj->width, (int)$obj->height);
-				$graph->addData($data);
-				$graph->setTitle($obj->title);
-				$graph->setLabelTextColor('50,50,50');
-				$graph->setLegendTextColor('50,50,50');
-				$graph->createGraph();
-			}
-			else if ((string)$obj->type == 'bar')
-			{
-				$graph = new PHPGraphLib((int)$obj->width, (int)$obj->height);
-				$graph->addData($data);
-				$graph->setTitle($obj->title);
-				//$graph->setLabelTextColor('50,50,50');
-				//$graph->setLegendTextColor('50,50,50');
-				$graph->setupXAxis(40);
-				$graph->createGraph();
-
-			}
-		}
-	}
-
-	function createTable($name, $obj, $data) {
-		$html = '';
-		if (count($data)>0) {
-			$html = "<p>$obj->title</p><table>";
-			$sum = $obj->sum;
-			$total = 0;
-			foreach($data as $key => $val) {
-				$html .= "<tr><td>$key</td><td>$val</td></tr>";
-				if ($sum != '')
-				{
-					$total += $val;
-				}
-			}
-			if ($total>0) {
-				$html .= "<tr><td></td><td>$total</td></tr>";
-			}
-
-			$html .= '</table>';
-		}
-		return $html;
-	}*/
-
 	function getChecks() {
 		$conf = $this->loadXmlFromFile();
 		return $conf->checks;
@@ -91,7 +41,13 @@ class CamilaIntegrity
 	
 	function check($obj) {
 		$result = $this->camilaWT->startExecuteQuery($obj->query);
-		$count = $result->RecordCount();
+		$count = -1;
+		$error = false;
+		if ($result) {
+			$count = $result->RecordCount();
+		} else {
+			$error = true;
+		}
 		$ret = new stdClass;
 		
 		if ($count > 0)
@@ -102,15 +58,17 @@ class CamilaIntegrity
 			$ret->fix = (string)$obj->fix;
 		}
 		else
-		{
-			$ret->code = (string)$obj->result->none->code;
-			$ret->message = (string)$obj->result->none->message;
+		{	if ($error) {
+				$ret->code = 'queryerror';
+				$ret->message = 'Errore query ' . $this->camilaWT->parseWorktableSqlStatement($obj->query);
+			} else {
+				$ret->code = (string)$obj->result->none->code;
+				$ret->message = (string)$obj->result->none->message;
+			}
 		}
 		$this->camilaWT->endExecuteQuery();
-		//print_r($data);
 		return $ret;
 	}
-
 
 }
 
