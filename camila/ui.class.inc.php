@@ -20,7 +20,15 @@ class CamilaUserInterface
 	function __construct()
     {
     }
-
+	
+	function insertImage($src, $br = true) {
+		global $_CAMILA;
+		$html = '<img src="'.$src.'" />';
+		if ($br)
+			$html.='<br />';
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
+	}
+	
 	function insertButton($link, $text, $icon, $br = true, $badge='', $target='_self') {
 		global $_CAMILA;
 		$b = '';
