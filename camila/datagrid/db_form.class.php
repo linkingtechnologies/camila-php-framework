@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2024 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -167,7 +167,7 @@ require_once(CAMILA_DIR . 'datagrid/form.class.php');
 			<input class="form-control" id="autosuggesturl" type="hidden">
 			<input class="form-control" id="autosuggestcb" type="hidden">
 			<input class="form-control" id="autosuggestfield" type="hidden">
-			<input class="form-control" id="autosuggestinput" type="text" placeholder="'.camila_get_translation('camila.search').'...">
+			<input class="form-control" autocomplete="off" id="autosuggestinput" type="text" placeholder="'.camila_get_translation('camila.search').'...">
 		</p>
 		<div id="autosuggestresults" style="height:250px;overflow:auto;">
 			<table id="results" class="table-striped">
