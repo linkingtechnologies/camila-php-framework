@@ -21,12 +21,12 @@ class CamilaUserInterface
     {
     }
 
-	function insertButton($link, $text, $icon, $br = true, $badge='') {
+	function insertButton($link, $text, $icon, $br = true, $badge='', $target='_self') {
 		global $_CAMILA;
 		$b = '';
 		if ($badge != '')
 			$b=' <span class="badge">'.$badge.'</span>';
-		$html = '<a href="'.$link.'" type="button" class="btn btn-md btn-default btn-primary btn-space" aria-label=""><span class="glyphicon glyphicon-'.$icon.'" aria-hidden="true"></span> '.$text.$b.'</a>';
+		$html = '<a href="'.$link.'" type="button" target="'.$target.'" class="btn btn-md btn-default btn-primary btn-space" aria-label=""><span class="glyphicon glyphicon-'.$icon.'" aria-hidden="true"></span> '.$text.$b.'</a>';
 		if ($br)
 			$html.='<br />';
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
