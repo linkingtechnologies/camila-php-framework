@@ -53,6 +53,12 @@ class CamilaUserInterface
 		global $_CAMILA;
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<h4><span class="glyphicon glyphicon-'.$icon.'"></span> '.$text.'</h4>'));
 	}
+	
+	function insertAutoRefresh($ms) {
+		global $_CAMILA;
+		$refrCode = "<script>function refreshPage() {window.location.reload();};setInterval(refreshPage, $ms);</script>";
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $refrCode));
+	}
 
 	public static function insertWarning($text){
 		global $_CAMILA;
