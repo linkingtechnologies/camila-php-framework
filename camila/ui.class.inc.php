@@ -101,6 +101,12 @@ class CamilaUserInterface
 		$_CAMILA['page']->add_link($myLink);
 	}
 	
+	function insertLineBreak() {
+		global $_CAMILA;
+		$html.='<br />';
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
+	}
+	
 	function printHomeMenu($confFile, $defaultId = '') {
 		$current = Array();
 		global $_CAMILA;
@@ -128,11 +134,7 @@ class CamilaUserInterface
 		return $current;
 	}
 	
-	function insertLineBreak() {
-		global $_CAMILA;
-		$html.='<br />';
-		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
-	}
+	
 
 }
 
