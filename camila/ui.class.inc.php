@@ -56,7 +56,20 @@ class CamilaUserInterface
 
 	public static function insertWarning($text){
 		global $_CAMILA;
-		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="alert alert-warning" role="alert">'.$text.'</div>'));
+		if ($_CAMILA['page'] !== null) {
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="alert alert-warning" role="alert">'.$text.'</div>'));
+		} else {
+			echo('<p>'.$text."</p>\n");
+		}
+	}
+	
+	public static function insertError($text){
+		global $_CAMILA;
+		if ($_CAMILA['page'] !== null) {
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="alert alert-danger" role="alert">'.$text.'</div>'));
+		} else {
+			echo('<p>'.$text."</p>\n");
+		}
 	}
 	
 	public static function insertSuccess($text){
@@ -93,7 +106,7 @@ class CamilaUserInterface
 		global $_CAMILA;
 		$menu = new SimpleXMLElement(file_get_contents($confFile));
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div id="linkset2"><div id="nav"><ul class="nav nav-tabs">'));
-		
+
 		foreach ($menu as $k => $v) {
 			$curr = false;
 			if ((isset($_REQUEST['dashboard']) && strpos('?'.$_SERVER['QUERY_STRING'], (string)($v->url)) !==  false) || ((string)($v->id) == $defaultId) || (isset($_REQUEST['dashboard']) && strpos(','.(string)($v->pages).',', ','.$_REQUEST['dashboard'].',') !==  false))
