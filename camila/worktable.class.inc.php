@@ -184,9 +184,9 @@ class CamilaWorkTable
 		return $arr;
 	}
 
-	function startExecuteQuery($sql,$prefix = true)
+	function startExecuteQuery($sql,$prefix = true,$fetchMode=ADODB_FETCH_NUM)
 	{
-		$old = $this->db->SetFetchMode(ADODB_FETCH_NUM);
+		$old = $this->db->SetFetchMode($fetchMode);
 		$query = $this->parseWorktableSqlStatement($sql, $prefix);
 		//echo $query;
 		$result = $this->db->Execute($query);
