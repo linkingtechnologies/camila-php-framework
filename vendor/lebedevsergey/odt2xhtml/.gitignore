@@ -1,7 +1,0 @@
-syntax: glob
-
-*.log
-
-nbproject
-.idea
-vendor/
