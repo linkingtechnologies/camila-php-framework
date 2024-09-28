@@ -90,6 +90,10 @@ class CamilaReport
 		return $filenames;
 	}
 	
+	function getCurrentReportName() {
+		return $this->currentReport;
+	}
+	
 	function getCurrentReportTitle() {
 		$title = null;
 		if (!empty($this->reportList)) {
@@ -133,11 +137,11 @@ class CamilaReport
 		$query = (string) $report->query;
 		$title = (string) $report->graphs->graph[0]->title;
 		$rId = (string) $report->id;
-
+		//echo $query;
 		// Execute the query
 		//$result = $this->db->Execute($query);
 		$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
-		$result = $this->camilaWT->startExecuteQuery($query);			
+		$result = $this->camilaWT->startExecuteQuery($query);
 		$data = $this->queryWorktableDatabase($result);
 
 		if (!$result) {
@@ -157,35 +161,42 @@ class CamilaReport
 			$html .= '<table><tr>';
 
 		// Handle graphs and tables
+		
+		$notEmptyCount = 0;
 		foreach ($report->graphs->graph as $graph) {
 			$type = (string) $graph->type;
 			$gId = (string) $graph->id;
+			
+			if (count($data) > 0) {
 
-			if ($type === 'bar' || $type === 'pie') {
-				// Graph with an external image
-				//$filename = (string) $graph->filename;
-				$filename = CAMILA_TMP_DIR.'/g'.$rId.'_'.$gId.'.png';
-				$this->createGraph($gId, $graph, $data, $filename);
-				
-				$width = (int) $graph->width;
-				$height = (int) $graph->height;
-				
-				if ($gCount>1)
-					$html .= '<td width="50%" style="vertical-align: middle;">';
-				$html .= '<div><img src="' . htmlspecialchars($filename) . '" width="' . $width . '" height="' . $height . '" /></div>';
-				if ($gCount>1)
-					$html .= '</td>';
+				if ($type === 'bar' || $type === 'pie') {
+					$filename = CAMILA_TMP_DIR.'/g'.$rId.'_'.$gId.'.png';
+					$this->createGraph($gId, $graph, $data, $filename);					
+					$width = (int) $graph->width;
+					$height = (int) $graph->height;
+					if ($gCount>1)
+						$html .= '<td width="50%" style="vertical-align: middle;">';
+					$html .= '<div><img src="' . htmlspecialchars($filename) . '" width="' . $width . '" height="' . $height . '" /></div>';
+					if ($gCount>1)
+						$html .= '</td>';
+					$notEmptyCount++;
+				}
+
+				if ($type === 'table') {
+					// Generate table content
+					if ($gCount>1)
+						$html .= '<td width="50%" style="vertical-align: middle;">';
+					$html .= $this->generateTable($result2, $graph).'</td>';
+					if ($gCount>1)
+						$html .= '</td>';
+				}
 			}
-
-			if ($type === 'table') {
-				// Generate table content
-				if ($gCount>1)
-					$html .= '<td width="50%" style="vertical-align: middle;">';
-				$html .= $this->generateTable($result2, $graph).'</td>';
-				if ($gCount>1)
-					$html .= '</td>';
-			}	
 		}
+		
+		if ($notEmptyCount == 0) {
+			$html .= '<td><p>Nessun dato!</p></td>';
+		}
+		
 		if ($gCount>1) {
 			$html .= '</tr></table>';
 			//$html .= '</div>';
@@ -295,10 +306,7 @@ class CamilaReport
 				$graph->createGraph();
 				//if ($graph->error != null && count($graph->error) > 0)
 				//{echo "!";}
-
 			}
-			
-			
 		}
 	}
 
@@ -372,8 +380,6 @@ class CamilaReport
 
             // Add the title to the Word document
             $section->addTitle($title, 1);  // Level 1 heading for the ToC
-			
-			
 
             // Handle graphs and tables
             foreach ($report->graphs->graph as $graph) {
@@ -514,6 +520,7 @@ class CamilaReport
 					}
 					else
 					{
+						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<p>'.$v3->title . ' - Nessun dato!'.'</p>'));
 						//$camilaUI->insertWarning($v3->title . ' - Nessun dato!');
 					}
 					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
@@ -527,6 +534,7 @@ class CamilaReport
 			}
 			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
 			
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<hr/>'));
 			//$camilaUI->insertDivider();
 		}	
 		

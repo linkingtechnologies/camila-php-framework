@@ -120,8 +120,6 @@ class CamilaWorkTable
 		//return preg_replace('/\s+/', '', $str);
 		return $str;
 	}
-	
-	
 
 	function countWorktableRecords($id)
     {
