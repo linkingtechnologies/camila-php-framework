@@ -33,16 +33,11 @@ class CamilaReport
 	private $reportDir;
 	private $reportList;
 	private $currentReport;
+	private $lang;
 
-    /**
-     * Constructor to load the database connection and the XML configuration file.
-     *
-     * @param ADOConnection $db Database connection object.
-     * @param string $xmlFilePath Path to the XML configuration file.
-     */
     public function __construct($lang, $camilaWT, $reportDir, $reportName = '')
     {
-        //$this->db = $db;
+		$this->lang = $lang;
 		$this->camilaWT = $camilaWT;
 		$this->reportDir = $reportDir . DIRECTORY_SEPARATOR. $lang;
 		$this->reportList = $this->getReports();
@@ -95,6 +90,19 @@ class CamilaReport
 		}
 		return $title;
 	}
+	
+	function getQuery($node) {
+		$dbType = $this->camilaWT->db->dataProvider;
+		$query = $node->query;
+		if (isset($node->mysqlQuery) && $dbType == 'mysql') {
+			$query = $node->mysqlQuery;
+		}
+		if (isset($node->sqliteQuery) && $dbType == 'sqlite') {
+			$query = $node->sqliteQuery;
+		}
+		return $query;
+
+	}
 
 	function createTable($name, $obj, $data) {
 		$html = '';
@@ -118,94 +126,6 @@ class CamilaReport
 		return $html;
 	}
 
-    /**
-     * Executes all queries defined in the XML and generates HTML content for tables and graphs.
-     *
-     * @return string The generated HTML with tables, titles, and graphs.
-     */
-    public function generateHtmlContent($report, $index, $title)
-    {
-        $html = '';
-		$html.= '<mpdf><div keep-with-next="true"><nobreak>';
-		$html .= '<h2 id="table' . $index . '" style="page-break-after: avoid;">' . htmlspecialchars($title) . '</h2>';
-		$query = $this->getQuery($report);
-		
-		$title = (string) $report->graphs->graph[0]->title;
-		$rId = (string) $report->id;
-
-		$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
-		$result = $this->camilaWT->startExecuteQuery($query);
-		$data = $this->queryWorktableDatabase($result);
-
-		if (!$result) {
-			throw new Exception('Error executing query: ' . $this->db->ErrorMsg());
-		}
-
-		// Add the title
-		//$html .= '<h2>' . htmlspecialchars($title) . '</h2>';
-		//$html .= '<div style="page-break-before: avoid; display: flex; justify-content: space-between;">';
-		
-		
-		$gCount = 0;
-		foreach ($report->graphs->graph as $graph) {
-			$gCount++;
-		}
-		if ($gCount>1)
-			$html .= '<table><tr>';
-
-		// Handle graphs and tables
-		
-		$notEmptyCount = 0;
-		foreach ($report->graphs->graph as $graph) {
-			$type = (string) $graph->type;
-			$gId = (string) $graph->id;
-			
-			if (count($data) > 0) {
-
-				if ($type === 'bar' || $type === 'pie') {
-					$filename = CAMILA_TMP_DIR.'/g'.$rId.'_'.$gId.'.png';
-					$this->createGraph($gId, $graph, $data, $filename);					
-					$width = (int) $graph->width;
-					$height = (int) $graph->height;
-					if ($gCount>1)
-						$html .= '<td width="50%" style="vertical-align: middle;">';
-					$html .= '<div><img src="' . htmlspecialchars($filename) . '" width="' . $width . '" height="' . $height . '" /></div>';
-					if ($gCount>1)
-						$html .= '</td>';
-					$notEmptyCount++;
-				}
-
-				if ($type === 'table') {
-					// Generate table content
-					if ($gCount>1)
-						$html .= '<td width="50%" style="vertical-align: middle;">';
-					$html .= $this->generateTable($result2, $graph).'</td>';
-					if ($gCount>1)
-						$html .= '</td>';
-				}
-			}
-		}
-		
-		if ($notEmptyCount == 0) {
-			$html .= '<td><p>Nessun dato!</p></td>';
-		}
-		
-		if ($gCount>1) {
-			$html .= '</tr></table>';
-			//$html .= '</div>';
-		}
-		
-		$html.= '</nobreak></div></mpdf>';
-        return $html;
-    }
-
-    /**
-     * Generate the table from the query result and XML configuration.
-     *
-     * @param object $result The query result from ADODB.
-     * @param SimpleXMLElement $graph The graph element from the XML configuration.
-     * @return string The generated HTML table.
-     */
     private function generateTable($result, $graph)
     {
         // Generate the table headers
@@ -213,8 +133,17 @@ class CamilaReport
 			$html = '<div><table border="1" cellspacing="0" cellpadding="5">';
 			$columns = array_keys($result->fields);
 			$html .= '<thead><tr>';
+			$skipFirst = false;
+			if (isset($graph->hideFirstColumn) && $graph->hideFirstColumn == true) {
+				$skipFirst = true;
+			}
+			$cCount = 0;
 			foreach ($columns as $column) {
-				$html .= '<th>' . ucfirst($column) . '</th>';
+				if ($cCount == 0 && $skipFirst) {
+				} else {
+					$html .= '<th>' . ucfirst($column) . '</th>';
+				}
+				$cCount++;
 			}
 			$html .= '</tr></thead>';
 
@@ -223,17 +152,22 @@ class CamilaReport
 			$totalRow = [];
 			while (!$result->EOF) {
 				$html .= '<tr>';
+				$cCount = 0;
 				foreach ($columns as $column) {
-					$value = $result->fields[$column];
-					$html .= '<td>' . htmlspecialchars($value) . '</td>';
+					if ($cCount == 0 && $skipFirst) {
+					} else {
+						$value = $result->fields[$column];
+						$html .= '<td>' . htmlspecialchars($value) . '</td>';
 
-					// Handle column summing if required by XML
-					if ((int)$graph->sum == 1) {
-						if (!isset($totalRow[$column])) {
-							$totalRow[$column] = 0;
+						// Handle column summing if required by XML
+						if ((int)$graph->sum == 1) {
+							if (!isset($totalRow[$column])) {
+								$totalRow[$column] = 0;
+							}
+							$totalRow[$column] += (is_numeric($value) ? $value : 0);
 						}
-						$totalRow[$column] += (is_numeric($value) ? $value : 0);
 					}
+					$cCount++;
 				}
 				$html .= '</tr>';
 				$result->MoveNext();
@@ -303,16 +237,85 @@ class CamilaReport
 		}
 	}
 
-    /**
-     * Generates a PDF report with multiple tables and graphs (images) from the XML configuration.
-     */
+    public function generateHtmlContent($report, $index, $title)
+    {
+        $html = '';
+		$html.= '<mpdf><div keep-with-next="true"><nobreak>';
+		$html .= '<h2 id="table' . $index . '" style="page-break-after: avoid;">' . htmlspecialchars($title) . '</h2>';
+		$query = $this->getQuery($report);
+		
+		$title = (string) $report->graphs->graph[0]->title;
+		$rId = (string) $report->id;
+
+		$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
+		$result = $this->camilaWT->startExecuteQuery($query);
+		$data = $this->queryWorktableDatabase($result);
+
+		if (!$result) {
+			throw new Exception('Error executing query: ' . $this->db->ErrorMsg());
+		}
+
+		// Add the title
+		//$html .= '<h2>' . htmlspecialchars($title) . '</h2>';
+		//$html .= '<div style="page-break-before: avoid; display: flex; justify-content: space-between;">';
+		
+		$gCount = 0;
+		foreach ($report->graphs->graph as $graph) {
+			$gCount++;
+		}
+		if ($gCount>1)
+			$html .= '<table><tr>';
+		
+		$notEmptyCount = 0;
+		foreach ($report->graphs->graph as $graph) {
+			$type = (string) $graph->type;
+			$gId = (string) $graph->id;
+			
+			if (count($data) > 0) {
+
+				if ($type === 'bar' || $type === 'pie') {
+					$filename = CAMILA_TMP_DIR.'/g'.$rId.'_'.$gId.'.png';
+					$this->createGraph($gId, $graph, $data, $filename);					
+					$width = (int) $graph->width;
+					$height = (int) $graph->height;
+					if ($gCount>1)
+						$html .= '<td width="50%" style="vertical-align: middle;">';
+					$html .= '<div><img src="' . htmlspecialchars($filename) . '" width="' . $width . '" height="' . $height . '" /></div>';
+					if ($gCount>1)
+						$html .= '</td>';
+					$notEmptyCount++;
+				}
+
+				if ($type === 'table') {
+					// Generate table content
+					if ($gCount>1)
+						$html .= '<td width="50%" style="vertical-align: middle;">';
+					$html .= $this->generateTable($result2, $graph).'</td>';
+					if ($gCount>1)
+						$html .= '</td>';
+				}
+			}
+		}
+		
+		if ($notEmptyCount == 0) {
+			$html .= '<td><p>Nessun dato disponibile.</p></td>';
+		}
+		
+		if ($gCount>1) {
+			$html .= '</tr></table>';
+			//$html .= '</div>';
+		}
+		
+		$html.= '</nobreak></div></mpdf>';
+        return $html;
+    }
+
     public function outputPdfToBrowser()
     {
-        // Create an instance of mPDF
         $mpdf = new Mpdf();
 
         // Add header and footer
-		$t = new CamilaTemplate('it');
+		$t = new CamilaTemplate($this->lang);
         $mpdf->SetHeader('Intervento "' . $t->getParameters()['evento'] . '"');
         $mpdf->SetFooter('{PAGENO} | |' . CAMILA_APPLICATION_NAME . "\n".'<br/>Report del '.date('m/d/Y') . ' ore ' . date('H:i'));
 		$mpdf->use_kwt = true;
@@ -346,6 +349,158 @@ class CamilaReport
 		//$pdf->SetTitle('Report '.$date.'.pdf');
 	
         $mpdf->Output('Report '.$date.'.pdf', \Mpdf\Output\Destination::INLINE);
+    }
+
+	function outputHtmlToBrowser() {
+		global $_CAMILA;
+		
+		$reports = $this->xmlConfig->report;
+		foreach ($reports as $k => $v) {
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="row">'));	
+			$query = $this->getQuery($v);
+
+			$data = $this->camilaWT->queryWorktableDatabase($query);
+			$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
+
+			$gCount = 0;
+			$title = '';
+			foreach ($v->graphs->graph as $graph) {
+				$gCount++;
+				if ($title == '')
+					$title = $graph->title;
+			}
+			
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12">'));
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<h3>'.$title.'</h3>'));
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+			
+			$arr = $v->graphs->graph;
+			for ($i=0; $i<count($arr);$i++)
+			{
+				$v3 = $arr[$i];
+				if ($v3->type == 'pie' || $v3->type == 'bar') {
+					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-8">'));
+					$image1 = new HAW_image("?dashboard=m1&rid=".$v2->id.'&gid='.$v3->id, "?dashboard=m1&rid=".$v->id.'&gid='.$v3->id, ":-)");
+					$image1->set_br(1);
+					if (count($data)>0)
+					{
+						$_CAMILA['page']->add_image($image1);
+					}
+					else
+					{
+						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<p><i>Nessun dato disponibile.</i></p>'));
+						//$camilaUI->insertWarning($v3->title . ' - Nessun dato!');
+					}
+					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+				}
+				if ($v3->type == 'table') {
+					if ($gCount>1)
+						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-4">'));
+					else
+						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-12">'));
+					//$myDiv = new HAW_raw(HAW_HTML, $this->createTable($v3->id, $v3, $data));
+					$myDiv = new HAW_raw(HAW_HTML, $this->generateTable($result2, $v3));
+					
+					$_CAMILA['page']->add_raw($myDiv);
+					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+				}
+			}
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+			
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<hr/>'));
+			//$camilaUI->insertDivider();
+		}	
+		
+	}
+	
+	function outputImageToBrowser($rId, $gId) {
+		global $_CAMILA;
+		$reports = $this->xmlConfig->report;
+		
+		foreach ($reports as $k => $v) {
+			if ($rId == ($v->id)) {
+				$query = $this->getQuery($v);
+				$data = $this->camilaWT->queryWorktableDatabase($query);
+				
+				foreach ($v->graphs->graph as $k2 => $v2) {
+					if ($gId == $v2->id) {
+						if (count($data)>0)
+							$this->createGraph($v2->id, $v2, $data);
+					}
+				}
+			}
+		}
+	}
+	
+	    /**
+     * Generates an ODF report (.odt) with multiple tables and graphs from the XML configuration.
+     */
+    public function outputOdfToBrowser()
+    {
+        // Create a new ODF document
+        $phpWord = new PhpWord();
+        $section = $phpWord->addSection();
+
+        // Add a Table of Contents (ToC)
+        $section->addText("Table of Contents");
+        $section->addTOC();  // Adds automatic Table of Contents
+
+        // Add header and footer
+        $header = $section->addHeader();
+        $header->addText("Report");
+        $footer = $section->addFooter();
+        $footer->addPreserveText('Page {PAGE} of {NUMPAGES}', null, array('alignment' => 'center'));
+
+        // Iterate over each report in the XML and generate tables and images
+        foreach ($this->xmlConfig->report as $index => $report) {
+            $title = (string) $report->graphs->graph[0]->title;
+
+            // Add the title to the ODF document
+            $section->addTitle($title, 1);  // Level 1 heading for the ToC
+
+            // Handle graphs and tables
+            foreach ($report->graphs->graph as $graph) {
+                $type = (string) $graph->type;
+
+                if ($type === 'bar') {
+                    // Add image to the document
+                    $filename = (string) $graph->filename;
+                    $width = (int) $graph->width;
+                    $height = (int) $graph->height;
+                    $section->addImage($filename, array('width' => $width, 'height' => $height));
+                }
+
+                if ($type === 'table') {
+                    // Add the table to the ODF document
+                    $table = $section->addTable();
+                    $result = $this->db->Execute((string)$report->query);
+                    $columns = array_keys($result->fields);
+
+                    // Add table headers
+                    $table->addRow();
+                    foreach ($columns as $column) {
+                        $table->addCell()->addText(ucfirst($column));
+                    }
+
+                    // Add table data
+                    while (!$result->EOF) {
+                        $table->addRow();
+                        foreach ($columns as $column) {
+                            $table->addCell()->addText($result->fields[$column]);
+                        }
+                        $result->MoveNext();
+                    }
+                }
+            }
+        }
+
+        // Save and output the ODF document to the browser
+        header('Content-Type: application/vnd.oasis.opendocument.text');
+        header('Content-Disposition: attachment;filename="report.odt"');
+        header('Cache-Control: max-age=0');
+
+        $writer = IOFactory::createWriter($phpWord, 'ODText');
+        $writer->save('php://output');
     }
 
     /**
@@ -419,151 +574,5 @@ class CamilaReport
         $writer->save('php://output');
     }
 
-    /**
-     * Generates an ODF report (.odt) with multiple tables and graphs from the XML configuration.
-     */
-    public function outputOdfToBrowser()
-    {
-        // Create a new ODF document
-        $phpWord = new PhpWord();
-        $section = $phpWord->addSection();
-
-        // Add a Table of Contents (ToC)
-        $section->addText("Table of Contents");
-        $section->addTOC();  // Adds automatic Table of Contents
-
-        // Add header and footer
-        $header = $section->addHeader();
-        $header->addText("Report");
-        $footer = $section->addFooter();
-        $footer->addPreserveText('Page {PAGE} of {NUMPAGES}', null, array('alignment' => 'center'));
-
-        // Iterate over each report in the XML and generate tables and images
-        foreach ($this->xmlConfig->report as $index => $report) {
-            $title = (string) $report->graphs->graph[0]->title;
-
-            // Add the title to the ODF document
-            $section->addTitle($title, 1);  // Level 1 heading for the ToC
-
-            // Handle graphs and tables
-            foreach ($report->graphs->graph as $graph) {
-                $type = (string) $graph->type;
-
-                if ($type === 'bar') {
-                    // Add image to the document
-                    $filename = (string) $graph->filename;
-                    $width = (int) $graph->width;
-                    $height = (int) $graph->height;
-                    $section->addImage($filename, array('width' => $width, 'height' => $height));
-                }
-
-                if ($type === 'table') {
-                    // Add the table to the ODF document
-                    $table = $section->addTable();
-                    $result = $this->db->Execute((string)$report->query);
-                    $columns = array_keys($result->fields);
-
-                    // Add table headers
-                    $table->addRow();
-                    foreach ($columns as $column) {
-                        $table->addCell()->addText(ucfirst($column));
-                    }
-
-                    // Add table data
-                    while (!$result->EOF) {
-                        $table->addRow();
-                        foreach ($columns as $column) {
-                            $table->addCell()->addText($result->fields[$column]);
-                        }
-                        $result->MoveNext();
-                    }
-                }
-            }
-        }
-
-        // Save and output the ODF document to the browser
-        header('Content-Type: application/vnd.oasis.opendocument.text');
-        header('Content-Disposition: attachment;filename="report.odt"');
-        header('Cache-Control: max-age=0');
-
-        $writer = IOFactory::createWriter($phpWord, 'ODText');
-        $writer->save('php://output');
-    }
-
-	function getQuery($node) {
-		$dbType = $this->camilaWT->db->dataProvider;
-		$query = $node->query;
-		if (isset($node->mysqlQuery) && $dbType == 'mysql') {
-			$query = $node->mysqlQuery;
-		}
-		if (isset($node->sqliteQuery) && $dbType == 'sqlite') {
-			$query = $node->sqliteQuery;
-		}
-		return $query;
-
-	}
-
-	function outputHtmlToBrowser() {
-		global $_CAMILA;
-		
-		$reports = $this->xmlConfig->report;
-		foreach ($reports as $k => $v) {
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="row">'));	
-			$query = $this->getQuery($v);
-
-			$data = $this->camilaWT->queryWorktableDatabase($query);
-
-			$arr = $v->graphs->graph;
-			for ($i=0; $i<count($arr);$i++)
-			{
-				$v3 = $arr[$i];
-				if ($v3->type == 'pie' || $v3->type == 'bar') {
-					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-8">'));
-					$image1 = new HAW_image("?dashboard=m1&rid=".$v2->id.'&gid='.$v3->id, "?dashboard=m1&rid=".$v->id.'&gid='.$v3->id, ":-)");
-					$image1->set_br(1);
-					if (count($data)>0)
-					{
-						$_CAMILA['page']->add_image($image1);
-					}
-					else
-					{
-						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<p>'.$v3->title . ' - Nessun dato!'.'</p>'));
-						//$camilaUI->insertWarning($v3->title . ' - Nessun dato!');
-					}
-					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
-				}
-				if ($v3->type == 'table') {
-					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-4">'));
-					$myDiv = new HAW_raw(HAW_HTML, $this->createTable($v3->id, $v3, $data));
-					$_CAMILA['page']->add_raw($myDiv);
-					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
-				}
-			}
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
-			
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<hr/>'));
-			//$camilaUI->insertDivider();
-		}	
-		
-	}
-	
-	function outputImageToBrowser($rId, $gId) {
-		global $_CAMILA;
-		$reports = $this->xmlConfig->report;
-		
-		foreach ($reports as $k => $v) {
-			if ($rId == ($v->id)) {
-				$query = $this->getQuery($v);
-				$data = $this->camilaWT->queryWorktableDatabase($query);
-				
-				foreach ($v->graphs->graph as $k2 => $v2) {
-					if ($gId == $v2->id) {
-						if (count($data)>0)
-							$this->createGraph($v2->id, $v2, $data);
-					}
-				}
-			}
-		}
-	}
 }
 ?>
