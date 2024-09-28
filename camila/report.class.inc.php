@@ -25,12 +25,6 @@ use Mpdf\Mpdf;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
 
-//$camilaWT  = new CamilaWorkTable();
-//$camilaWT->db = $_CAMILA['db'];
-
-//require(CAMILA_LIB_DIR.'/fpdf/fpdf.php');
-//require_once(CAMILA_DIR.'export/phpgraphlib/phpgraphlib.php');
-//require_once(CAMILA_DIR.'export/phpgraphlib/phpgraphlib_pie.php');
 
 class CamilaReport
 {
@@ -134,12 +128,11 @@ class CamilaReport
         $html = '';
 		$html.= '<mpdf><div keep-with-next="true"><nobreak>';
 		$html .= '<h2 id="table' . $index . '" style="page-break-after: avoid;">' . htmlspecialchars($title) . '</h2>';
-		$query = (string) $report->query;
+		$query = $this->getQuery($report);
+		
 		$title = (string) $report->graphs->graph[0]->title;
 		$rId = (string) $report->id;
-		//echo $query;
-		// Execute the query
-		//$result = $this->db->Execute($query);
+
 		$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
 		$result = $this->camilaWT->startExecuteQuery($query);
 		$data = $this->queryWorktableDatabase($result);
@@ -200,7 +193,7 @@ class CamilaReport
 		if ($gCount>1) {
 			$html .= '</tr></table>';
 			//$html .= '</div>';
-			}
+		}
 		
 		$html.= '</nobreak></div></mpdf>';
         return $html;
@@ -496,13 +489,27 @@ class CamilaReport
         $writer = IOFactory::createWriter($phpWord, 'ODText');
         $writer->save('php://output');
     }
-	
+
+	function getQuery($node) {
+		$dbType = $this->camilaWT->db->dataProvider;
+		$query = $node->query;
+		if (isset($node->mysqlQuery) && $dbType == 'mysql') {
+			$query = $node->mysqlQuery;
+		}
+		if (isset($node->sqliteQuery) && $dbType == 'sqlite') {
+			$query = $node->sqliteQuery;
+		}
+		return $query;
+
+	}
+
 	function outputHtmlToBrowser() {
 		global $_CAMILA;
+		
 		$reports = $this->xmlConfig->report;
 		foreach ($reports as $k => $v) {
 			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="row">'));	
-			$query = $v->query;
+			$query = $this->getQuery($v);
 
 			$data = $this->camilaWT->queryWorktableDatabase($query);
 
@@ -546,7 +553,7 @@ class CamilaReport
 		
 		foreach ($reports as $k => $v) {
 			if ($rId == ($v->id)) {
-				$query = $v->query;
+				$query = $this->getQuery($v);
 				$data = $this->camilaWT->queryWorktableDatabase($query);
 				
 				foreach ($v->graphs->graph as $k2 => $v2) {
