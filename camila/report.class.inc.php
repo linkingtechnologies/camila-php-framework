@@ -178,10 +178,13 @@ class CamilaReport
 				$html .= '<tr>';
 				$count = 0;
 				foreach ($columns as $column) {
-					if ($count ==0)
-						$html .= '<td><strong></td>';
-					else
-						$html .= '<td><strong>' . ($totalRow[$column] ?? '') . '</strong></td>';
+					if ($count == 0 && $skipFirst) {
+					} else {
+						if ($count == 0 || ($count ==1 && $skipFirst))
+							$html .= '<td><strong></td>';
+						else
+							$html .= '<td><strong>' . ($totalRow[$column] ?? '') . '</strong></td>';
+					}
 					$count++;
 				}
 				$html .= '</tr>';
@@ -293,6 +296,7 @@ class CamilaReport
 					$html .= $this->generateTable($result2, $graph).'</td>';
 					if ($gCount>1)
 						$html .= '</td>';
+					$notEmptyCount++;
 				}
 			}
 		}
@@ -380,7 +384,7 @@ class CamilaReport
 				$v3 = $arr[$i];
 				if ($v3->type == 'pie' || $v3->type == 'bar') {
 					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-8">'));
-					$image1 = new HAW_image("?dashboard=m1&rid=".$v2->id.'&gid='.$v3->id, "?dashboard=m1&rid=".$v->id.'&gid='.$v3->id, ":-)");
+					$image1 = new HAW_image("?dashboard=m1&rid=".$v2->id.'&gid='.$v3->id, "?dashboard=m1&rid=".$v->id.'&gid='.$v3->id.'&report='.urlencode($this->currentReport), ":-)");
 					$image1->set_br(1);
 					if (count($data)>0)
 					{
@@ -413,13 +417,14 @@ class CamilaReport
 		
 	}
 	
-	function outputImageToBrowser($rId, $gId) {
+	function outputImageToBrowser($rId, $gId, $report) {
 		global $_CAMILA;
 		$reports = $this->xmlConfig->report;
 		
 		foreach ($reports as $k => $v) {
 			if ($rId == ($v->id)) {
 				$query = $this->getQuery($v);
+				
 				$data = $this->camilaWT->queryWorktableDatabase($query);
 				
 				foreach ($v->graphs->graph as $k2 => $v2) {
