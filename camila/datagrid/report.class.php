@@ -171,6 +171,8 @@ class report
 	
 	var $isThereGroupBy;
 	var $isThereGroupByOrder;
+	
+	var $customFunctions;
     
     
     function __construct($stmt, $title, $orderby = '', $direction = 'asc', $mapping = '', $ordermapping = null, $keys = '', $defaultfields = '', $filter = '', $canupdate = true, $candelete = false)
@@ -861,7 +863,12 @@ class report
 		foreach ($this->fields as $key => $val) {
 			$fld = [$key, $val];
             if ($fld[1]->print && !($_CAMILA['page']->camila_exporting() && $fld[1]->dummy) && !($_CAMILA['page']->camila_exporting() && (!(strpos($fld[1]->field, 'camilakey_') === false)))) {
-                $fld[1]->draw($myRow, $this->fields);
+
+				if (isset($this->customFunctions[$fld[1]->field])) {
+					$this->customFunctions[$fld[1]->field]($myRow, $fld[1]->field, $this->fields);
+				} else {
+					$fld[1]->draw($myRow, $this->fields);
+				}
                 
                 if ($fld[1]->field == $this->orderby) {
                     $currval = $fld[1]->value;
