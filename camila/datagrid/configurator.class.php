@@ -1785,34 +1785,49 @@ class configurator
         //    $form3 = new phpform('camilastep4', $returl);
         //else
         $form3 = new phpform('camilastep4', 'cf_worktable_wizard_step4.php');
-        
-        $form3->submitbutton = camila_get_translation('camila.wizard.next');
-        $form3->drawrules    = false;
+        $form3->drawrules = false;
         new form_hidden($form3, 'custom', $id);
+
+		new form_hidden($form3, 'iw_filename', $_REQUEST['camila_iwfilepath']);
+		new form_hidden($form3, 'iw_sheetnum', 0);		
+		$form3->submitbutton = camila_get_translation('camila.wizard.next');
+		if (isset($_REQUEST['camila_iwfilepath'])) {
+			//echo $_REQUEST['camila_filename'];
+		} else {
+			new form_filebox($form3, 'filename', camila_get_translation('camila.worktable.xls.choose'), 50, CAMILA_TMP_DIR, $this->camila_get_max_filesize());
+		}
+
+		$max = 10;
+		if (isset($_REQUEST['camila_iwfilepath'])) {
+			$max = 1;
+		}
+		$sheet_list = '';
+		for ($i = 0; $i < $max; $i++) {
+			if ($i > 0)
+				$sheet_list .= ',';
+			$sheet_list .= ($i) . ';' . ($i + 1);
+		}			
+		new form_static_listbox($form3, 'sheetnum', camila_get_translation('camila.worktable.xls.sheetnum'), $sheet_list);
+		$form3->fields['sheetnum']->set_br(2);
         
         if ($returl != '')
             new form_hidden($form3, 'returl', $_REQUEST['camila_returl']);
-        
-        new form_filebox($form3, 'filename', camila_get_translation('camila.worktable.xls.choose'), 50, CAMILA_TMP_DIR, $this->camila_get_max_filesize());
-        
-        $sheet_list = '';
-        for ($i = 0; $i < 10; $i++) {
-            if ($i > 0)
-                $sheet_list .= ',';
-            $sheet_list .= ($i) . ';' . ($i + 1);
-        }
-        
-        new form_static_listbox($form3, 'sheetnum', camila_get_translation('camila.worktable.xls.sheetnum'), $sheet_list);
-		$form3->fields['sheetnum']->set_br(2);
 					
         $success = true;
         
         if ($form3->process()) {
-			//echo(':'.$form3->value);
+			$exampleFilename = false;
+			$filename = '';
 
-			$filename = $form3->fields['filename']->value[0];
-			if (!file_exists(CAMILA_TMP_DIR . '/' .$filename)) {
-				
+			if (isset($form3->fields['iw_filename']) && $form3->fields['iw_filename']->value != '') {
+				$exampleFilename = true;
+				$filename = $form3->fields['iw_filename']->value;
+			} else {
+				$filename = $form3->fields['filename']->value[0];
+			}
+			$filenamePath = $exampleFilename ? (CAMILA_APP_PATH . $filename) : (CAMILA_TMP_DIR . '/' .$filename);
+
+			if (!file_exists($filenamePath)) {				
 				echo "File does not exist: ". $filename;
 			}
             $sheetnum = $form3->fields['sheetnum']->value;
@@ -1820,7 +1835,7 @@ class configurator
             $result = $_CAMILA['db']->Execute('select short_title, scriptname, tablename, filename, sheetnum from ' . CAMILA_TABLE_WORKT . ' where id=' . $_CAMILA['db']->qstr($id));
             if ($result === false)
                 camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
-            
+
             $table           = $result->fields['tablename'];
             $worktablename   = $result->fields['short_title'];
             $worktablescript = $result->fields['scriptname'];
@@ -1828,6 +1843,7 @@ class configurator
             if ($filename == '' && $result->fields['filename'] != '') {
                 $filename = $result->fields['filename'];
                 $sheetnum = $result->fields['sheetnum'];
+				$filenamePath = CAMILA_TMP_DIR . '/' .$filename;
             }
 
             if ($filename != '') {
@@ -1838,7 +1854,7 @@ class configurator
 				if ($this->ends_with($filename,'xls'))
 					require_once(CAMILA_LIB_DIR . 'php-excel-reader/excel_reader2.php');
 			
-                $data = new Spreadsheet_Excel_Reader(CAMILA_TMP_DIR . '/' . $filename);
+                $data = new Spreadsheet_Excel_Reader($filenamePath);
 
                 $excelColNames = Array();
                 
@@ -2025,7 +2041,8 @@ class configurator
             camila_information_text(camila_get_translation('camila.worktable.db.importedrows') . ': ' . $successCount);
             camila_information_text(camila_get_translation('camila.worktable.db.skippedrows') . ': ' . $failCount);
             
-            @unlink(CAMILA_TMP_DIR . '/' . $filename);
+			if (!$exampleFilename)
+				@unlink(CAMILA_TMP_DIR . '/' . $filename);
             
         } else {
             $result = $_CAMILA['db']->Execute('select tablename, filename, sheetnum from ' . CAMILA_TABLE_WORKT . ' where id=' . $_CAMILA['db']->qstr($id));
@@ -2041,9 +2058,11 @@ class configurator
 			$_CAMILA['page']->add_text($myText);
 
 			
-			
-			$myText = new CHAW_text(camila_get_translation('camila.wizard.choosefileforimport'));
-            $_CAMILA['page']->add_text($myText);
+			if (isset($_REQUEST['camila_iwfilepath'])) {
+			} else {
+				$myText = new CHAW_text(camila_get_translation('camila.wizard.choosefileforimport'));
+				$_CAMILA['page']->add_text($myText);
+			}
             $form3->draw();
             $success = false;
 
