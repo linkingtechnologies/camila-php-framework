@@ -34,6 +34,26 @@
 	"config": {
         "platform": {
             "php": "8.3"
-        }
-    }
+        },
+		"preferred-install": "dist",
+		"sort-packages": true,
+		"optimize-autoloader": true,
+		"discard-changes": true
+    },
+	"archive": {
+		"exclude": [
+			"*/tests/*",
+			"*/docs/*",
+			"*/examples/*",
+			"*/.github/*",
+			"*/.git/*",
+			"*/.gitignore",
+			"*/.travis.yml",
+			"*/phpunit.xml*",
+			"*/composer.json",
+			"*/composer.lock",
+			"*/README*",
+			"*/CHANGELOG*"
+		]
+	}
 }
