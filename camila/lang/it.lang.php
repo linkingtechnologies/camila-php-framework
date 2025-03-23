@@ -51,6 +51,7 @@ camila.wizard.choosesheetnumdescandtitle = Seleziona il numero del foglio del fi
 camila.wizard.configurecolumns = Configura ora le caratteristiche di ogni campo.
 camila.wizard.configurationapplied = Le operazioni sulla configurazione della Scheda Dati sono state eseguite correttamente.
 camila.wizard.choosefileforimport = Scegli un file Excel ed il numero del foglio che verrà usato per l'importazione dei dati.
+camila.wizard.examplefiletoimport = File di esempio scelto per l'importazione
 
 camila.worktable.worksheet.conf = Conf
 camila.worktable.worksheet.data = Dati

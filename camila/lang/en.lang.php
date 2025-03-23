@@ -51,6 +51,7 @@ camila.wizard.choosesheetnumdescandtitle = Please choose Excel Sheet number whic
 camila.wizard.configurecolumns = Now configure the characteristics of each field.
 camila.wizard.configurationapplied = The configuration has been successfully applied to the database.
 camila.wizard.choosefileforimport = Please choose Excel file and Sheet number which will be used to import data.
+camila.wizard.examplefiletoimport = Sample file selected for import
 
 camila.worktable.worksheet.conf = Conf
 camila.worktable.worksheet.data = Data
