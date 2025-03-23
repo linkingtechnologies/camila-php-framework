@@ -1773,14 +1773,13 @@ class configurator
     
     function xls_import($id, $returl = '')
     {
-
         global $_CAMILA;
 
-        require_once(CAMILA_DIR . 'datagrid/form.class.php');
-        require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
-        require_once(CAMILA_DIR . 'datagrid/elements/form/filebox.php');
-        require_once(CAMILA_DIR . 'datagrid/elements/form/static_listbox.php');
-        
+        //require_once(CAMILA_DIR . 'datagrid/form.class.php');
+        //require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
+        //require_once(CAMILA_DIR . 'datagrid/elements/form/filebox.php');
+        //require_once(CAMILA_DIR . 'datagrid/elements/form/static_listbox.php');
+   
         //if ($returl != '')
         //    $form3 = new phpform('camilastep4', $returl);
         //else
@@ -1792,7 +1791,10 @@ class configurator
 		new form_hidden($form3, 'iw_sheetnum', 0);		
 		$form3->submitbutton = camila_get_translation('camila.wizard.next');
 		if (isset($_REQUEST['camila_iwfilepath'])) {
-			//echo $_REQUEST['camila_filename'];
+			$myText = new CHAW_text('');
+			$_CAMILA['page']->add_text($myText);
+			$myText = new CHAW_text(camila_get_translation('camila.wizard.examplefiletoimport').': ' . basename($_REQUEST['camila_iwfilepath']));
+			$_CAMILA['page']->add_text($myText);
 		} else {
 			new form_filebox($form3, 'filename', camila_get_translation('camila.worktable.xls.choose'), 50, CAMILA_TMP_DIR, $this->camila_get_max_filesize());
 		}
