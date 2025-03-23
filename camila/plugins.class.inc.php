@@ -1,6 +1,6 @@
 <?php
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -56,6 +56,20 @@ class CamilaPlugins
 	
 	public static function getRepositoryInformation($pluginId) {
 		return json_decode(file_get_contents(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/conf/repo.json'), true);
+	}
+	
+	public static function setRepositoryInformation($pluginId) {
+		$url = "https://api.github.com/repos/linkingtechnologies/camila-php-framework-app-plugin-".$pluginId;
+		$ch = curl_init();				
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_USERAGENT, "PHP");
+		//curl_setopt($ch, CURLOPT_VERBOSE, 1);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		$result=curl_exec($ch);
+		curl_close($ch);
+		file_put_contents(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/conf/repo.json', $result);
 	}
 
 	public static function install($db, $lang, $pluginId) {

@@ -365,6 +365,7 @@ abstract class CLI extends Base
 			global $_CAMILA;
 			CamilaPlugins::install($_CAMILA['db'], $lang, $name);
 			$this->success('Plugin ' . $options->getArgs()[0] . ' initialized!');
+			CamilaPlugins::setRepositoryInformation($name):
 		}
 	}
 	
