@@ -39,7 +39,7 @@ $camilaAuth->userTable       = CAMILA_TABLE_USERS;
 $camilaAuth->authUserTable   = CAMILA_AUTH_TABLE_USERS;
 $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
 
-if (basename($_SERVER['PHP_SELF']) == 'cf_api.php') {
+if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_NAME']) == 'cf_api.php') {
 
 	global $_CAMILA;
 	
