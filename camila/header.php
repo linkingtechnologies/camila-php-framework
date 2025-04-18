@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2024 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -753,7 +753,7 @@ $smartMenusTheme = 'sm-camila';
 			
 			$code .="<link href=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.css\" rel=\"stylesheet\">\n";
 
-		    $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/jquery/jquery.js\"></script>\n";
+		    $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/jquery/jquery.min.js"></script>\n";
 
 			$code .="<script src=\"".CAMILA_LIB_DIR."bootstrap/js/bootstrap.min.js\"></script>\n";
 		    $code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."smartmenus/jquery.smartmenus.js\"></script>\n";
