@@ -753,7 +753,7 @@ $smartMenusTheme = 'sm-camila';
 			
 			$code .="<link href=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.css\" rel=\"stylesheet\">\n";
 
-		    $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/jquery/jquery.min.js"></script>\n";
+		    $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/jquery/jquery.min.js></script>\n";
 
 			$code .="<script src=\"".CAMILA_LIB_DIR."bootstrap/js/bootstrap.min.js\"></script>\n";
 		    $code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."smartmenus/jquery.smartmenus.js\"></script>\n";
