@@ -110,9 +110,8 @@ class CHAW_deck extends HAW_deck
 		  }
 		  
 		  if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
-			  $this->camila_add_js("<link href=\"".CAMILA_LIB_DIR."bulms/css/bulma.min.css\" rel=\"stylesheet\">\n");
+			  $this->camila_add_js("<link href=\"".CAMILA_LIB_DIR."bulma/css/bulma.min.css\" rel=\"stylesheet\">\n");
 		  }
-
 
           $this->camila_add_js("<script type=\"text/javascript\">\n");
  
@@ -267,17 +266,12 @@ class CHAW_deck extends HAW_deck
  function print_menu_children($parents,$titles,$visible,$urls,$father)
  {
    $count = 0;
-
-   			//if ($father=='')
-			//	echo '<li><a href="'.$urls[$i].'"><img src="../camila/images/png/home.png"></a>';
-
    for($i=0;$i<count($parents);$i++) {
 	   if($parents[$i] == $father) {
 	       if ($father!='' && $count==0)
 		   {
               echo "<ul class=\"dropdown-menu\">";
 			}
-			
 
 		  $count++;
 
@@ -299,6 +293,59 @@ class CHAW_deck extends HAW_deck
 
    if ($father!='' && $count>0)
           echo "</ul>";
+ }
+
+ function print_menu_children_bulma($parents,$titles,$visible,$urls,$father)
+ {
+   $count = 0;
+   for($i=0;$i<count($parents);$i++) {
+	   if($parents[$i] == $father) {
+	       if ($father!='' && $count==0)
+		   {
+              ////echo "<ul class=\"dropdown-menu\">";
+			  //echo '<div class="navbar-item has-dropdown is-hoverable>';
+			  //echo '<div class="navbar-dropdown">';
+			  
+			}
+
+		  $count++;
+
+
+		  $class="";
+		  if ($father == '')
+		  {
+		      $currPage = substr($_SERVER["SCRIPT_NAME"],strrpos($_SERVER["SCRIPT_NAME"],"/")+1);
+			  if ($currPage == $urls[$i])
+			     $class = 'current';
+		  }
+if ($father=='')
+echo '<div class="navbar-item has-dropdown is-hoverable">';
+	      echo '<a href="'.$urls[$i].'" class="navbar-item '.$class.'">'.$titles[$i].'</a>';
+
+		$c = 0;
+		for($j=0;$j<count($parents);$j++) {
+			if ($parents[$j] == $urls[$i])
+				$c++;
+		}
+
+if ($father=='') {
+	if ($c>0)
+		echo '<div class="navbar-dropdown">';
+}
+	      $this->print_menu_children_bulma($parents,$titles,$visible,$urls,$urls[$i]);
+if ($father=='')
+		  echo '</div>';
+if ($father=='')
+	if ($c>0)
+		  echo '</div>';
+		  echo '';
+	   }
+   }
+
+   if ($father!='' && $count>0) {
+          ////echo "</ul>";
+		  //echo '</div>';
+   }
  }
  
  function add_footer($code) {
@@ -433,7 +480,11 @@ class CHAW_deck extends HAW_deck
 		//$TBS->SetOption('noerr', true);
 		$TBS->SetOption('protect', false);
 		$TBS->MethodsAllowed = true;
-		$TBS->LoadTemplate(CAMILA_DIR.'/tbs/templates/head.htm');
+		$uiKit='';
+		if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+			$uiKit='bulma/';
+		}
+		$TBS->LoadTemplate(CAMILA_DIR.'/tbs/templates/'.$uiKit.'head.htm');
 		$TBS->Show();
       }
 
@@ -623,8 +674,50 @@ class CHAW_deck extends HAW_deck
       {
         if ($this->css_enabled && ($this->use_simulator == HAW_SIM_SKIN))
         {
-          //Camila Framework: New block START
 
+		if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+			  if (is_array($_CAMILA['mainmenu']) || is_object($_CAMILA['mainmenu']))
+		  {
+			   
+			  echo '<nav class="navbar is-light" role="navigation" aria-label="main navigation">';
+			  echo '  <div class="navbar-brand">';
+			  echo '    <a class="navbar-item" href="'.CAMILA_HOME.'">'.CAMILA_APPLICATION_TITLE.'</a>';
+			  echo '    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="mainNavbar">';
+			  echo '      <span aria-hidden="true"></span>';
+			  echo '      <span aria-hidden="true"></span>';
+			  echo '      <span aria-hidden="true"></span>';
+			  echo '    </a>';
+			  
+			  echo '  </div>';
+			  echo '  <div id="mainNavbar" class="navbar-menu">';
+
+		  echo '<div class="navbar-start">';
+
+		      $parents = array();
+			  $titles = array();
+			  $visible = array();
+			  $urls = array();
+
+			  foreach($_CAMILA['mainmenu'] as $key => $value)
+			  {
+			    $parents[$key]=$value['parent'];
+				$titles[$key]=$value['short_title'];
+				$visible[$key]=$value['visible'];
+				$urls[$key]=$value['url'];
+			  }
+
+			  $this->print_menu_children_bulma($parents, $titles, $visible, $urls, $father);
+
+			  		  echo "</div>";
+		  
+echo '		    </div><!--/.nav-collapse -->';
+echo '</nav>';
+
+		}
+
+}
+else
+{
 		  if (is_array($_CAMILA['mainmenu']) || is_object($_CAMILA['mainmenu']))
 		  {
 			  echo '<div class="navbar navbar-default" role="navigation">';
@@ -638,9 +731,6 @@ class CHAW_deck extends HAW_deck
 			  echo '    <a class="navbar-brand" href="'.CAMILA_HOME.'">'.CAMILA_APPLICATION_TITLE.'</a>';
 			  echo '  </div>';
 			  echo '  <div class="navbar-collapse collapse">';
-
-          //echo "<div id=\"camilamenutop\">";
-		  //echo "<ul id=\"main-menu\" class=\"sm ".$this->smartMenusTheme."\">";
 
 		  echo "<ul id=\"main-menu\" class=\"nav navbar-nav\">";
 
@@ -659,21 +749,13 @@ class CHAW_deck extends HAW_deck
 
 			  $this->print_menu_children($parents, $titles, $visible, $urls, $father);
 
-		      //print_r($_CAMILA['mainmenu']);
-
 			  		  echo "</ul>";
-		  //echo "</div>";
 		  
 echo '		    </div><!--/.nav-collapse -->';
 echo '</div>';
 
-			  }
-		  
-          //Camila Framework: New block END
-		  
-          //Camila Framework: New block START
-          //echo "<div id=\"camilamenuleft\"></div>";
-          //Camila Framework: New block END
+		}
+}		  
 
           // use skin design
 		  echo "<div class=\"container\">";
@@ -1089,7 +1171,11 @@ class CHAW_preferences
 		$TBS->SetOption(array('render'=>TBS_OUTPUT));
 		//$TBS->SetOption('noerr', true);
 		$TBS->MethodsAllowed = true;
-		$TBS->LoadTemplate(CAMILA_DIR.'/tbs/templates/user_actions.htm');			
+		$uiKit='';
+		if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+			$uiKit='bulma/';
+		}
+		$TBS->LoadTemplate(CAMILA_DIR.'/tbs/templates/'.$uiKit.'user_actions.htm');
 		$TBS->Show();
     }
 		
