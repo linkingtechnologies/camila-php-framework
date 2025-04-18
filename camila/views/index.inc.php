@@ -2,7 +2,7 @@
 defined('CAMILA_APPLICATION_NAME') or die('No direct script access.');
 
 
-if (CAMILA_ANON_LOGIN & !isset($_REQUEST['camila_autosuggest'])) {
+/*if (CAMILA_ANON_LOGIN & !isset($_REQUEST['camila_autosuggest'])) {
    
     if ($dh2 = opendir('./lang/')) {
         while (($file2 = readdir($dh2)) !== false) {
@@ -19,7 +19,7 @@ if (CAMILA_ANON_LOGIN & !isset($_REQUEST['camila_autosuggest'])) {
         }
         closedir($dh2);
     }
-}
+}*/
 
 
 if (!CAMILA_ANON_LOGIN & !isset($_REQUEST['camila_autosuggest'])) {
