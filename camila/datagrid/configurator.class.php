@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2024 Umberto Bresciani
+    Copyright (C) 2006-2025 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1930,8 +1930,16 @@ class configurator
                             if ($worktableColName != '') {
                                 if ($types[$k] == 'date' && $data->val($i, $k2 + 1, $sheetnum) != '') {
 									if ($this->ends_with($reflector->getFileName(),'excel_reader_wrapper.php')) {
-										$dt = $data->excelToDateTimeObject($data->value($i, $k2 + 1, $sheetnum));
-										$record[$worktableColName] = $_CAMILA['db']->BindDate($dt->format('Y-m-d'));
+										$value = $data->val($i, $k2 + 1, $sheetnum);
+										if (substr_count($value, '/') === 2) {
+											$mm = substr($value, camila_get_translation('camila.dateformat.monthpos'), 2);
+											$dd = substr($value, camila_get_translation('camila.dateformat.daypos'), 2);
+											$yyyy = substr($value, camila_get_translation('camila.dateformat.yearpos'), 4);
+											$record[$worktableColName] = $_CAMILA['db']->BindDate($yyyy.'-'.$mm.'-'. $dd);
+										} else {
+											$dt = $data->excelToDateTimeObject($data->value($i, $k2 + 1, $sheetnum));
+											$record[$worktableColName] = $_CAMILA['db']->BindDate($dt->format('Y-m-d'));
+										}
 									} else {
 										$numValue = $data->sheets[$sheetnum]['cellsInfo'][$i][$k2 + 1]['raw'];
                                     
