@@ -761,8 +761,12 @@ $smartMenusTheme = 'sm-camila';
 		    $code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."smartmenus/jquery.smartmenus.js?v?2025\"></script>\n";
 			$code .="<script src=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.js?v=2025\"></script>\n";
 
-			$code .="<script src=\"".CAMILA_LIB_DIR."x-editable/bootstrap3-editable/js/bootstrap-editable.js\"></script>\n";
-			$code .="<link href=\"".CAMILA_LIB_DIR."x-editable/bootstrap3-editable/css/bootstrap-editable.css\" rel=\"stylesheet\">\n";
+			//$code .="<script src=\"".CAMILA_LIB_DIR."x-editable/bootstrap3-editable/js/bootstrap-editable.js\"></script>\n";
+			//$code .="<link href=\"".CAMILA_LIB_DIR."x-editable/bootstrap3-editable/css/bootstrap-editable.css\" rel=\"stylesheet\">\n";
+
+			$code .="<script src=\"".CAMILA_DIR."js/jquery/jquery.poshytip.js\"></script>\n";
+			$code .="<script src=\"".CAMILA_DIR."js/x-editable/jquery-editable-poshytip.min.js\"></script>\n";
+			$code .="<link href=\"".CAMILA_DIR."css/x-editable/jquery-editable.css\" rel=\"stylesheet\">\n";
 
 			//$code .="<script scr=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.js\"></script>\n";
 			//$code .="<script type=\"text/javascript\">\$(function() {\$('#main-menu').smartmenus({subMenusSubOffsetX: 1,subMenusSubOffsetY: -8});});</script>";
