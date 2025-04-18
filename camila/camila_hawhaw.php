@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -105,7 +105,14 @@ class CHAW_deck extends HAW_deck
           $this->camila_add_js("<script type=\"text/javascript\" src=\"".CAMILA_DIR."js/camila_instantedit2.js?v=".$this->camila_force_js_update_token."\"></script>\n");
           $this->camila_add_js("<script type=\"text/javascript\" src=\"".CAMILA_DIR."js/camila_security.js?v=".$this->camila_force_js_update_token."\"></script>\n");
 
-		  $this->camila_add_js("<link href=\"".CAMILA_LIB_DIR."bootstrap/css/bootstrap.min.css\" rel=\"stylesheet\">\n");
+		  if (!defined('CAMILA_APPLICATION_UI_KIT') || (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bootstrap3')) {
+			  $this->camila_add_js("<link href=\"".CAMILA_LIB_DIR."bootstrap/css/bootstrap.min.css\" rel=\"stylesheet\">\n");
+		  }
+		  
+		  if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+			  $this->camila_add_js("<link href=\"".CAMILA_LIB_DIR."bulms/css/bulma.min.css\" rel=\"stylesheet\">\n");
+		  }
+
 
           $this->camila_add_js("<script type=\"text/javascript\">\n");
  

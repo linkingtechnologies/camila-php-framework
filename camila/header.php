@@ -742,10 +742,10 @@ $smartMenusTheme = 'sm-camila';
           $camila_menu_id = $_CAMILA['skin'];
 		  
 		  $code = "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."dommenu/domLib.js\"></script>\n";
-            $code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."dommenu/domMenu.js\"></script>\n";
+          $code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."dommenu/domMenu.js\"></script>\n";
 
-		    $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/menu.js\"></script>\n";
-		    $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/menu" . $camila_menu_id . ".js\"></script>\n";
+		  $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/menu.js\"></script>\n";
+		  $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/menu" . $camila_menu_id . ".js\"></script>\n";
 			//$code .="<link href=\"".CAMILA_LIB_DIR."smartmenus/libs/demo-assets/bootstrap/css/bootstrap.min.css\" rel=\"stylesheet\">\n";
 
 		  if ($useSmartMenus) {
@@ -755,7 +755,9 @@ $smartMenusTheme = 'sm-camila';
 
 		    $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/jquery/jquery.min.js?v=2025\"></script>\n";
 
-			$code .="<script src=\"".CAMILA_LIB_DIR."bootstrap/js/bootstrap.min.js\"></script>\n";
+			if (!defined('CAMILA_APPLICATION_UI_KIT') || (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bootstrap3')) {
+				$code .="<script src=\"".CAMILA_LIB_DIR."bootstrap/js/bootstrap.min.js\"></script>\n";
+			}
 		    $code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."smartmenus/jquery.smartmenus.js?v?2025\"></script>\n";
 			$code .="<script src=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.js?v=2025\"></script>\n";
 
