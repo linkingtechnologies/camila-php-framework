@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,10 +30,10 @@ new form_textbox($form, 'username', camila_get_translation('camila.login.usernam
 new form_textbox($form, 'surname', camila_get_translation('camila.login.surname'), false, 50, 50);
 new form_textbox($form, 'name', camila_get_translation('camila.login.name'), false, 50,50);
 new form_password($form, 'password', camila_get_translation('camila.login.password'));
-//new form_static_listbox($form, 'grp', camila_get_translation('camila.login.group'), camila_get_translation('camila.login.options.group'));
-new form_textbox($form, 'grp', camila_get_translation('camila.login.group'), false, 20);
+new form_static_listbox($form, 'level', camila_get_translation('camila.login.level'), camila_get_translation('camila.login.options.level'));
+new form_static_listbox($form, 'grp', camila_get_translation('camila.login.group'), camila_get_translation('camila.login.options.group'));
 new form_static_listbox($form, 'visibility_type', camila_get_translation('camila.login.visibility'), camila_get_translation('camila.login.options.visibility'));
-
+//new form_textbox($form, 'grp', camila_get_translation('camila.login.group'), false, 20);
 if (is_object($form->fields['grp']))
     $form->fields['grp']->defaultvalue = 'default';
 
@@ -42,8 +42,6 @@ if (is_object($form->fields['id'])) {
 	$camilaAuth->db = $_CAMILA['db'];
     $form->fields['id']->defaultvalue = $camilaAuth->getAutoincrementValue();
 }
-
-new form_static_listbox($form, 'level', camila_get_translation('camila.login.level'), camila_get_translation('camila.login.options.level'));
 
 new form_generate_password($form, 'token', camila_get_translation('camila.login.token'), 100, false, 'alpha', 75);
 
