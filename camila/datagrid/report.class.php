@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2023 Umberto Bresciani
+    Copyright (C) 2006-2025 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ function camila_formupdatelink(&$field, &$row, $fields)
     
 	
     $myLink = new CHAW_link($field->report->formupdatelinktext, $link . $reqs . '&camila_returl=' . urlencode($_CAMILA['returl']));
-	$myLink->set_css_class('btn btn-xs btn-default btn-info');
+	$myLink->set_css_class('btn btn-xs btn-default btn-info button is-info is-small');
     $myLink->set_br(0);
 
 
@@ -112,7 +112,7 @@ function camila_formdeletelink(&$field, &$row, $fields)
         $url = basename($_SERVER['PHP_SELF']) . "?camila_delete=" . serialize($arr) . '&camila_returl=' . urlencode($_CAMILA['returl']) . '&camila_token=' . camila_token(serialize($arr));
     $myLink = new CHAW_link(camila_get_translation('camila.delete'), $url);
     $myLink->set_br(0);
-	$myLink->set_css_class('btn btn-xs btn-default btn-danger');
+	$myLink->set_css_class('btn btn-xs btn-default btn-danger button is-danger is-small');
     $row->add_column($myLink);
 }
 
@@ -1028,7 +1028,7 @@ class report
                     if (is_object($this->additional_links_images[$key]))
                         $link->add_image($this->additional_links_images[$key]);
 					
-					$link->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default');
+					$link->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
 					if ($this->additional_links_css_classes[$key] != '')
                         $link->set_css_class($this->additional_links_css_classes[$key]);
 
@@ -1053,7 +1053,7 @@ class report
             if ($this->page > 2) {
                 $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.first'), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=1');
                 $myLink->set_br(0);
-				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default');
+				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
                 $_CAMILA['page']->add_link($myLink);
                 
                 $text = new CHAW_text(' | ');
@@ -1064,7 +1064,7 @@ class report
             if ($this->page > 1) {
                 $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.prev'), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=' . ($this->page - 1));
 				$myLink->set_br(0);
-				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default');
+				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
                 $_CAMILA['page']->add_link($myLink);
             }
             
@@ -1075,19 +1075,19 @@ class report
             if ( /*$this->rowsloaded >= $this->rows*/ $this->page < ceil($this->totalrows / $this->rows)) {
                 $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.next'), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=' . ($this->page + 1));
                 $myLink->set_br(0);
-				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default');
+				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
                 $_CAMILA['page']->add_link($myLink);
             }
             
             if ($this->page < (ceil($this->totalrows / $this->rows) - 1)) {
                 $text = new CHAW_text(' | ');
                 $text->set_br(0);
-				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default');
+				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
                 $_CAMILA['page']->add_text($text);
                 
                 $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.last'), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=' . ceil($this->totalrows / $this->rows));
                 $myLink->set_br(0);
-				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default');
+				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
                 $_CAMILA['page']->add_link($myLink);
             }
             
@@ -1097,7 +1097,7 @@ class report
             
             $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.allpages') . ' (' . $this->totalrows . ' ' . camila_get_translation('camila.report.navbox.rows') . ')', basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=-1');
             $myLink->set_br(0);
-			$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default');
+			$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
             if ($this->page > 0)
                 $_CAMILA['page']->add_link($myLink);
             
@@ -1107,7 +1107,7 @@ class report
 			
 			/**/
 		
-		$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
+		$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group buttons"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
 		$_CAMILA['page']->add_raw($myDivOpen);
 			
             $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.countorderby'), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=-1&camila_countorderby');
@@ -1121,7 +1121,7 @@ class report
 		
 		if ($this->rows < 0 && !$_CAMILA['page']->camila_exporting()) {
 
-			$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
+			$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group buttons"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
 			$_CAMILA['page']->add_raw($myDivOpen);
 		}
 
@@ -1150,7 +1150,7 @@ class report
             
             $myLink = new CHAW_link(strtoupper(camila_get_translation('camila.export.xml2pdf')), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&camila_xml2pdf');
             $myLink->set_br(0);
-			$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-info');
+			$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-info button is-info is-small');
             if ($this->page > 0)
                 $_CAMILA['page']->add_link($myLink);
 
@@ -1164,7 +1164,7 @@ class report
                     if (is_object($this->additional_links_images[$key]))
                         $link->add_image($this->additional_links_images[$key]);
 					
-					$link->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default');
+					$link->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
 
 					if ($this->additional_links_css_classes[$key] != '')
                         $link->set_css_class($this->additional_links_css_classes[$key]);
@@ -1364,7 +1364,7 @@ class report
             /*if (!$this->gbyconditionpresent) */ {
                 $myLink = new CHAW_link(camila_get_translation('camila.report.addfilter'), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&camila_addfilter=1');
 
-				$myLink->set_css_class('btn btn-xs btn-default');
+				$myLink->set_css_class('btn btn-xs btn-default button is-light is-small');
                 $_CAMILA['page']->add_link($myLink);
             }
             

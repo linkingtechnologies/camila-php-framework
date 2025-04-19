@@ -1,14 +1,18 @@
-  document.addEventListener('DOMContentLoaded', () => {
-    // Get all "navbar-burger" elements
-    const burgers = Array.from(document.querySelectorAll('.navbar-burger'));
+document.addEventListener('DOMContentLoaded', () => {
+  // Get all "navbar-burger" elements
+  const burgers = Array.from(document.querySelectorAll('.navbar-burger'));
 
-    burgers.forEach(burger => {
-      burger.addEventListener('click', () => {
-        const targetId = burger.dataset.target;
-        const target = document.getElementById(targetId);
+  burgers.forEach(burger => {
+    burger.addEventListener('click', () => {
+      const targetId = burger.dataset.target;
+      const target = document.getElementById(targetId);
 
-        burger.classList.toggle('is-active');
-        target.classList.toggle('is-active');
-      });
+      burger.classList.toggle('is-active');
+      target.classList.toggle('is-active');
     });
   });
+});
+  
+document.querySelector('.dropdown-trigger').addEventListener('click', function() {
+  document.querySelector('.dropdown').classList.toggle('is-active');
+});
