@@ -2163,7 +2163,7 @@ class CHAW_linkset extends HAW_linkset
           //Camila Framework Mod - BEGIN
           if (!$deck->lynx)
           {
-            echo "<div id=\"nav\">\n";
+            echo "<div id=\"nav\" class=\"tabs is-boxed is-size-7\">\n";
             // create link list to avoid whitespace between links
             echo "<ul class=\"nav nav-tabs\">\n";
             //while (list($key, $val) = each($this->element))

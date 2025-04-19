@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2024 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -68,14 +68,14 @@
       {
           $theSubmission = new CHAW_submit($button_text, 'submit_button');
 		  
-		  $theSubmission->set_css_class('btn btn-md btn-primary');
+		  $theSubmission->set_css_class('btn btn-md btn-primary button is-primary is-small');
           $this->form->add_submit($theSubmission);
       }
 
       function draw_delete($button_text)
       {
           $theSubmission = new CHAW_submit($button_text, 'submit_delete');
-		  $theSubmission->set_css_class('btn btn-danger');
+		  $theSubmission->set_css_class('btn btn-danger button is-danger');
           $this->form->add_submit($theSubmission);
       }
 
@@ -124,14 +124,14 @@
 				  return;
 
               if ($this->mode == 'insert') {
-                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space" type="submit" name="submitandnew_button_header" id="hawinputsubmitandnewheader">'.camila_get_translation('camila.insertandnewbutton').'</button>');
+                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-primary" type="submit" name="submitandnew_button_header" id="hawinputsubmitandnewheader">'.camila_get_translation('camila.insertandnewbutton').'</button>');
                   $this->form->add_userdefined($js);
               }
 
               if (isset($_REQUEST['camila_delete']) && $this->mode != 'insert')
-                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space" type="submit" name="submit_button_header" id="hawinputsubmitheader">'.camila_get_translation('camila.deletebutton').'</button><br /><br />');
+                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-primary" type="submit" name="submit_button_header" id="hawinputsubmitheader">'.camila_get_translation('camila.deletebutton').'</button><br /><br />');
               else
-                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space" type="submit" name="submit_button_header" id="hawinputsubmitheader">'.camila_get_translation('camila.' . $this->mode . 'button').'</button><br /><br />');
+                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-primary" type="submit" name="submit_button_header" id="hawinputsubmitheader">'.camila_get_translation('camila.' . $this->mode . 'button').'</button><br /><br />');
 
               $this->form->add_userdefined($js);
 
