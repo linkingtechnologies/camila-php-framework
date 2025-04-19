@@ -112,6 +112,8 @@ class CHAW_deck extends HAW_deck
 		  if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
 			  $this->camila_add_js("<link href=\"".CAMILA_LIB_DIR."bulma/css/bulma.min.css\" rel=\"stylesheet\">\n");
 			  $this->camila_add_js("<link href=\"".CAMILA_LIB_DIR."remixicon/fonts/remixicon.css\" rel=\"stylesheet\">\n");
+			  $this->camila_add_js("<link href=\"".CAMILA_DIR."css/bulma.css\" rel=\"stylesheet\">\n");
+			  $this->camila_add_js("<script type=\"text/javascript\" src=\"".CAMILA_DIR."js/bulma.js?v=".$this->camila_force_js_update_token."\"></script>\n");
 		  }
 
           $this->camila_add_js("<script type=\"text/javascript\">\n");
