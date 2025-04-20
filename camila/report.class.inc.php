@@ -337,7 +337,7 @@ class CamilaReport
 
             // Add the section title and the table content
             //
-            $contentHtml .= $this->generateHtmlContent($report, $index, $title);
+            $contentHtml .= '<div style="white-space: nowrap;">'.$this->generateHtmlContent($report, $index, $title).'</div>';
         }
 
         // Close the Table of Contents
