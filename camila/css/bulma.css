@@ -6,8 +6,14 @@ nav.navbar {
 }
 
 .navbar-item.is-selected {
-  padding-top: 10px;
-  background-color: #f0f0f0;
+	padding-top: 10px;
+	background-color: #f0f0f0;
+}
+
+.navbar-brand > .navbar-item {
+	color: #000080;
+    font-size: 18px;
+    line-height: 20px
 }
 
 hr {
