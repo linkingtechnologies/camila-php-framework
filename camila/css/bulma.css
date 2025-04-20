@@ -1,8 +1,25 @@
+nav.navbar {
+    background-color: #f8f8f8;
+    
+    border-top: 2px solid #000080;
+    border-bottom: 2px solid #000080;
+}
+
+.navbar-item.is-selected {
+  padding-top: 10px;
+  background-color: #f0f0f0;
+}
+
 hr {
     margin-top: 20px;
     margin-bottom: 20px;
     border: 0;
     border-top: 1px solid #eee
+}
+
+.container i small {
+  padding-top: 20px;
+  display: inline-block;
 }
 
 :root {
