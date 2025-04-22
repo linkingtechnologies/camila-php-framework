@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2024 Umberto Bresciani
+    Copyright (C) 2006-2025 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -360,54 +360,57 @@ class CamilaReport
 		
 		$reports = $this->xmlConfig->report;
 		foreach ($reports as $k => $v) {
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="row">'));	
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="row columns">'));	
 			$query = $this->getQuery($v);
+			try {
+				$data = $this->camilaWT->queryWorktableDatabase($query);
+				$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
 
-			$data = $this->camilaWT->queryWorktableDatabase($query);
-			$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
-
-			$gCount = 0;
-			$title = '';
-			foreach ($v->graphs->graph as $graph) {
-				$gCount++;
-				if ($title == '')
-					$title = $graph->title;
-			}
-			
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12">'));
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<h3>'.$title.'</h3>'));
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
-			
-			$arr = $v->graphs->graph;
-			for ($i=0; $i<count($arr);$i++)
-			{
-				$v3 = $arr[$i];
-				if ($v3->type == 'pie' || $v3->type == 'bar') {
-					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-8">'));
-					$image1 = new HAW_image("?dashboard=m1&rid=".$v2->id.'&gid='.$v3->id, "?dashboard=m1&rid=".$v->id.'&gid='.$v3->id.'&report='.urlencode($this->currentReport), ":-)");
-					$image1->set_br(1);
-					if (count($data)>0)
-					{
-						$_CAMILA['page']->add_image($image1);
-					}
-					else
-					{
-						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<p><i>Nessun dato disponibile.</i></p>'));
-						//$camilaUI->insertWarning($v3->title . ' - Nessun dato!');
-					}
-					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+				$gCount = 0;
+				$title = '';
+				foreach ($v->graphs->graph as $graph) {
+					$gCount++;
+					if ($title == '')
+						$title = $graph->title;
 				}
-				if ($v3->type == 'table') {
-					if ($gCount>1)
-						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-4">'));
-					else
-						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-12">'));
-					//$myDiv = new HAW_raw(HAW_HTML, $this->createTable($v3->id, $v3, $data));
-					$myDiv = new HAW_raw(HAW_HTML, $this->generateTable($result2, $v3));
-					
-					$_CAMILA['page']->add_raw($myDiv);
-					$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+				
+				$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 column is-12">'));
+				$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<h3>'.$title.'</h3>'));
+				$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+				
+				$arr = $v->graphs->graph;
+				for ($i=0; $i<count($arr);$i++)
+				{
+					$v3 = $arr[$i];
+					if ($v3->type == 'pie' || $v3->type == 'bar') {
+						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-8 column is-12-mobile is-8-desktop">'));
+						$image1 = new HAW_image("?dashboard=m1&rid=".$v2->id.'&gid='.$v3->id, "?dashboard=m1&rid=".$v->id.'&gid='.$v3->id.'&report='.urlencode($this->currentReport), ":-)");
+						$image1->set_br(1);
+						if (count($data)>0)
+						{
+							$_CAMILA['page']->add_image($image1);
+						}
+						else
+						{
+							$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<p><i>Nessun dato disponibile.</i></p>'));
+							//$camilaUI->insertWarning($v3->title . ' - Nessun dato!');
+						}
+						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+					}
+					if ($v3->type == 'table') {
+						if ($gCount>1)
+							$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-4 column is-12-mobile is-4-desktop">'));
+						else
+							$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-12 column is-12">'));
+						//$myDiv = new HAW_raw(HAW_HTML, $this->createTable($v3->id, $v3, $data));
+						$myDiv = new HAW_raw(HAW_HTML, $this->generateTable($result2, $v3));
+						
+						$_CAMILA['page']->add_raw($myDiv);
+						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+					}
 				}
+			} catch (Throwable $e) {
+				$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<p><i>Problemi nella generazione del report '.$v->id.'.</i></p>'));
 			}
 			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
 			

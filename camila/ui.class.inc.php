@@ -46,7 +46,7 @@ class CamilaUserInterface
 		if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
 			$icon = $this->decodeIcon($icon);
 			$b = '';
-			
+
 			$html = '<a href="'.$link.'" target="'.$target.'" class="button is-primary mb-2" aria-label="">';
 			if ($icon != '')
 				$html.=' <span class="icon"><i class="ri-'.$icon.'-line"></i></span>';
@@ -203,10 +203,10 @@ class CamilaUserInterface
 		
 		if ($icon == 'wrench')
 			$icon = 'tools';
-		
+
 		if ($icon == 'plane')
 			$icon = 'truck';
-		
+
 		return $icon;
 	}
 
