@@ -24,6 +24,10 @@ require_once(CAMILA_DIR.'export/phpgraphlib/phpgraphlib_pie.php');
 use Mpdf\Mpdf;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\Shared\Html;
+use PhpOffice\PhpWord\Element\Section;
+use PhpOffice\PhpWord\SimpleType\Jc;
+use PhpOffice\PhpWord\Element\Cell;
 
 
 class CamilaReport
@@ -126,11 +130,15 @@ class CamilaReport
 		return $html;
 	}
 
-    private function generateTable($result, $graph)
+    private function generateTable($result, $graph, $noCustomCode = false)
     {
         // Generate the table headers
 		if ($result->RecordCount()>0) {
-			$html = '<div><table border="1" cellspacing="0" cellpadding="5">';
+			$html = '';
+			if (!$noCustomCode) {
+				$html .= '<div>';
+			}
+			$html .= '<table border="1" cellspacing="0" cellpadding="5">';
 			$columns = array_keys($result->fields);
 			$html .= '<thead><tr>';
 			$skipFirst = false;
@@ -190,7 +198,14 @@ class CamilaReport
 				$html .= '</tr>';
 			}
 
-			$html .= '</tbody></table></div>';
+			$html .= '</tbody></table>';
+			
+		if (!$noCustomCode) {
+			$html .= '</div>';
+		}
+			
+			
+			
 		}
 
         return $html;
@@ -240,10 +255,12 @@ class CamilaReport
 		}
 	}
 
-    public function generateHtmlContent($report, $index, $title)
+
+    public function generateHtmlContent($report, $index, $title, $noCustomCode = false)
     {
         $html = '';
-		$html.= '<mpdf><div keep-with-next="true"><nobreak>';
+		if (!$noCustomCode)
+			$html.= '<mpdf><div keep-with-next="true"><nobreak>';
 		$html .= '<h2 id="table' . $index . '" style="page-break-after: avoid;">' . htmlspecialchars($title) . '</h2>';
 		$query = $this->getQuery($report);
 		
@@ -293,7 +310,7 @@ class CamilaReport
 					// Generate table content
 					if ($gCount>1)
 						$html .= '<td width="50%" style="vertical-align: middle;">';
-					$html .= $this->generateTable($result2, $graph).'</td>';
+					$html .= $this->generateTable($result2, $graph, $noCustomCode).'</td>';
 					if ($gCount>1)
 						$html .= '</td>';
 					$notEmptyCount++;
@@ -310,9 +327,213 @@ class CamilaReport
 			//$html .= '</div>';
 		}
 		
-		$html.= '</nobreak></div></mpdf>';
+		if (!$noCustomCode) {
+			$html.= '</nobreak></div></mpdf>';
+		}
         return $html;
     }
+
+
+	private function generatePhpWordTable($container, $result, $graph, $totalWidth = 9065, $fontStyle)
+	{
+		if ($result->RecordCount() <= 0) {
+			$container->addText("Nessun dato disponibile.", $fontStyle);
+			return;
+		}
+
+		$table = $container->addTable([
+			'borderSize' => 4,
+			'borderColor' => '000000',
+			'cellMargin' => 80,
+		]);
+		
+		$cellStyle = ['borderSize' => 4, 'borderColor' => '000000'];
+
+		$columns = array_keys($result->fields);
+		$skipFirst = isset($graph->hideFirstColumn) && $graph->hideFirstColumn == true;
+		$sumEnabled = isset($graph->sum) && ((int)$graph->sum === 1);
+
+		$activeColumns = $skipFirst ? array_slice($columns, 1) : $columns;
+		if (empty($activeColumns)) {
+			$container->addText("No visible columns.");
+			return;
+		}
+
+		$colCount = count($activeColumns);
+		$customWidths = [];
+
+		// Try to use provided columnWidths (percent values)
+		if (!empty($graph->columnWidths)) {
+			$percentValues = array_map('trim', explode(',', (string)$graph->columnWidths));
+			if (count($percentValues) === $colCount) {
+				$sum = array_sum($percentValues);
+				if ($sum > 0) {
+					foreach ($percentValues as $percent) {
+						$customWidths[] = round(($totalWidth * ((float)$percent)) / 100);
+					}
+				}
+			}
+		}
+
+		// Fallback: divide 100% equally across all visible columns
+		if (empty($customWidths)) {
+			$percentPerCol = 100 / $colCount;
+			foreach (range(1, $colCount) as $_) {
+				$customWidths[] = round(($totalWidth * $percentPerCol) / 100);
+			}
+		}
+
+		// Header
+		$table->addRow(null, ['tblHeader' => true]);
+		foreach ($activeColumns as $i => $colName) {
+			$table->addCell($customWidths[$i],$cellStyle)->addText(ucfirst($colName), array_merge($fontStyle,['bold' => true]));
+		}
+
+		$totalRow = [];
+
+		// Data rows
+		while (!$result->EOF) {
+			$table->addRow();
+			foreach ($activeColumns as $i => $column) {
+				$value = $result->fields[$column];
+				$table->addCell($customWidths[$i], $cellStyle)->addText((string)$value, $fontStyle);
+
+				if ($sumEnabled && is_numeric($value)) {
+					if (!isset($totalRow[$column])) {
+						$totalRow[$column] = 0;
+					}
+					$totalRow[$column] += $value;
+				}
+			}
+			$result->MoveNext();
+		}
+
+		// Totals row
+		if ($sumEnabled) {
+			$table->addRow();
+			foreach ($activeColumns as $i => $column) {
+				$val = isset($totalRow[$column]) ? $totalRow[$column] : '';
+				$table->addCell($customWidths[$i],$cellStyle)->addText((string)$val, array_merge($fontStyle,['bold' => true]));
+			}
+		}
+	}
+
+	public function generateWordContent(Section $section, $report, $index, $title)
+	{
+		$query = $this->getQuery($report);
+		$title = (string) $report->graphs->graph[0]->title;
+		$rId = (string) $report->id;
+
+		$result2 = $this->camilaWT->startExecuteQuery($query, true, ADODB_FETCH_ASSOC);
+		$result = $this->camilaWT->startExecuteQuery($query);
+		$data = $this->queryWorktableDatabase($result);
+
+		if (!$result) {
+			throw new Exception('Error executing query: ' . $this->db->ErrorMsg());
+		}
+
+		// Add title (used for TOC)
+		//$section->addTitle(htmlspecialchars($title), 2);
+
+		$gCount = count($report->graphs->graph);
+		//$elements = iterator_to_array($report->graphs->graph);
+		
+		$cellStyle = ['borderSize' => 0, 'borderColor' => 'ffffff'];
+		$fontStyleNormal = ['size' => 8, 'name' => 'Arial'];
+		$fontStyleSmall = ['size' => 6, 'name' => 'Arial'];
+		$totalWidth = 9065; // usable width on A4
+
+		if ($gCount > 1) {
+			$table = $section->addTable([
+				'borderSize' => 0,
+				'cellMargin' => 100,
+			]);
+
+			$table->addRow();
+			
+			$equalWidth = floor($totalWidth / $gCount);
+
+			$contentAdded = false;
+			foreach ($report->graphs->graph as $graph) {
+				$type = (string) $graph->type;
+				$gId = (string) $graph->id;
+				
+				
+				if (count($data) > 0) {
+					if ($type == 'bar' || $type == 'pie') {
+						$cell = $table->addCell($equalWidth, $cellStyle);
+						$filename = CAMILA_TMP_DIR . '/g' . $rId . '_' . $gId . '.png';
+						$this->createGraph($gId, $graph, $data, $filename);
+						$this->addAutoScaledImageToCell($cell, $filename, $equalWidth - 200);
+						$contentAdded = true;
+					}
+
+					if ($type == 'table') {
+						$cell = $table->addCell($equalWidth, $cellStyle);
+						$this->generatePhpWordTable($cell, $result2, $graph, $equalWidth-200, $fontStyleSmall);
+						$contentAdded = true;
+					}
+				}
+
+				
+			}
+			if (!$contentAdded) {
+					$cell = $table->addCell($equalWidth, $cellStyle);
+					$cell->addText("Nessun dato disponibile.");
+			}
+		} else {
+			// Single graph/table → render directly
+			foreach ($report->graphs->graph as $graph) {
+				$type = (string) $graph->type;
+				$gId = (string) $graph->id;
+
+				if (count($data) > 0) {
+					if ($type === 'bar' || $type === 'pie') {
+						$filename = CAMILA_TMP_DIR . '/g' . $rId . '_' . $gId . '.png';
+						$this->createGraph($gId, $graph, $data, $filename);
+						$this->addAutoScaledImageToCell($section, $filename, $totalWidth);
+					}
+
+					if ($type === 'table') {
+						$this->generatePhpWordTable($section, $result2, $graph, $totalWidth + 100, $fontStyleNormal);
+					}
+				} else {
+					$section->addText("No data available.");
+				}
+			}
+		}
+	}
+
+	private function addAutoScaledImageToCell($cellOrSection, $imagePath, $maxWidthTwip = 4000)
+	{
+		if (!file_exists($imagePath)) {
+			$cellOrSection->addText('Immagine non trovata.');
+			return;
+		}
+
+		list($widthPx, $heightPx) = getimagesize($imagePath);
+
+		$dpi = 96; // Default Word DPI
+		$twipPerInch = 1440;
+
+		// Convert max width from twip to pixels
+		$maxWidthInches = $maxWidthTwip / $twipPerInch;
+		$maxWidthPx = $maxWidthInches * $dpi;
+
+		if ($widthPx > $maxWidthPx) {
+			$scale = $maxWidthPx / $widthPx;
+			$widthPx = round($widthPx * $scale);
+			$heightPx = round($heightPx * $scale);
+		}
+
+		$cellOrSection->addImage($imagePath, [
+			'width' => $widthPx*.75,
+			'height' => $heightPx*.75,
+			'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
+		]);
+		
+
+	}
 
     public function outputPdfToBrowser()
     {
@@ -439,147 +660,86 @@ class CamilaReport
 			}
 		}
 	}
-	
-	    /**
-     * Generates an ODF report (.odt) with multiple tables and graphs from the XML configuration.
-     */
-    public function outputOdfToBrowser()
+
+    public function getPhpWordDocument()
+	{
+		$phpWord = new PhpWord();
+		
+		$phpWord->addTitleStyle(2, [
+			'bold' => true,
+			'size' => 14,
+			'color' => '333366',
+			'spaceAfter' => 200,
+		], [
+			'spaceBefore' => 200,
+			'spaceAfter' => 100,
+			'keepNext' => true,
+		]);
+
+		// Impostazioni documento
+		$section = $phpWord->addSection();
+
+		// Header e footer
+		$header = $section->addHeader();
+		$footer = $section->addFooter();
+
+		$t = new CamilaTemplate($this->lang);
+		$header->addText('Evento "' . $t->getParameters()['evento'] . '"');
+
+		$footer->addPreserveText('{PAGE} | ' . CAMILA_APPLICATION_NAME . ' | Report del ' . date('d/m/Y') . ' ore ' . date('H:i'));
+
+		// Indice
+		$section->addText('Indice', ['bold' => true, 'size' => 16]);
+		$section->addTOC(['spaceAfter' => 200]);
+
+		// Contenuto
+		foreach ($this->xmlConfig->report as $index => $report) {
+			$title = (string) $report->graphs->graph[0]->title;
+
+			// Aggiunge un segnalibro per l’indice
+			$section->addTitle($title, 2);
+			
+			$this->generateWordContent($section, $report, $index, $title);
+
+		}
+
+		return $phpWord;
+	}
+
+    public function outputDocxToBrowser()
+	{
+		$phpWord = $this->getPhpWordDocument();
+
+		// Output a browser
+		$date = $this->camilaWT->db->UserDate(date('Y-m-d'), camila_get_locale_date_adodb_format());
+		$fileName = 'Report_' . $date . '.docx';
+
+		header("Content-Description: File Transfer");
+		header('Content-Disposition: attachment; filename="' . $fileName . '"');
+		header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+		$objWriter = IOFactory::createWriter($phpWord, 'Word2007');
+		$objWriter->save("php://output");
+		exit;
+	}
+
+    public function outputOdtToBrowser()
     {
-        // Create a new ODF document
-        $phpWord = new PhpWord();
-        $section = $phpWord->addSection();
+		$phpWord = $this->getPhpWordDocument();
 
-        // Add a Table of Contents (ToC)
-        $section->addText("Table of Contents");
-        $section->addTOC();  // Adds automatic Table of Contents
-
-        // Add header and footer
-        $header = $section->addHeader();
-        $header->addText("Report");
-        $footer = $section->addFooter();
-        $footer->addPreserveText('Page {PAGE} of {NUMPAGES}', null, array('alignment' => 'center'));
-
-        // Iterate over each report in the XML and generate tables and images
-        foreach ($this->xmlConfig->report as $index => $report) {
-            $title = (string) $report->graphs->graph[0]->title;
-
-            // Add the title to the ODF document
-            $section->addTitle($title, 1);  // Level 1 heading for the ToC
-
-            // Handle graphs and tables
-            foreach ($report->graphs->graph as $graph) {
-                $type = (string) $graph->type;
-
-                if ($type === 'bar') {
-                    // Add image to the document
-                    $filename = (string) $graph->filename;
-                    $width = (int) $graph->width;
-                    $height = (int) $graph->height;
-                    $section->addImage($filename, array('width' => $width, 'height' => $height));
-                }
-
-                if ($type === 'table') {
-                    // Add the table to the ODF document
-                    $table = $section->addTable();
-                    $result = $this->db->Execute((string)$report->query);
-                    $columns = array_keys($result->fields);
-
-                    // Add table headers
-                    $table->addRow();
-                    foreach ($columns as $column) {
-                        $table->addCell()->addText(ucfirst($column));
-                    }
-
-                    // Add table data
-                    while (!$result->EOF) {
-                        $table->addRow();
-                        foreach ($columns as $column) {
-                            $table->addCell()->addText($result->fields[$column]);
-                        }
-                        $result->MoveNext();
-                    }
-                }
-            }
-        }
+		// Output a browser
+		$date = $this->camilaWT->db->UserDate(date('Y-m-d'), camila_get_locale_date_adodb_format());
+		$fileName = 'Report_' . $date . '.odt';
 
         // Save and output the ODF document to the browser
+		header("Content-Description: File Transfer");
         header('Content-Type: application/vnd.oasis.opendocument.text');
-        header('Content-Disposition: attachment;filename="report.odt"');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
         header('Cache-Control: max-age=0');
 
         $writer = IOFactory::createWriter($phpWord, 'ODText');
         $writer->save('php://output');
-    }
-
-    /**
-     * Generates a Word report (.docx) with multiple tables and graphs from the XML configuration.
-     */
-    public function outputWordToBrowser()
-    {
-        // Create a new Word document
-        $phpWord = new PhpWord();
-        $section = $phpWord->addSection();
-
-        // Add a Table of Contents (ToC)
-        $section->addText("Table of Contents");
-        $section->addTOC();  // Adds automatic Table of Contents
-
-        // Add header and footer
-        $header = $section->addHeader();
-        $header->addText("Report");
-        $footer = $section->addFooter();
-        $footer->addPreserveText('Page {PAGE} of {NUMPAGES}', null, array('alignment' => 'center'));
-
-        // Iterate over each report in the XML and generate tables and images
-        foreach ($this->xmlConfig->report as $index => $report) {
-            $title = (string) $report->graphs->graph[0]->title;
-
-            // Add the title to the Word document
-            $section->addTitle($title, 1);  // Level 1 heading for the ToC
-
-            // Handle graphs and tables
-            foreach ($report->graphs->graph as $graph) {
-                $type = (string) $graph->type;
-
-                if ($type === 'bar') {
-                    // Add image to the document
-                    $filename = (string) $graph->filename;
-                    $width = (int) $graph->width;
-                    $height = (int) $graph->height;
-                    $section->addImage($filename, array('width' => $width, 'height' => $height));
-                }
-
-                if ($type === 'table') {
-                    // Add the table to the Word document
-                    $table = $section->addTable();
-                    $result = $this->db->Execute((string)$report->query);
-                    $columns = array_keys($result->fields);
-
-                    // Add table headers
-                    $table->addRow();
-                    foreach ($columns as $column) {
-                        $table->addCell()->addText(ucfirst($column));
-                    }
-
-                    // Add table data
-                    while (!$result->EOF) {
-                        $table->addRow();
-                        foreach ($columns as $column) {
-                            $table->addCell()->addText($result->fields[$column]);
-                        }
-                        $result->MoveNext();
-                    }
-                }
-            }
-        }
-
-        // Save and output the Word document to the browser
-        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        header('Content-Disposition: attachment;filename="report.docx"');
-        header('Cache-Control: max-age=0');
-
-        $writer = IOFactory::createWriter($phpWord, 'Word2007');
-        $writer->save('php://output');
+		exit;
     }
 
 }
