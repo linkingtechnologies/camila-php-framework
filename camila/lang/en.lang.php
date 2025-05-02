@@ -111,6 +111,7 @@ camila.worktable.field.selected = Selected
 camila.worktable.field.help = Help Text
 camila.worktable.field.groupvisibilityfield = GV
 camila.worktable.field.personalvisibilityfield = PV
+camila.worktable.field.recordreadonlifnotnullfields = ROWP
 camila.worktable.field.hideautosuggest = no autosuggest
 
 

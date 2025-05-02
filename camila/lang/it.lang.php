@@ -111,6 +111,7 @@ camila.worktable.field.selected = Riga selezionata
 camila.worktable.field.help = Testo aiuto
 camila.worktable.field.groupvisibilityfield = VG
 camila.worktable.field.personalvisibilityfield = VP
+camila.worktable.field.recordreadonlifnotnullfields = SLQP
 camila.worktable.field.hideautosuggest = nessun suggerimento
 
 camila.worktable.reconfig = RICONFIGURA
