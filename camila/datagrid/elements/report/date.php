@@ -1,6 +1,6 @@
 <?php
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ class report_date extends report_field {
       $this->type = 'date';
   }
 
-  function draw(&$row, &$fields)
+  function draw(&$row, &$fields, $readOnly = false)
   {
       if ($this->value!='' && $this->value!='0000-00-00') {
           global $_CAMILA;
@@ -52,7 +52,7 @@ class report_date extends report_field {
       }
       else
           $this->value = '';
-      parent::draw($row, $fields);
+      parent::draw($row, $fields, $readOnly);
 
   }
 }

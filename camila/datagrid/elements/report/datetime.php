@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,13 +30,13 @@ class report_datetime extends report_field {
     $this->inline = true;
   }
 
-  function draw(&$row, &$fields)
+  function draw(&$row, &$fields, $readOnly = false)
   {
     if( isset($this->format) ) {
       $this->value = date($this->format, strtotime($this->value));
     }
 
-    parent::draw($row, $fields);
+    parent::draw($row, $fields, $readOnly);
   }
 
 }

@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class report_icon extends report_field {
       }
   }
 
-  function draw(&$row, &$fields)
+  function draw(&$row, &$fields, $readOnly = false)
   {
       global $_CAMILA;
 

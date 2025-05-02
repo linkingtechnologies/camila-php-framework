@@ -173,6 +173,8 @@ class report
 	var $isThereGroupByOrder;
 	
 	var $customFunctions;
+	
+	var $recordReadOnlyIfNotNullFields;
     
     
     function __construct($stmt, $title, $orderby = '', $direction = 'asc', $mapping = '', $ordermapping = null, $keys = '', $defaultfields = '', $filter = '', $canupdate = true, $candelete = false)
@@ -857,17 +859,36 @@ class report
         $myRow = new CHAW_row();
         
         $currval = '';
+		
+		//If ReadOnly, non inline editing allowed
+		$ro = false;
+		if (property_exists($this, 'recordReadOnlyIfNotNullFields') && is_array($this->recordReadOnlyIfNotNullFields)) {
+			if (!($_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP)) {
+				
+				foreach ($this->fields as $key => $val) {
+					if (in_array($this->fields[$key]->field,$this->recordReadOnlyIfNotNullFields)) {
+						{
+							if (isset($this->fields[$key]) && is_object($this->fields[$key]) && property_exists($this->fields[$key], 'value') && !empty($this->fields[$key]->value))
+							{
+								$ro = true;
+							}
+						}
+					}
+				}					
+			}					
+		}
         
         reset($this->fields);
         //while ($fld = each($this->fields)) {
 		foreach ($this->fields as $key => $val) {
 			$fld = [$key, $val];
+			//echo ($val->value);
             if ($fld[1]->print && !($_CAMILA['page']->camila_exporting() && $fld[1]->dummy) && !($_CAMILA['page']->camila_exporting() && (!(strpos($fld[1]->field, 'camilakey_') === false)))) {
 
 				if (isset($this->customFunctions[$fld[1]->field])) {
 					$this->customFunctions[$fld[1]->field]($myRow, $fld[1]->field, $this->fields);
 				} else {
-					$fld[1]->draw($myRow, $this->fields);
+					$fld[1]->draw($myRow, $this->fields, $ro);
 				}
                 
                 if ($fld[1]->field == $this->orderby) {

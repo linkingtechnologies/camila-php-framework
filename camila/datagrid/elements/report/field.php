@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2023 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ class report_field {
   var $report;
   var $inline = true;
   var $orderable = true;
-
 
 
   function __construct($field, $title)
@@ -92,7 +91,7 @@ class report_field {
     }
   }
 
-  function draw(&$row, &$fields)
+  function draw(&$row, &$fields, $readOnly = false)
   {
 
       if ( isset($this->onprint) ) {
@@ -156,7 +155,7 @@ class report_field {
 
         $text->set_br(0);
 
-        if ($this->inline && $this->report->inline_editing) {
+        if ($this->inline && $this->report->inline_editing && !$readOnly) {
             $id = $this->field;
 
             foreach($this->report->keys as $k=>$v) {
