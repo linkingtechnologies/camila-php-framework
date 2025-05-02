@@ -88,10 +88,7 @@ function fieldBlur(campo, idfld) {
 
         if (result['result'] == "OK") {
             if (result['type'] == 'select') {
-                //if (result['value'] != '-')
                 elem.innerHTML = symbolsToEntities(result['options'][result['value']]);
-                //else
-                //    elem.innerHTML = symbolsToEntities(campo.value);        
             } else
                 elem.innerHTML = symbolsToEntities(result['value']);
         } else {
@@ -99,29 +96,16 @@ function fieldBlur(campo, idfld) {
             elem.innerHTML = camila_inline_object['value'];
         }
 
-        //alert(result['value']);
         changing = false;
-
-        //alert('#' + idfld);
         $('#' + idfld).editable('hide', null);
-
         return false;
-        //}
 
-
-        //    if (campo.value == camila_inline_object['value']) {
-        //        changing = false;
         elem = document.getElementById(idfld);
 
         if (camila_inline_object['type'] == 'select') {
             elem.innerHTML = symbolsToEntities(camila_inline_object['options'][campo.value]);
         } else
             elem.innerHTML = symbolsToEntities(campo.value);
-
-
-        //        return false;
-        //    }
-
 
     });
 }
@@ -138,19 +122,13 @@ function camila_changeBool(idfld, value, imgsrc) {
         url = url + "&" + key + "=" + escape(camila_inline_object[key]);
     }
 
-    //alert(url);
     remotos = new datosServidor;
-    //nt = remotos.enviar(urlBase + "?fieldname=" +escape(elem.id)+ "&content="+escape(urlencode(campo.value))+"&"+formVars,"");
     nt = remotos.enviar(url, "");
     eval("var result = " + nt);
-    //alert(nt);
     if (result['result'] == "OK") {
         if (result['type'] == 'select') {
-            //if (result['value'] != '-')
             var html = "<img src=\"" + imgsrc + "\" alt=\"\" style=\"vertical-align:middle; border-style:none\" />";
             elem.innerHTML = html;
-            //else
-            //    elem.innerHTML = symbolsToEntities(campo.value);        
         } else
             elem.innerHTML = symbolsToEntities(result['value']);
     } else {
@@ -166,11 +144,8 @@ function camila_changeBool(idfld, value, imgsrc) {
 
 function camila_editBox(actualParent) {	
     if (changing) {
-		//console.log('changing = true');
         return;
 	}
-	
-	//console.log('camila_editBox');
 
     var changingBool = false;
     actual = xFirstChild(actualParent, 'span');
@@ -178,7 +153,6 @@ function camila_editBox(actualParent) {
     enterK = false;
     var field = actual.id.substr(0, actual.id.indexOf("__cf__"));
     var url = camila_inline_script + camila_inline[actual.id.substr(actual.id.indexOf("__cf__"))] + "&camila_inline&camila_inline_field=" + field;
-    //console.log('camila_editBox: ' + field);
     $.ajax({
         url: url
     }).done(function(nt) {
@@ -190,19 +164,12 @@ function camila_editBox(actualParent) {
 
         if (camila_inline_object['result'] != 'OK')
 		{
-			//console.log(camila_inline_object['result']);
             return;
 		}
 		
-		//console.log('camila_inline_object_type: ' + camila_inline_object['type']);
-		//console.log('camila_inline_object_value: ' + camila_inline_object['value']);
-		
-
-        //alert(actual.nodeName+' '+changing);
         if (!changing) {
             var html = '';
             if (camila_inline_object['type'] == 'text') {
-                //html = "<input id=\"" + actual.id + "_field\" size=\"" + camila_inline_object['size'] + "\" maxlength=\"" + camila_inline_object['maxlength'] + "\" type=\"text\" value=\"" + camila_inline_object['value'].replace(/[\"]/g, "&quot;") + "\" onkeypress=\"return fieldEnter(this,event,'" + actual.id + "')\" onfocus=\"highLight(this);\" onblur=\"noLight(this); return fieldBlur(this,'" + actual.id + "');\" />";
                 $('#' + actual.id).editable({
                     type: 'text',
                     defaultValue: camila_inline_object['value']/*.replace(/[\"]/g, "&quot;")*/,
@@ -212,7 +179,6 @@ function camila_editBox(actualParent) {
                     emptytext: '',
                     params: camila_inline_object,
                     success: function(response, newValue) {
-						//console.log('text - success!');
                         var val = $('#' + actual.id).editable();
                         var campo = {
                             value: newValue
@@ -222,15 +188,14 @@ function camila_editBox(actualParent) {
                 });
                 $('#' + actual.id).on('hidden', function(e, reason) {
                     changing = false;
-					//console.log('text - hidden!');
-                    //$('#' + actual.id).editable('hide',null);
                 });
                 $('#' + actual.id).editable('show');
+				setTimeout(function() {
+					$('.editable-input input').focus();
+				}, 100);
             }
 
             if (camila_inline_object['type'] == 'textarea') {
-                html = "<textarea id=\"" + actual.id + "_field\" rows=\"10\" cols=\"80\" onkeypress=\"return fieldEnter(this,event,'" + actual.id + "')\" onfocus=\"highLight(this);\" onblur=\"noLight(this); return fieldBlur(this,'" + actual.id + "');\">" + camila_inline_object['value'].replace(/[\"]/g, "&quot;") + "</textarea>";
-                //actual.innerHTML = "<tex style=\"width: "+width+"px; height: "+height+"px;\"  return fieldBlur(this,'" + actual.id + "');\">" + actual.innerHTML + "</textarea>";
                 $('#' + actual.id).editable({
                     type: 'textarea',
                     pk: actual.id,
@@ -247,9 +212,12 @@ function camila_editBox(actualParent) {
                 });
                 $('#' + actual.id).on('hidden', function(e, reason) {
                     changing = false;
-                    //$('#' + actual.id).editable('hide',null);
                 });
                 $('#' + actual.id).editable('show');
+				setTimeout(function() {
+					$('.editable-input textarea').focus();
+				}, 100);
+				
             }
 
             if (camila_inline_object['type'] == 'select') {
@@ -271,16 +239,6 @@ function camila_editBox(actualParent) {
                     camila_changeBool(actual.id, val, imgsrc);
                     changing = false;
                 } else {
-                    /*html = "<select id=\"" + actual.id + "_field\" onkeypress=\"return fieldEnter(this,event,'" + actual.id + "')\" onfocus=\"highLight(this);\" onblur=\"noLight(this); return fieldBlur(this,'" + actual.id + "');\" />";
-
-                    for (var key in camila_inline_object['options']) {
-                        if (key == camila_inline_object['value'])
-                            html += "<option value=\"" + key.replace(/[\"]/g, "&quot;") + "\" selected=\"selected\">" + camila_inline_object['options'][key] + "</option>";
-                        else
-                            html += "<option value=\"" + key.replace(/[\"]/g, "&quot;") + "\">" + camila_inline_object['options'][key] + "</option>";
-                    }
-                    html += '</select>';*/
-
                     var arr = [];
                     var defVal = "";
                     for (var key in camila_inline_object['options']) {
@@ -292,7 +250,6 @@ function camila_editBox(actualParent) {
                         });
                     }
 
-                    //alert(defVal);
 
                     $('#' + actual.id).editable({
                         type: 'select',
@@ -317,35 +274,17 @@ function camila_editBox(actualParent) {
 
                 }
             }
-
-
-            //////////actual.innerHTML = html;
-
-            //            actual.innerHTML = "<input id=\""+ actual.id +"_field\" size=\""+ camila_inline_object['size'] +"\" maxlength=\""+ camila_inline_object['maxlength'] +"\" type=\"text\" value=\"" + camila_inline_object['value'] + "\" onkeypress=\"return fieldEnter(this,event,'" + actual.id + "')\" onfocus=\"highLight(this);\" onblur=\"noLight(this); return fieldBlur(this,'" + actual.id + "');\" />";
-
-            //if (!changingBool)
-			//	changing = true;
         }
-
-        //actual.firstChild.focus();	
-
-
     });
 }
 
 
 function camila_inline_editbox_init() {
-	//console.log('camila_inline_editbox_init');
-	
-	/*$( ".cf_editText" ).parent().on( "click", function() {
-		console.log($(this));
-		camila_editBox($(this));
-		});*/
-
+	$.fn.editableform.buttons = '<button type="submit" class="editable-submit">OK</button>'+
+    '<button type="button" class="editable-cancel">Annulla</button>';
     tips = xGetElementsByClassName("cf_editText");
     for (i = 0; i < tips.length; ++i) {
         xParent(tips[i], false).onclick = function(e) {
-			//console.log(e.target.tagName.toLowerCase());
 			if (e.target.tagName.toLowerCase() != 'button' && e.target.tagName.toLowerCase() != 'i') {
 				camila_editBox(this);
 			}
@@ -353,7 +292,6 @@ function camila_inline_editbox_init() {
         }
         tips[i].style.cursor = "pointer";
         tips[i].style.display = "block";
-        //tips[i].title = window['camila_messages']['clicktoedit'];
     }
 
 }
