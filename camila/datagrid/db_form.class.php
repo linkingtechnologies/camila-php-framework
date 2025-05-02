@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2024 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -80,6 +80,8 @@ require_once(CAMILA_DIR . 'datagrid/form.class.php');
       var $oninsert = 'camila_db_oninsert_message';
       var $onupdate = 'camila_db_onupdate_message';
       var $ondelete = 'camila_db_ondelete_message';
+	  
+	  var $recordReadOnlyIfNotNullFields;
 
       var $caninsert = true;
       var $candelete = false;
@@ -592,6 +594,31 @@ $(document).ready(function(){
 	              $myLink->set_br(1);
 	              $_CAMILA['page']->add_link($myLink);
 	          }
+
+
+			  if (isset($_GET['camila_update']) || $_REQUEST[$this->table.'_sess_mode'] == 'update') {
+				  if (property_exists($this, 'recordReadOnlyIfNotNullFields') && is_array($this->recordReadOnlyIfNotNullFields)) {
+					  if (!($_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP)) {
+						$ro = false;
+						foreach ($this->fields as $key => $val) {
+							if (in_array($this->fields[$key]->field,$this->recordReadOnlyIfNotNullFields)) {
+								{
+									if (isset($this->fields[$key]) && is_object($this->fields[$key]) && property_exists($this->fields[$key], 'value') && !empty($this->fields[$key]->value))
+									{
+										$ro = true;
+									}
+								}
+							}
+						}
+
+						if ($ro) {
+							foreach ($this->fields as $key => $val) {
+								$this->fields[$key]->updatable = false;
+							}
+						}
+					  }
+				  }
+			  }
 
               //if (!$this->_data_inserted && !$this->_data_updated)
               parent::draw();
