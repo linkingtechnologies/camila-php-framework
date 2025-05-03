@@ -199,12 +199,10 @@ class CamilaReport
 			}
 
 			$html .= '</tbody></table>';
-			
-		if (!$noCustomCode) {
-			$html .= '</div>';
-		}
-			
-			
+
+			if (!$noCustomCode) {
+				$html .= '</div>';
+			}
 			
 		}
 
@@ -546,23 +544,23 @@ class CamilaReport
 		$mpdf->use_kwt = true;
 
         // Initialize the Table of Contents (ToC)
-        $tocHtml = '<h1>Indice</h1><ul>';
+        $tocHtml = '<h1>Indice</h1><ol>';
         $contentHtml = '';
 
         // Iterate over each report in the XML
+		
         foreach ($this->xmlConfig->report as $index => $report) {
             $title = (string) $report->graphs->graph[0]->title;
 
-            // Add entry to the Table of Contents with an internal link
-            $tocHtml .= '<li><a href="#table' . $index . '">' . htmlspecialchars($title) . '</a></li>';
+            //$tocHtml .= '<li><a href="#table' . $index . '">' . htmlspecialchars($title) . '</a></li>';
+			$tocHtml .= '<li>' . htmlspecialchars($title) . '</li>';
 
             // Add the section title and the table content
-            //
             $contentHtml .= '<div style="white-space: nowrap;">'.$this->generateHtmlContent($report, $index, $title).'</div>';
         }
 
         // Close the Table of Contents
-        $tocHtml .= '</ul>';
+        $tocHtml .= '</ol>';
 
         // Add ToC and content to the PDF
         $mpdf->WriteHTML($tocHtml); // Add ToC at the start
@@ -665,7 +663,7 @@ class CamilaReport
 	{
 		$phpWord = new PhpWord();
 		
-		$phpWord->addTitleStyle(2, [
+		$phpWord->addTitleStyle(1, [
 			'bold' => true,
 			'size' => 14,
 			'color' => '333366',
@@ -676,10 +674,8 @@ class CamilaReport
 			'keepNext' => true,
 		]);
 
-		// Impostazioni documento
 		$section = $phpWord->addSection();
 
-		// Header e footer
 		$header = $section->addHeader();
 		$footer = $section->addFooter();
 
@@ -688,19 +684,17 @@ class CamilaReport
 
 		$footer->addPreserveText('{PAGE} | ' . CAMILA_APPLICATION_NAME . ' | Report del ' . date('d/m/Y') . ' ore ' . date('H:i'));
 
-		// Indice
+		// Index
 		$section->addText('Indice', ['bold' => true, 'size' => 16]);
 		$section->addTOC(['spaceAfter' => 200]);
 
-		// Contenuto
+		// Content
+		$count = 1;
 		foreach ($this->xmlConfig->report as $index => $report) {
-			$title = (string) $report->graphs->graph[0]->title;
-
-			// Aggiunge un segnalibro per l’indice
-			$section->addTitle($title, 2);
-			
+			$title = $count . '. ' . (string) $report->graphs->graph[0]->title;
+			$section->addTitle($title, 1);
 			$this->generateWordContent($section, $report, $index, $title);
-
+			$count++;
 		}
 
 		return $phpWord;
