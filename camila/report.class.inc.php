@@ -535,11 +535,37 @@ class CamilaReport
 
     public function outputPdfToBrowser()
     {
-        $mpdf = new Mpdf();
+        $mpdf = new \Mpdf\Mpdf([
+			'margin_top' => 35,
+			'margin_bottom' => 15,
+			'margin_left' => 15,
+			'margin_right' => 15,
+		]);
 
         // Add header and footer
 		$t = new CamilaTemplate($this->lang);
-        $mpdf->SetHeader('Intervento "' . $t->getParameters()['evento'] . '"');
+		$params = $t->getParameters();
+
+		$logoPath = CAMILA_TMPL_DIR . '/images/'.$this->lang.'/'.$params['logo']; // Percorso assoluto o accessibile
+		$evento = htmlspecialchars($params['evento']);
+		$comune = htmlspecialchars($params['comune']);
+		$segreteria = htmlspecialchars($params['segreteriacampo'] . ' ' . $params['nomecampo']);
+		$headerHtml = '
+		<table width="100%" style="border: none;">
+		  <tr>
+			<td width="60" style="vertical-align: top;">
+			  <img src="' . $logoPath . '" width="55" height="55">
+			</td>
+			<td style="vertical-align: top; font-size: 12pt; padding-left: 10px;">
+			  <div><strong>' . $evento . '</strong></div>
+			  <div><strong>' . $comune . '</strong></div>
+			  <div style="color: red;"><strong>' . $segreteria . '</strong></div>
+			</td>
+		  </tr>
+		</table>
+		<div style="height: 15px;"></div>';
+		$mpdf->SetHTMLHeader($headerHtml);
+		
         $mpdf->SetFooter('{PAGENO} | |' . CAMILA_APPLICATION_NAME . "\n".'<br/>Report del '.date('m/d/Y') . ' ore ' . date('H:i'));
 		$mpdf->use_kwt = true;
 
@@ -549,6 +575,7 @@ class CamilaReport
 
         // Iterate over each report in the XML
 		
+		$count = 1;
         foreach ($this->xmlConfig->report as $index => $report) {
             $title = (string) $report->graphs->graph[0]->title;
 
@@ -556,7 +583,8 @@ class CamilaReport
 			$tocHtml .= '<li>' . htmlspecialchars($title) . '</li>';
 
             // Add the section title and the table content
-            $contentHtml .= '<div style="white-space: nowrap;">'.$this->generateHtmlContent($report, $index, $title).'</div>';
+            $contentHtml .= '<div style="white-space: nowrap;">'.$this->generateHtmlContent($report, $index, $count. '. ' . $title).'</div>';
+			$count++;
         }
 
         // Close the Table of Contents
@@ -680,7 +708,20 @@ class CamilaReport
 		$footer = $section->addFooter();
 
 		$t = new CamilaTemplate($this->lang);
-		$header->addText('Evento "' . $t->getParameters()['evento'] . '"');
+		$table = $header->addTable();
+		$table->addRow();
+		$params = $t->getParameters();
+		$directory = CAMILA_TMPL_DIR . '/images/'.$this->lang;
+		$cell1 = $table->addCell(1000); 
+		$cell1->addImage(
+			$directory.'/'.$params['logo'],
+			['width' => 40, 'height' => 40, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT]
+		);
+		$cell2 = $table->addCell(8000);
+		$cell2->addText($params['evento'], ['bold' => true], ['lineHeight' => 1.2]);
+		$cell2->addText($params['comune'], ['bold' => true], ['lineHeight' => 1.2]);
+		$cell2->addText($params['segreteriacampo']. ' ' . $params['nomecampo'], ['bold' => true, 'color' => 'FF0000'], ['lineHeight' => 1.2]);
+		$cell2->addText('', null, ['spaceAfter' => 200]);
 
 		$footer->addPreserveText('{PAGE} | ' . CAMILA_APPLICATION_NAME . ' | Report del ' . date('d/m/Y') . ' ore ' . date('H:i'));
 
