@@ -120,6 +120,8 @@ if (camila_form_in_update_mode('${table}')) {
 
 }
 
+	${form_readonly_record_script}
+	
     ${autosuggest_script}
 
     $form->process();
@@ -159,6 +161,8 @@ if (camila_form_in_update_mode('${table}')) {
 		  $stmt = 'select ' . $report_fields . ' from ${table}';
       
       $report = new report($stmt.$filter, '', '${order_field}', '${order_dir}', $mapping, null, 'id', $default_fields, '', (isset($_REQUEST['camila_rest'])) ? false : ${canupdate}, (isset($_REQUEST['camila_rest'])) ? false : ${candelete});
+	  
+	  ${report_readonly_record_script}
 
       if (${caninsert} && !isset($_REQUEST['camila_rest'])) {
           $report->additional_links = Array(camila_get_translation('camila.report.insertnew') => basename($_SERVER['PHP_SELF']) . '?camila_update=new');

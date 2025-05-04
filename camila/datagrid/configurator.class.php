@@ -1177,6 +1177,7 @@ class configurator
         $qcount         = 0;
 		$groupvisibilityfield = 'grp';
 		$personalvisibilityfield = 'created_by';
+		$recordReadOnlyIfNotNullFields = [];
 
         while (!$result->EOF) {
             if ($vcount > 0)
@@ -1250,14 +1251,26 @@ class configurator
 				$groupvisibilityfield = $result->fields['col_name'];
 			}
 			
-			if (stripos(strtolower($result->fields['field_options']), $this->camila_get_translation('camila.worktable.field.personalvisibilityfield')) !== false) {
-				$personalvisibilityfield = $result->fields['col_name'];
+			if (stripos(strtolower($result->fields['field_options']), $this->camila_get_translation('camila.worktable.field.groupvisibilityfield')) !== false) {
+				$groupvisibilityfield = $result->fields['col_name'];
+			}
+			
+			if (stripos(strtolower($result->fields['field_options']), $this->camila_get_translation('camila.worktable.field.recordreadonlifnotnullfields')) !== false) {
+				$recordReadOnlyIfNotNullFields[] = $result->fields['col_name'];
 			}
 
             $t->addBlock('element');
             
             $result->MoveNext();
         }
+
+		if (!empty($recordReadOnlyIfNotNullFields)) {
+			$formString = '$form->recordReadOnlyIfNotNullFields = Array('. "'" . implode("', '", $recordReadOnlyIfNotNullFields) . "');";
+			$t->setVariable('form_readonly_record_script', $formString);
+			
+			$reportString = '$report->recordReadOnlyIfNotNullFields = Array('. "'" . implode("', '", $recordReadOnlyIfNotNullFields) . "');";
+			$t->setVariable('report_readonly_record_script', $reportString);
+		}
 
         $report_fields .= ',created,created_by,created_by_surname,created_by_name,last_upd,last_upd_by,last_upd_by_surname,last_upd_by_name,mod_num';
         foreach ($this->requires as $value) {
