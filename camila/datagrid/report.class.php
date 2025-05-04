@@ -886,6 +886,7 @@ class report
             if ($fld[1]->print && !($_CAMILA['page']->camila_exporting() && $fld[1]->dummy) && !($_CAMILA['page']->camila_exporting() && (!(strpos($fld[1]->field, 'camilakey_') === false)))) {
 
 				if (isset($this->customFunctions[$fld[1]->field])) {
+					$fld[1]->draw($myRow, $this->fields, $ro);
 					$this->customFunctions[$fld[1]->field]($myRow, $fld[1]->field, $this->fields);
 				} else {
 					$fld[1]->draw($myRow, $this->fields, $ro);

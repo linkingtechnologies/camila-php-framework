@@ -2,6 +2,8 @@
 $_CAMILA['page']->camila_worktable = true;
 
 $wt_id = substr($_SERVER['PHP_SELF'], 12, -4);
+$wt_short_title = '${wt_short_title}';
+$wt_full_title = '${wt_full_title}';
 
 if (intval($wt_id) > 0)
     $_CAMILA['page']->camila_worktable_id = $wt_id;
@@ -162,6 +164,8 @@ if (camila_form_in_update_mode('${table}')) {
       
       $report = new report($stmt.$filter, '', '${order_field}', '${order_dir}', $mapping, null, 'id', $default_fields, '', (isset($_REQUEST['camila_rest'])) ? false : ${canupdate}, (isset($_REQUEST['camila_rest'])) ? false : ${candelete});
 	  
+	  ${report_functions_script}
+
 	  ${report_readonly_record_script}
 
       if (${caninsert} && !isset($_REQUEST['camila_rest'])) {

@@ -1144,7 +1144,6 @@ class configurator
         if ($resultTable === false)
             camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
         
-        
         $result = $this->db->Execute('select * from ' . CAMILA_TABLE_WORKC . ' where (wt_id=' . $this->db->qstr($id) . ' and is_deleted<>' . $this->db->qstr('y') . ') order by sequence');
         if ($result === false)
             camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
@@ -1153,6 +1152,9 @@ class configurator
         
         $t = new MiniTemplator;
         $t->readTemplateFromFile(CAMILA_DIR . 'templates/worktable.inc.php');
+		
+		$t->setVariable('wt_short_title', $resultTable->fields['short_title']);
+		$t->setVariable('wt_full_title', $resultTable->fields['full_title']);
         
         $report_fields = 'id,';
         
@@ -1271,6 +1273,27 @@ class configurator
 			$reportString = '$report->recordReadOnlyIfNotNullFields = Array('. "'" . implode("', '", $recordReadOnlyIfNotNullFields) . "');";
 			$t->setVariable('report_readonly_record_script', $reportString);
 		}
+			
+			$reportFunctionsScript = '';
+			$pDir = CAMILA_APP_PATH . '/plugins/';
+			$pdh  = opendir($pDir);
+			while (false !== ($dir = readdir($pdh))) {
+				$tDir = $pDir. $dir . '/worktable/';
+				if ($dir != '.' && $dir != '..' && is_dir($tDir)) {
+					$dh2  = opendir($tDir);
+					while (false !== ($filename = readdir($dh2))) {
+						if  ($filename == 'report.functions.inc.php')
+						{
+							$scriptPath = $tDir . '/' . $filename;
+							$reportFunctionsScript .= file_get_contents($scriptPath) . "\n";
+						}
+					}
+				}
+			}
+			
+			if ($reportFunctionsScript != '')
+				$t->setVariable('report_functions_script', $reportFunctionsScript);
+
 
         $report_fields .= ',created,created_by,created_by_surname,created_by_name,last_upd,last_upd_by,last_upd_by_surname,last_upd_by_name,mod_num';
         foreach ($this->requires as $value) {
