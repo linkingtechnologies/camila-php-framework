@@ -1,6 +1,6 @@
 <?php
   /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2023 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
    
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@
 			for ($colIndex=0;$colIndex<$columns;$colIndex++)
 			{
 				$fieldInfo = $r->fetchField($colIndex);
-				$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($colIndex+1, 1, $fieldInfo->name);
+				$spreadsheet->getActiveSheet()->setCellValue([$colIndex+1, 1], $fieldInfo->name);
 
 			}  
 			$count = 2;
@@ -63,17 +63,17 @@
                         $d->setDate(intval(substr($v, 0, 4)), intval(substr($v, 5, 2)), intval(substr($v, 8, 2)));
 						$d->setTime(intval(substr($v, 11, 2)), intval(substr($v, 14, 2)), intval(substr($v, 17, 2)));					
 						$excelDateValue = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($d);
-						$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($k+1, $count, $excelDateValue);
-						$spreadsheet->getActiveSheet()->getStyleByColumnAndRow($k+1, $count)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DATETIME);						
+						$spreadsheet->getActiveSheet()->setCellValue([$k+1, $count], $excelDateValue);
+						$spreadsheet->getActiveSheet()->getStyle([$k+1, $count])->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DATETIME);						
 					} elseif (strlen($v)==10 && preg_match("/^[0-9]{4}-[0-9]{2}-[0-9]{2}/", $v)) {
 						$d = new DateTime();
                         $d->setDate(intval(substr($v, 0, 4)), intval(substr($v, 5, 2)), intval(substr($v, 8, 2)));
 						$d->setTime(0,0,0);
 						$excelDateValue = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($d);
-						$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($k+1, $count, $excelDateValue);
-						$spreadsheet->getActiveSheet()->getStyleByColumnAndRow($k+1, $count)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DDMMYYYY);
+						$spreadsheet->getActiveSheet()->setCellValue([$k+1, $count], $excelDateValue);
+						$spreadsheet->getActiveSheet()->getStyle([$k+1, $count])->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DDMMYYYY);
 					} else {
-						$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($k+1, $count, $v);
+						$spreadsheet->getActiveSheet()->setCellValue([$k+1, $count], $v);
 					}
 				}
 				$count++;

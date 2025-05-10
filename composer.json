@@ -3,7 +3,7 @@
 		"php": "^8.3",
         "adodb/adodb-php": "dev-master",
 		"rospdf/pdf-php": "0.12.67",
-		"phpoffice/phpspreadsheet": "1.29.7",
+		"phpoffice/phpspreadsheet": "4.2.0",
 		"tinybutstrong/tinybutstrong": "3.15.2",
 		"wizaplace/php-etl": "2.3.0",
 		"bordercloud/sparql": "2.1.0",

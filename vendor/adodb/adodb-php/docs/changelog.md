@@ -60,6 +60,23 @@ Older changelogs:
   [#833](https://github.com/ADOdb/ADOdb/issues/833)
 
 
+## [5.22.9] - 2025-05-01
+
+### Security
+ 
+- pgsql: SQL injection in pg_insert_id() method (CVE-2025-46337)
+  [#1070](https://github.com/ADOdb/ADOdb/issues/1070)
+
+### Fixed
+
+- sqlite: Fulfill PRIMARY KEY AUTOINCREMENT requirements
+  [#1055](https://github.com/ADOdb/ADOdb/issues/1055)
+- sqlite: fix error reporting
+  [#1061](https://github.com/ADOdb/ADOdb/issues/1061)
+- Creation of dynamic property deprecated warning with PHP 8.2
+  [#1068](https://github.com/ADOdb/ADOdb/issues/1068)
+
+
 ## [5.22.8] - 2025-01-25
 
 ### Added
@@ -1521,8 +1538,8 @@ Released together with [v4.95](changelog_v4.x.md#495---17-may-2007)
 
 [5.23.0]: https://github.com/adodb/adodb/compare/v5.22.8...master
 
+[5.22.9]: https://github.com/adodb/adodb/compare/v5.22.8...v5.22.9
 [5.22.8]: https://github.com/adodb/adodb/compare/v5.22.7...v5.22.8
-[5.22.7]: https://github.com/adodb/adodb/compare/v5.22.6...v5.22.7
 [5.22.7]: https://github.com/adodb/adodb/compare/v5.22.6...v5.22.7
 [5.22.6]: https://github.com/adodb/adodb/compare/v5.22.5...v5.22.6
 [5.22.5]: https://github.com/adodb/adodb/compare/v5.22.4...v5.22.5

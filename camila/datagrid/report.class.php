@@ -1071,7 +1071,13 @@ class report
         
         global $_CAMILA;
         
+		if (!$_CAMILA['page']->camila_exporting()) {
+			$myDivOpen = new HAW_raw(HAW_HTML, '<div class="buttons is-flex is-flex-wrap-wrap is-align-items-center">');
+			$_CAMILA['page']->add_raw($myDivOpen);
+		}
+			
         if ($this->rows > 0 && !$_CAMILA['page']->camila_exporting()) {
+
             if ($this->page > 2) {
                 $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.first'), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=1');
                 $myLink->set_br(0);
@@ -1129,11 +1135,12 @@ class report
 			
 			/**/
 		
-		$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group buttons"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
+		$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group dropdown dropdown-trigger"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
 		$_CAMILA['page']->add_raw($myDivOpen);
 			
             $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.countorderby'), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=-1&camila_countorderby');
             $myLink->set_br(0);
+			$myLink->set_css_class('dropdown-item');
 			//$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default');
             if ($this->page > 0 && !$this->gbyconditionpresent)
                 $_CAMILA['page']->add_link($myLink);
@@ -1143,7 +1150,7 @@ class report
 		
 		if ($this->rows < 0 && !$_CAMILA['page']->camila_exporting()) {
 
-			$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group buttons"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
+			$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
 			$_CAMILA['page']->add_raw($myDivOpen);
 		}
 
@@ -1200,6 +1207,12 @@ class report
             $text = new CHAW_text('');
             $_CAMILA['page']->add_text($text);
         }
+		
+		if (!$_CAMILA['page']->camila_exporting()) {
+			$myDivClose = new HAW_raw(HAW_HTML, '</div>');
+			$_CAMILA['page']->add_raw($myDivClose);
+		}
+		
     }
     
     function map($field)

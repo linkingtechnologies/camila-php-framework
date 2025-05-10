@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-Copyright (C) 2006-2024 Umberto Bresciani
+Copyright (C) 2006-2025 Umberto Bresciani
 
 Camila PHP Framework is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ class CAMILA_XLS_deck extends CHAW_deck
                         if (is_object($column) && $column->get_elementtype() == HAW_LINK)
                             $text = $column->get_label();
                         
-                        $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, ($text));
+                        $spreadsheet->getActiveSheet()->setCellValue([$b + 1, $a + 1], ($text));
                         
                     }
                     
@@ -96,7 +96,7 @@ class CAMILA_XLS_deck extends CHAW_deck
                                 if (is_object($column) && $column->get_elementtype() == HAW_LINK) {
                                     $text = $column->get_label();
                                     $url  = $column->get_url();
-                                    $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, $text);
+                                    $spreadsheet->getActiveSheet()->setCellValue([$b + 1, $a + 1], $text);
 									//FIX ME
                                     //$spreadsheet->getActiveSheet()->getCellValueByColumnAndRow($b + 1, $a + 1)->getHyperlink()->setUrl($url);
                                 } else {
@@ -110,7 +110,7 @@ class CAMILA_XLS_deck extends CHAW_deck
                                         case 'I':
                                         case 'N':
                                             if ($text != '') {
-                                                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, intval($text));
+                                                $spreadsheet->getActiveSheet()->setCellValue([$b + 1, $a + 1], intval($text));
                                             }
                                             break;
 
@@ -122,11 +122,11 @@ class CAMILA_XLS_deck extends CHAW_deck
 												$excelDateValue = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date);
 												//echo $excelDateValue;
 												if ($isExcel) {
-													$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, $excelDateValue);
+													$spreadsheet->getActiveSheet()->setCellValue([$b + 1, $a + 1], $excelDateValue);
 												} else {
-													$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, $date);
+													$spreadsheet->getActiveSheet()->setCellValue([$b + 1, $a + 1], $date);
 												}
-                                                $spreadsheet->getActiveSheet()->getStyleByColumnAndRow($b + 1, $a + 1)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DDMMYYYY);
+                                                $spreadsheet->getActiveSheet()->getStyle([$b + 1, $a + 1])->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DDMMYYYY);
                                             }
 											break;
 										case 'T':
@@ -142,16 +142,16 @@ class CAMILA_XLS_deck extends CHAW_deck
 												}
 												$excelDateValue = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date);
 												if ($isExcel) {
-													$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, $excelDateValue);
+													$spreadsheet->getActiveSheet()->setCellValue([$b + 1, $a + 1], $excelDateValue);
 												} else {
-													$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, $date);
+													$spreadsheet->getActiveSheet()->setCellValue([$b + 1, $a + 1], $date);
 												}
-                                                $spreadsheet->getActiveSheet()->getStyleByColumnAndRow($b + 1, $a + 1)->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DDMMYYYY);
+                                                $spreadsheet->getActiveSheet()->getStyle([$b + 1, $a + 1])->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_DATE_DDMMYYYY);
                                             }
                                             break;
                                         
                                         default:
-                                            $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($b + 1, $a + 1, ($text));
+                                            $spreadsheet->getActiveSheet()->setCellValue([$b + 1, $a + 1], ($text));
                                     }
                                 }
                             }
@@ -204,7 +204,7 @@ class CAMILA_XLS_deck extends CHAW_deck
             
             foreach ($opt as $key => $value) {
                 $text = $opt[$key];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(1, intval($key) + 2, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([1, intval($key) + 2], ($text));
             }
             
             //$worksheet->setColumn(0, 0, 30);
@@ -224,40 +224,40 @@ class CAMILA_XLS_deck extends CHAW_deck
             while (!$result->EOF) {
                 $colArray[$result->fields['col_name']] = $result->fields['name'];
                 $text = $result->fields['name'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 1, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 1], ($text));
                 if ($_REQUEST['camila_worktable_export'] == 'all' && !$dataFound)
-					$spreadsheet->getSheet(0)->setCellValueByColumnAndRow($count, 1, $text);
+					$spreadsheet->getSheet(0)->setCellValue([$count, 1], $text);
 				
                 $text = $result->fields['sequence'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 2, intval($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 2], intval($text));
                 $text = $result->fields['name_abbrev'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 3, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 3], ($text));
                 $text = $fieldTypeArr[$result->fields['type']];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 4, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 4], ($text));
                 $text = $result->fields['listbox_options'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 5, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 5], ($text));
                 $text = $result->fields['maxlength'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 6, intval(($text)));				
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 6], intval(($text)));				
 				$text = $yesNoArr[$result->fields['required']];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 7, $text);
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 7], $text);
                 $text = $result->fields['default_value'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 8, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 8], ($text));
                 $text = $text = $yesNoArr[$result->fields['readonly']];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 9, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 9], ($text));
                 $text = $text = $yesNoArr[$result->fields['visible']];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 10, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 10], ($text));
                 $text = $forceArr[$result->fields['force_case']];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 11, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 11], ($text));
                 $text = $yesNoArr[$result->fields['must_be_unique']];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 12, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 12], ($text));
                 $text = $result->fields['field_options'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 13, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 13], ($text));
                 $text = $result->fields['autosuggest_wt_name'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 14, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 14], ($text));
                 $text = $result->fields['autosuggest_wt_colname'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 15, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 15], ($text));
                 $text = $result->fields['help'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow($count+1, 16, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([$count+1, 16], ($text));
                 
                 $count++;
                 $result->MoveNext();
@@ -269,24 +269,24 @@ class CAMILA_XLS_deck extends CHAW_deck
                 camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
             
             $text = $result->fields['short_title'];
-            $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(2, 18, ($text));
+            $spreadsheet->getActiveSheet()->setCellValue([2, 18], ($text));
             $text = $result->fields['full_title'];
-            $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(2, 19, ($text));
+            $spreadsheet->getActiveSheet()->setCellValue([2, 19], ($text));
             $text = $colArray[$result->fields['order_field']];
-            $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(2, 20, ($text));
+            $spreadsheet->getActiveSheet()->setCellValue([2, 20], ($text));
             $text = $orderDirArr[$result->fields['order_dir']];
-            $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(2, 21, ($text));
+            $spreadsheet->getActiveSheet()->setCellValue([2, 21], ($text));
             $text = $yesNoArr[$result->fields['canupdate']];
-            $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(2, 22, ($text));
+            $spreadsheet->getActiveSheet()->setCellValue([2, 22], ($text));
             $text = $yesNoArr[$result->fields['caninsert']];
-            $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(2, 23, ($text));
+            $spreadsheet->getActiveSheet()->setCellValue([2, 23], ($text));
             $text = $yesNoArr[$result->fields['candelete']];
-            $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(2, 24, ($text));
+            $spreadsheet->getActiveSheet()->setCellValue([2, 24], ($text));
             $text = $result->fields['category'];
-            $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(2, 25, ($text));
+            $spreadsheet->getActiveSheet()->setCellValue([2, 25], ($text));
             
             $text = camila_get_translation('camila.worktable.bookmarks');
-            $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(3, 17, ($text));
+            $spreadsheet->getActiveSheet()->setCellValue([3, 17], ($text));
         
             $query = 'select base_url,url,title from ' . CAMILA_APPLICATION_PREFIX . 'camila_bookmarks where base_url=' . $_CAMILA['db']->qstr('cf_worktable' . $id . '.php') . ' order by sequence';
             
@@ -299,17 +299,17 @@ class CAMILA_XLS_deck extends CHAW_deck
                 $i++;
                 
                 $text = $result->fields['title'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(3, 17 + $i, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([3, 17 + $i], ($text));
 
                 $url  = parse_url($result->fields['url'], PHP_URL_QUERY);
                 $qArr = $this->parse_query_string($url);
                 
                 $text = $qArr['filter'];
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(4, 17 + $i, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([4, 17 + $i], ($text));
 
 				if (str_starts_with($result->fields['url'], 'index.php')) {
 					$url = $result->fields['url'];
-					$spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(4, 17 + $i, ($url));
+					$spreadsheet->getActiveSheet()->setCellValue([4, 17 + $i], ($url));
 				}
 
                 $result->MoveNext();
@@ -329,7 +329,7 @@ class CAMILA_XLS_deck extends CHAW_deck
             while (!$result->EOF) {
                 $text = $result->fields['name'];
                 //$dWorksheet->writeString(0, $count-1, ($text));
-                $spreadsheet->getActiveSheet()->setCellValueByColumnAndRow(0, $count - 1, ($text));
+                $spreadsheet->getActiveSheet()->setCellValue([0, $count - 1], ($text));
                 $count++;
                 $result->MoveNext();
             }

@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2024 Umberto Bresciani
+    Copyright (C) 2006-2025 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ class Spreadsheet_Excel_Reader {
 	function val($row,$col,$sheet=0) {
 		$val = '';
 		if ($this->spreadsheet != null) {
-			if ($this->spreadsheet->getSheet($sheet)->getCellByColumnAndRow($col, $row, false) != null)
-				$val = $this->spreadsheet->getSheet($sheet)->getCellByColumnAndRow($col, $row, false)->getValue();
+			if ($this->spreadsheet->getSheet($sheet)->getCell([$col, $row], false) != null)
+				$val = $this->spreadsheet->getSheet($sheet)->getCell([$col, $row], false)->getValue();
 		}
 		return $val;
 	}
@@ -43,8 +43,8 @@ class Spreadsheet_Excel_Reader {
 	
 	function cell($row,$col,$sheet=0) {
 		$val = '';
-		if ($this->spreadsheet->getSheet($sheet)->getCellByColumnAndRow($col, $row, false) != null)
-			$val = $this->spreadsheet->getSheet($sheet)->getCellByColumnAndRow($col, $row, false);
+		if ($this->spreadsheet->getSheet($sheet)->getCell([$col, $row], false) != null)
+			$val = $this->spreadsheet->getSheet($sheet)->getCell([$col, $row], false);
 		return $val;
 	}
 	
@@ -71,8 +71,8 @@ class Spreadsheet_Excel_Reader {
 
 	function type($row,$col,$sheet=0) {
 		$val = '';
-		if ($this->spreadsheet->getSheet($sheet)->getCellByColumnAndRow($col, $row, false) != null)
-			$val = $this->spreadsheet->getSheet($sheet)->getCellByColumnAndRow($col, $row, false)->getDataType();
+		if ($this->spreadsheet->getSheet($sheet)->getCell([$col, $row], false) != null)
+			$val = $this->spreadsheet->getSheet($sheet)->getCell([$col, $row], false)->getDataType();
 		return $val;
 
 	}
