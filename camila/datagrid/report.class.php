@@ -998,11 +998,16 @@ class report
             
             
             $this->draw_footer();
-            
-            $text = new CHAW_text('');
-            
+
             global $_CAMILA;
-            $_CAMILA['page']->add_text($text);
+			
+			if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+			} else {
+				$text = new CHAW_text('');
+				$_CAMILA['page']->add_text($text);
+			}
+			
+            
             
             //                  $code = "<div id='camilatablemenu' class='camilaWorkTableRSMenu'><p><b>Menu 1</b></p><p><a href=''>item 1</a></p><p><a href=''>item 2</a></p><p><a href=''>item 3</a></p></div>";
             //    $js = new CHAW_js($code);
@@ -1043,9 +1048,12 @@ class report
             
             if (isset($this->additional_links))
                 foreach ($this->additional_links as $key => $value) {
-                    $text = new CHAW_text(' | ');
-                    $text->set_br(0);
-                    $_CAMILA['page']->add_text($text);
+					if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+					} else {
+						$text = new CHAW_text(' | ');
+						$text->set_br(0);
+						$_CAMILA['page']->add_text($text);
+					}
                     $link = new CHAW_link($key, $value);
                     if (is_object($this->additional_links_images[$key]))
                         $link->add_image($this->additional_links_images[$key]);
@@ -1083,10 +1091,12 @@ class report
                 $myLink->set_br(0);
 				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
                 $_CAMILA['page']->add_link($myLink);
-                
-                $text = new CHAW_text(' | ');
-                $text->set_br(0);
-                $_CAMILA['page']->add_text($text);
+                if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+				} else {
+					$text = new CHAW_text(' | ');
+					$text->set_br(0);
+					$_CAMILA['page']->add_text($text);
+				}
             }
             
             if ($this->page > 1) {
@@ -1108,20 +1118,25 @@ class report
             }
             
             if ($this->page < (ceil($this->totalrows / $this->rows) - 1)) {
-                $text = new CHAW_text(' | ');
-                $text->set_br(0);
-				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
-                $_CAMILA['page']->add_text($text);
-                
+				if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+				} else {
+					$text = new CHAW_text(' | ');
+					$text->set_br(0);
+					$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
+					$_CAMILA['page']->add_text($text);
+                }
                 $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.last'), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=' . ceil($this->totalrows / $this->rows));
                 $myLink->set_br(0);
 				$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
                 $_CAMILA['page']->add_link($myLink);
             }
-            
-            $text = new CHAW_text(' | ');
-            $text->set_br(0);
-            $_CAMILA['page']->add_text($text);
+			
+			if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+			} else {
+				$text = new CHAW_text('|');
+				$text->set_br(0);
+				$_CAMILA['page']->add_text($text);
+			}
             
             $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.allpages') . ' (' . $this->totalrows . ' ' . camila_get_translation('camila.report.navbox.rows') . ')', basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=-1');
             $myLink->set_br(0);
@@ -1129,53 +1144,60 @@ class report
             if ($this->page > 0)
                 $_CAMILA['page']->add_link($myLink);
             
-            $text = new CHAW_text(' | ');
-            $text->set_br(0);
-            $_CAMILA['page']->add_text($text);
+			if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+			} else {
+				$text = new CHAW_text(' | ');
+				$text->set_br(0);
+				$_CAMILA['page']->add_text($text);
+			}
 			
 			/**/
-		
-		$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group dropdown dropdown-trigger"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
-		$_CAMILA['page']->add_raw($myDivOpen);
+
+			if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+				$myDivOpen = new HAW_raw(HAW_HTML, '<div class="dropdown"><div class="dropdown-trigger"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="icon is-small ml-1"><i class="ri-arrow-down-s-line"></i></span></button></div><div class="dropdown-menu" id="dropdown-menu" role="menu"><div class="dropdown-content">');
+				$_CAMILA['page']->add_raw($myDivOpen);
+			} else {
+				$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group dropdown"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
+				$_CAMILA['page']->add_raw($myDivOpen);
+			}
 			
             $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.countorderby'), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=-1&camila_countorderby');
             $myLink->set_br(0);
 			$myLink->set_css_class('dropdown-item');
-			//$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default');
             if ($this->page > 0 && !$this->gbyconditionpresent)
                 $_CAMILA['page']->add_link($myLink);
-        
 		
         }
 		
-		if ($this->rows < 0 && !$_CAMILA['page']->camila_exporting()) {
-
+		//???
+		/*if ($this->rows < 0 && !$_CAMILA['page']->camila_exporting()) {
 			$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
 			$_CAMILA['page']->add_raw($myDivOpen);
-		}
+		}*/
 
         if (!$_CAMILA['page']->camila_exporting()) {
-            if ($this->defaultfields != '') {
-                /*$text = new CHAW_text(' | ');
-                $text->set_br(0);
-                if ($this->rows > 0 && !$this->gbyconditionpresent)
-                    $_CAMILA['page']->add_text($text);*/
-                
+            if ($this->defaultfields != '') {          
                 $myLink = new CHAW_link(camila_get_translation('camila.report.navbox.addremcols'), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&f0=' . $_REQUEST['f0'] . '&camila_pagnum=' . ($this->page) . '&camila_editcols=y');
                 $myLink->set_br(0);
-				//$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default');
+				$myLink->set_css_class('dropdown-item');
                 if ($this->page > 0 && !$this->gbyconditionpresent)
                     $_CAMILA['page']->add_link($myLink);
-                
             }
-
-			$myDivOpen = new HAW_raw(HAW_HTML, '</li></ul></div>');
-			$_CAMILA['page']->add_raw($myDivOpen);
 			
+			if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+				$myDivOpen = new HAW_raw(HAW_HTML, '</div></div></div>');
+				$_CAMILA['page']->add_raw($myDivOpen);
+			} else {
+				$myDivOpen = new HAW_raw(HAW_HTML, '</li></ul></div>');
+				$_CAMILA['page']->add_raw($myDivOpen);
+			}
 			
-			$text = new CHAW_text(' | ');
-            $text->set_br(0);
-            $_CAMILA['page']->add_text($text);
+			if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+			} else {
+				$text = new CHAW_text(' | ');
+				$text->set_br(0);
+				$_CAMILA['page']->add_text($text);
+			}
             
             $myLink = new CHAW_link(strtoupper(camila_get_translation('camila.export.xml2pdf')), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&camila_xml2pdf');
             $myLink->set_br(0);
@@ -1186,26 +1208,32 @@ class report
 
             if (isset($this->additional_links))
                 foreach ($this->additional_links as $key => $value) {
-                    $text = new CHAW_text(' | ');
-                    $text->set_br(0);
-                    $_CAMILA['page']->add_text($text);
+					if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+					} else {
+						$text = new CHAW_text(' | ');
+						$text->set_br(0);
+						$_CAMILA['page']->add_text($text);
+					}
                     $link = new CHAW_link($key, $value);
                     if (is_object($this->additional_links_images[$key]))
                         $link->add_image($this->additional_links_images[$key]);
 					
 					$link->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-default button is-light is-small');
 
-					if ($this->additional_links_css_classes[$key] != '')
-                        $link->set_css_class($this->additional_links_css_classes[$key]);
-					
-					
+					if ($this->additional_links_css_classes[$key] != '') {
+						$link->set_css_class($this->additional_links_css_classes[$key]);
+					}
+
                     $link->set_br(0);
 					
                     $_CAMILA['page']->add_link($link);
                 }
             
-            $text = new CHAW_text('');
-            $_CAMILA['page']->add_text($text);
+			if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+			} else {
+				$text = new CHAW_text('');
+				$_CAMILA['page']->add_text($text);
+			}
         }
 		
 		if (!$_CAMILA['page']->camila_exporting()) {
