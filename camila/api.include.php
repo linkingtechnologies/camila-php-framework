@@ -8971,6 +8971,36 @@ namespace Tqdev\PhpCrudApi {
 	}
 }
 
+namespace Tqdev\PhpCrudApi {
+	use Psr\Http\Message\ResponseInterface;
+	use Psr\Http\Message\ServerRequestInterface;
+	use Tqdev\PhpCrudApi\Cache\Cache;
+	use Tqdev\PhpCrudApi\Column\ReflectionService;
+	use Tqdev\PhpCrudApi\Controller\Responder;
+	use Tqdev\PhpCrudApi\Database\GenericDB;
+	use Tqdev\PhpCrudApi\Middleware\Router\Router;
+
+	class CamilaWorktableController {
+
+		private $responder;
+		private $reflection;
+
+		public function __construct(Router $router, Responder $responder, GenericDB $db, ReflectionService $reflection, Cache $cache)
+		{
+			$router->register('GET', '/tables', array($this, 'getTables'));
+			$this->responder = $responder;
+			$this->reflection = $reflection;
+		}
+
+		public function getTables(ServerRequestInterface $request): ResponseInterface
+		{
+			global $_CAMILA;
+			$tables = $this->reflection->getTableNames();
+			return $this->responder->success(['tables' => $tables]);
+		}
+	}
+}
+
 // file: src/Tqdev/PhpCrudApi/Api.php
 namespace Tqdev\PhpCrudApi {
 
