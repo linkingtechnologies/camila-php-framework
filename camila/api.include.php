@@ -8993,10 +8993,33 @@ namespace Tqdev\PhpCrudApi {
 		}
 
 		public function getTables(ServerRequestInterface $request): ResponseInterface
-		{
-			global $_CAMILA;
+		{	
 			$tables = $this->reflection->getTableNames();
-			return $this->responder->success(['tables' => $tables]);
+			$suffixesToRemove = [
+				'_bookmarkseq',
+				'_camila_bookmarks',
+				'_camila_pages',
+				'_camila_pages_lang',
+				'_camila_plugins',
+				'_camila_template_params',
+				'_camila_worktables',
+				'_camila_worktables_cols',
+				'_worktablecolseq',
+				'_worktableseq'
+			];
+
+			foreach ($tables as $key => $value) {
+				foreach ($suffixesToRemove as $suffix) {
+					if (substr($value, -strlen($suffix)) === $suffix) {
+						unset($tables[$key]);
+						break;
+					}
+				}
+			}
+			
+			$fArray = array_values($tables);
+			sort($fArray);
+			return $this->responder->success(['tables' => $fArray]);
 		}
 	}
 }
