@@ -75,6 +75,30 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 			$ret = false;*/
 		return $ret;
 	};
+	$conf['authorization.columnHandler'] = function ($operation, $tableName, $columnName) {
+		$ret = true;
+		$excluded = [
+			'created',
+			'created_by',
+			'created_by_name',
+			'created_by_surname',
+			'created_src',
+			'last_upd',
+			'last_upd_by',
+			'last_upd_by_name',
+			'last_upd_by_surname',
+			'last_upd_src',
+			'grp',
+			'mod_num',
+			'is_deleted',
+			'cf_bool_is_selected',
+			'cf_bool_is_special',
+		];
+		
+		$ret = !in_array($columnName, $excluded);
+
+		return $ret;
+	};
 	$conf['mapping'] = $mapping;
 	$conf['customControllers'] = 'Tqdev\PhpCrudApi\CamilaCliController,Tqdev\PhpCrudApi\CamilaWorktableController';
 	$conf['apiKeyAuth.keys'] = CAMILA_APIKEYAUTH_KEYS;
