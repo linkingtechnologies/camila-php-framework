@@ -47,7 +47,7 @@ class CamilaUserInterface
 			$icon = $this->decodeIcon($icon);
 			$b = '';
 
-			$html = '<a href="'.$link.'" target="'.$target.'" class="button is-primary mb-2" aria-label="">';
+			$html = '<a href="'.$link.'" target="'.$target.'" class="button is-small is-primary mb-2" aria-label="">';
 			if ($icon != '')
 				$html.=' <span class="icon"><i class="ri-'.$icon.'-line"></i></span>';
 			$html .= '<span>'.$text.'</span>';

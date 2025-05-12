@@ -124,14 +124,14 @@
 				  return;
 
               if ($this->mode == 'insert') {
-                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-primary" type="submit" name="submitandnew_button_header" id="hawinputsubmitandnewheader">'.camila_get_translation('camila.insertandnewbutton').'</button>');
+                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-small is-primary" type="submit" name="submitandnew_button_header" id="hawinputsubmitandnewheader">'.camila_get_translation('camila.insertandnewbutton').'</button>');
                   $this->form->add_userdefined($js);
               }
 
               if (isset($_REQUEST['camila_delete']) && $this->mode != 'insert')
-                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-primary" type="submit" name="submit_button_header" id="hawinputsubmitheader">'.camila_get_translation('camila.deletebutton').'</button><br /><br />');
+                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-small is-primary" type="submit" name="submit_button_header" id="hawinputsubmitheader">'.camila_get_translation('camila.deletebutton').'</button><br /><br />');
               else
-                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-primary" type="submit" name="submit_button_header" id="hawinputsubmitheader">'.camila_get_translation('camila.' . $this->mode . 'button').'</button><br /><br />');
+                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-small is-primary" type="submit" name="submit_button_header" id="hawinputsubmitheader">'.camila_get_translation('camila.' . $this->mode . 'button').'</button><br /><br />');
 
               $this->form->add_userdefined($js);
 
