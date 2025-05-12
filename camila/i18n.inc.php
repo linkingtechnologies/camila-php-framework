@@ -57,7 +57,7 @@
           //$text->set_br(2);
           $msg = str_replace("\n", '\n', $msg);
 
-		  $myHtmlCode = '<div class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span><span class="sr-only">Error:</span>';
+		  $myHtmlCode = '<div class="alert alert-danger notification is-danger" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span><span class="sr-only">Error:</span>';
 		  $myDiv = new HAW_raw(HAW_HTML, $myHtmlCode);
 		  $_CAMILA['page']->add_raw($myDiv);
 	
@@ -86,7 +86,7 @@
 			$_CAMILA['cli_output'] .= $msg."\n";
 	  }else {
       
-	  $myHtmlCode = '<div class="alert alert-success" role="alert">';
+	  $myHtmlCode = '<div class="alert alert-success notification is-success" role="alert">';
 	  $myDiv = new HAW_raw(HAW_HTML, $myHtmlCode);
 	  $_CAMILA['page']->add_raw($myDiv);
       $text = new CHAW_text($msg, HAW_TEXTFORMAT_BOLD);

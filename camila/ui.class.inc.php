@@ -111,7 +111,7 @@ class CamilaUserInterface
 	public static function insertWarning($text){
 		global $_CAMILA;
 		if ($_CAMILA['page'] !== null) {
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="alert alert-warning" role="alert">'.$text.'</div>'));
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="alert alert-warning notification is-warning" role="alert">'.$text.'</div>'));
 		} else {
 			echo('<p>'.$text."</p>\n");
 		}
@@ -120,7 +120,7 @@ class CamilaUserInterface
 	public static function insertError($text){
 		global $_CAMILA;
 		if ($_CAMILA['page'] !== null) {
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="alert alert-danger" role="alert">'.$text.'</div>'));
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="alert alert-danger notification is-danger" role="alert">'.$text.'</div>'));
 		} else {
 			echo('<p>'.$text."</p>\n");
 		}
@@ -129,7 +129,7 @@ class CamilaUserInterface
 	public static function insertSuccess($text){
 		global $_CAMILA;
 		if ($_CAMILA['page'] !== null) {
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="alert alert-success" role="success">'.$text.'</div>'));
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="alert alert-success notification is-success" role="success">'.$text.'</div>'));
 		} else {
 			echo('<p>'.$text."</p>\n");
 		}
