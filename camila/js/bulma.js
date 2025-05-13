@@ -30,4 +30,28 @@ document.addEventListener('DOMContentLoaded', () => {
       dropdown.classList.remove('is-active');
     });
   });
+  
+
+  // Open modal when a trigger button is clicked
+  document.querySelectorAll('.open-modal').forEach(button => {
+    button.addEventListener('click', () => {
+      const modalId = button.getAttribute('data-target');
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('is-active');
+      }
+    });
+  });
+
+  // Close modal when clicking background, top-right 'X', or footer button
+  document.querySelectorAll('.bulma-modal').forEach(modal => {
+    const closeElements = modal.querySelectorAll('.modal-background, .modal-close, .modal-close-btn');
+    closeElements.forEach(el => {
+      el.addEventListener('click', () => {
+        modal.classList.remove('is-active');
+      });
+    });
+  });
+  
+
 });

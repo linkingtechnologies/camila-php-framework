@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-Copyright (C) 2006-2024 Umberto Bresciani
+Copyright (C) 2006-2025 Umberto Bresciani
 
 Camila PHP Framework is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -114,25 +114,53 @@ class form_field
         }
         
         if ($this->help != '' && !$this->hidden && $this->updatable && !$_CAMILA['page']->camila_exporting()) {
-            $code = '<button type="button" tabindex="-1" class="btn btn-sm btn-info" data-toggle="modal" data-target="#helpmodal' . $this->field . '"><span class="glyphicon glyphicon-info-sign"></span></button>
-<div id="helpmodal' . $this->field . '" class="modal fade" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">' . $this->title . '</h4>
-      </div>
-      <div class="modal-body">
-        <p>' . $this->help . '</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">' . camila_get_translation('camila.close') . '</button>
-      </div>
-    </div>
-  </div>
-</div>';
-            $js = new CHAW_js($code);
-            $form->add_userdefined($js);
+			
+			if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+				$code = '
+<button type="button" tabindex="-1" class="button is-white is-small open-modal" data-target="helpmodal'.$this->field.'"
+  style="padding: 0.2rem 0.2rem; line-height: 1; height: auto;">
+  <i class="ri-information-line" style="font-size: 1rem; color: #888;"></i>
+</button>				
+							<div id="helpmodal' . $this->field . '" class="modal bulma-modal" role="dialog">
+							<div class="modal-background"></div>
+							  <div class="modal-card">
+								  <header class="modal-card-head">
+									<h4 class="modal-card-title">' . $this->title . '</h4>
+									<button type="button" class="button is-white modal-close-btn" aria-label="close" style="border: none; background: none;">
+        <i class="ri-close-line" style="font-size: 1.5rem;"></i>
+      </button>
+								  </header>
+								  <section class="modal-card-body">
+									<p>' . $this->help . '</p>
+								  </section>
+								  <footer class="modal-card-foot">
+									<button type="button" class="button is-light modal-close-btn" aria-label="close">' . camila_get_translation('camila.close') . '</button>
+								  </footer>
+							  </div>
+							</div>';
+				$js = new CHAW_js($code);
+				$form->add_userdefined($js);			
+			} else {	
+				$code = '<button type="button" tabindex="-1" class="btn btn-sm btn-info" data-toggle="modal" data-target="#helpmodal' . $this->field . '"><span class="glyphicon glyphicon-info-sign"></span></button>
+							<div id="helpmodal' . $this->field . '" class="modal fade" role="dialog">
+							  <div class="modal-dialog">
+								<div class="modal-content">
+								  <div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal">&times;</button>
+									<h4 class="modal-title">' . $this->title . '</h4>
+								  </div>
+								  <div class="modal-body">
+									<p>' . $this->help . '</p>
+								  </div>
+								  <div class="modal-footer">
+									<button type="button" class="btn btn-default" data-dismiss="modal">' . camila_get_translation('camila.close') . '</button>
+								  </div>
+								</div>
+							  </div>
+							</div>';
+				$js = new CHAW_js($code);
+				$form->add_userdefined($js);
+			}
         }
     }
     
