@@ -70,6 +70,15 @@ if (camila_form_in_update_mode('${table}')) {
         $form->fields['id']->updatable = false;
         $form->fields['id']->forcedraw = true;
     }
+	
+	new form_textbox($form, 'uuid', camila_get_translation('camila.worktable.field.uuid'));
+	if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+        if ($_REQUEST['camila_update'] == 'new' && !isset($_REQUEST['camila_phpform_sent'])) {
+            $form->fields['uuid']->defaultvalue = camila_generate_uuid();
+        }
+        $form->fields['uuid']->updatable = false;
+        $form->fields['uuid']->forcedraw = true;		
+	}
 
     <!-- $BeginBlock element -->
     ${form_element}

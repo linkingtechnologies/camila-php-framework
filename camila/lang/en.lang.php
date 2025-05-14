@@ -101,6 +101,7 @@ camila.worktable.field.last_upd_by_surname = Last Update User Surname
 camila.worktable.field.mod_num = Modification Number
 camila.worktable.field.grp = Group
 camila.worktable.field.id = Row Id
+camila.worktable.field.uuid = UUID
 camila.worktable.field.delete = DELETE FIELD
 camila.worktable.field.options = Field options
 camila.worktable.field.autosuggestwtname = Autosuggest File Card

@@ -101,6 +101,7 @@ camila.worktable.field.last_upd_by_surname = Cognome utente ultimo aggiornamento
 camila.worktable.field.mod_num = Numero modifiche
 camila.worktable.field.grp = Gruppo
 camila.worktable.field.id = Codice riga
+camila.worktable.field.uuid = UUID
 camila.worktable.field.delete = ELIMINA CAMPO
 camila.worktable.field.options = Opzioni campo
 camila.worktable.field.autosuggestwtname = Scheda dati per suggerimento

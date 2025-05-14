@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -628,7 +628,16 @@ function camila_worktable_get_table_id($name)
 	  //return preg_replace('/\s+/', '', CAMILA_APPLICATION_NAME);
 	  return preg_replace('/[^a-zA-Z0-9]/', '', CAMILA_APPLICATION_NAME);
   }
-
+  
+  function camila_generate_uuid() {
+	  $data = random_bytes(16);
+	  // Set version to 0100 (UUIDv4)
+	  $data[6] = chr((ord($data[6]) & 0x0f) | 0x40);
+	  // Set variant to 10xx (RFC 4122)
+	  $data[8] = chr((ord($data[8]) & 0x3f) | 0x80);
+	  // Format the 16 bytes as a UUID string
+	  return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+  }
 
   require(CAMILA_DIR.'camila_hawhaw.php');
   

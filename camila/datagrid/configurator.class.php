@@ -975,9 +975,11 @@ class configurator
         $schema .= "<schema version=\"0.3\">\n";
         $schema .= "<table name=\"" . CAMILA_TABLE_WORKP . "$id\">\n";
         $schema .= "<field name=\"id\" type=\"I\">\n";
-        $schema .= "<KEY/>\n";
-        //$schema .= "<AUTOINCREMENT/>\n";
-        $schema .= "</field>\n";
+		$schema .= "<KEY/>\n";
+        $schema .= "</field>\n";		
+		$schema .= "<field name=\"uuid\" type=\"C\" size=\"36\">\n";
+		$schema .= "<KEY/>\n";
+        $schema .= "</field>\n";		
         $schema .= "<field name=\"created\" type=\"T\"/>\n";
         $schema .= "<field name=\"created_by\" type=\"C\" size=\"50\"/>\n";
         $schema .= "<field name=\"created_by_name\" type=\"C\" size=\"50\"/>\n";
@@ -2048,6 +2050,12 @@ class configurator
                             $record[$k] = str_replace('_camila_seq_num_', $id, $v);
 
                         $record['id']                  = $id;
+						
+						if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+							$uuid = camila_generate_uuid();
+							$record['uuid'] = $uuid;
+						}
+
 						//echo '<'.$record['id'].'>';
                         $record['created']             = $now;
                         $record['created_by']          = $_CAMILA['user'];
