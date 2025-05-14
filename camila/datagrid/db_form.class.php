@@ -358,8 +358,12 @@ $(document).ready(function(){
 
           
 
-          if ($_CAMILA['page']->camila_worktable)
+          if ($_CAMILA['page']->camila_worktable) {
               $stmt .= ', created, created_by, created_src, created_by_surname, created_by_name, last_upd, last_upd_by, last_upd_src, last_upd_by_surname, last_upd_by_name, mod_num'; 
+			  	if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+					$stmt .= ', uuid';
+				}
+		  }
 
 
           $stmt .= ' ) values ( ';

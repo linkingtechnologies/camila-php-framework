@@ -977,9 +977,7 @@ class configurator
         $schema .= "<field name=\"id\" type=\"I\">\n";
 		$schema .= "<KEY/>\n";
         $schema .= "</field>\n";		
-		$schema .= "<field name=\"uuid\" type=\"C\" size=\"36\">\n";
-		$schema .= "<KEY/>\n";
-        $schema .= "</field>\n";		
+		$schema .= "<field name=\"uuid\" type=\"C\" size=\"36\" />\n";
         $schema .= "<field name=\"created\" type=\"T\"/>\n";
         $schema .= "<field name=\"created_by\" type=\"C\" size=\"50\"/>\n";
         $schema .= "<field name=\"created_by_name\" type=\"C\" size=\"50\"/>\n";
@@ -1011,6 +1009,7 @@ class configurator
             $result->MoveNext();
         }
         
+		$schema .= "<index name=\"uuid\"><col>uuid</col></index>";
         $schema .= "</table>\n";
         $schema .= "</schema>\n";
 		
@@ -1298,6 +1297,10 @@ class configurator
 
 
         $report_fields .= ',created,created_by,created_by_surname,created_by_name,last_upd,last_upd_by,last_upd_by_surname,last_upd_by_name,mod_num';
+		if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+			$report_fields .= ', uuid';
+		}
+
         foreach ($this->requires as $value) {
             $t->setVariable('form_require', $value);
             $t->addBlock('require');
