@@ -209,6 +209,9 @@ class CamilaWorkTable
 		$fields2[]='last_upd_src';
 		$fields2[]='last_upd_by_surname';
 		$fields2[]='last_upd_by_name';
+		if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+			$fields2[]='uuid';
+		}
 
 		$values[]=$_CAMILA['db']->GenID(CAMILA_APPLICATION_PREFIX.'worktableseq', 100000);
 		if ($created_by != '')
@@ -223,6 +226,10 @@ class CamilaWorkTable
 		$values[]='application';
 		$values[]=$_CAMILA['user_surname'];
 		$values[]=$_CAMILA['user_name'];
+		
+		if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+			$values[]=camila_generate_uuid();
+		}
 
 		$query = 'INSERT INTO ${' . $worktableName . '} (';
 		$count = 0;
@@ -381,6 +388,9 @@ class CamilaWorkTable
 		$fields2[]='last_upd_src';
 		$fields2[]='last_upd_by_surname';
 		$fields2[]='last_upd_by_name';
+		if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+			$fields2[]='uuid';
+		}
 
 		$values[]=$newId;
 		if ($created_by != '')
@@ -395,6 +405,10 @@ class CamilaWorkTable
 		$values[]='application';
 		$values[]=$_CAMILA['user_surname'];
 		$values[]=$_CAMILA['user_name'];
+		if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+			$values[]=camila_generate_uuid();
+		}
+		
 
 		$query = 'INSERT INTO '.$toTable.' (';
 		$count = 0;
