@@ -126,7 +126,12 @@ class CamilaUserInterface
 	
 	function insertSubTitle($text, $icon = ''){
 		global $_CAMILA;
-		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<h4><span class="glyphicon glyphicon-'.$icon.'"></span> '.$text.'</h4>'));
+		if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+			$icon = $this->decodeIcon($icon);
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<h4><span class="icon"><i class="ri-'.$icon.'-line"></i></span> '.$text.'</h4>'));
+		} else {
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<h4><span class="glyphicon glyphicon-'.$icon.'"></span> '.$text.'</h4>'));
+		}		
 	}
 	
 	function insertAutoRefresh($ms) {
@@ -251,6 +256,9 @@ class CamilaUserInterface
 		
 		if ($icon == 'warning-sign')
 			$icon = 'alert';
+		
+		if ($icon == 'thumbs-up')
+			$icon = 'thumb-up';
 
 		return $icon;
 	}
