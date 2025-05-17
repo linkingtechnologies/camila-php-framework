@@ -1009,7 +1009,7 @@ class configurator
             $result->MoveNext();
         }
         
-		$schema .= "<index name=\"".CAMILA_TABLE_WORKP."$id_uuid\"><col>uuid</col></index>";
+		$schema .= "<index name=\"".CAMILA_TABLE_WORKP.$id."_uuid\"><col>uuid</col></index>";
         $schema .= "</table>\n";
         $schema .= "</schema>\n";
 		
