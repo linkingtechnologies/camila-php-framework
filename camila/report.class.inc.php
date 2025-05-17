@@ -607,7 +607,7 @@ class CamilaReport
 		
 		$reports = $this->xmlConfig->report;
 		foreach ($reports as $k => $v) {
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="row columns">'));	
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="row columns is-multiline">'));	
 			$query = $this->getQuery($v);
 			try {
 				$data = $this->camilaWT->queryWorktableDatabase($query);
