@@ -66,8 +66,35 @@ class CamilaUserInterface
 
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
 	}
-	
+
 	function insertSecondaryButton($link, $text, $icon, $br = true, $badge='', $target='_self') {
+		global $_CAMILA;
+
+		$html = '';
+		if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+			$icon = $this->decodeIcon($icon);
+			$b = '';
+
+			$html = '<a href="'.$link.'" target="'.$target.'" class="button is-small mb-2" aria-label="">';
+			if ($icon != '')
+				$html.=' <span class="icon"><i class="ri-'.$icon.'-line"></i></span>';
+			$html .= '<span>'.$text.'</span>';
+			$html .= '</a>';
+			if ($br)
+				$html.='<br />';
+		
+		} else {
+			$b = '';
+			if ($badge != '')
+				$b=' <span class="badge">'.$badge.'</span>';
+			$html = '<a href="'.$link.'" type="button" target="'.$target.'" class="btn btn-md btn-default btn-primary btn-space" aria-label=""><span class="glyphicon glyphicon-'.$icon.'" aria-hidden="true"></span> '.$text.$b.'</a>';
+			if ($br)
+				$html.='<br />';
+		}
+
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
+	}	
+	/*function insertSecondaryButton($link, $text, $icon, $br = true, $badge='', $target='_self') {
 		global $_CAMILA;
 		$b = '';
 		if ($badge != '')
@@ -76,7 +103,7 @@ class CamilaUserInterface
 		if ($br)
 			$html.='<br />';
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
-	}
+	}*/
 
 	function insertTitle($text, $icon=''){
 		global $_CAMILA;
