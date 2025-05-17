@@ -76,8 +76,10 @@ if (camila_form_in_update_mode('${table}')) {
         if ($_REQUEST['camila_update'] == 'new' && !isset($_REQUEST['camila_phpform_sent'])) {
             $form->fields['uuid']->defaultvalue = camila_generate_uuid();
         }
-        $form->fields['uuid']->updatable = false;
-        $form->fields['uuid']->forcedraw = true;		
+		if (is_object($form->fields['uuid'])) {
+			$form->fields['uuid']->updatable = false;
+			$form->fields['uuid']->forcedraw = true;
+		}		
 	}
 
     <!-- $BeginBlock element -->
