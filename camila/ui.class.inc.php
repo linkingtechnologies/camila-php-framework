@@ -206,6 +206,24 @@ class CamilaUserInterface
 
 		if ($icon == 'plane')
 			$icon = 'truck';
+		
+		if ($icon == 'list-alt')
+			$icon = 'task';
+		
+		if ($icon == 'cog')
+			$icon = 'settings-2';
+		
+		if ($icon == 'hdd')
+			$icon = 'hard-drive';
+		
+		if ($icon == 'question-sign')
+			$icon = 'questionnaire';
+		
+		if ($icon == 'map-marker')
+			$icon = 'map-pin';
+		
+		if ($icon == 'warning-sign')
+			$icon = 'alert';
 
 		return $icon;
 	}
