@@ -395,6 +395,10 @@ $(document).ready(function(){
 
           if ($_CAMILA['page']->camila_worktable) {
               $stmt .= ',?,?,?,?,?,?,?,?,?,?,?';
+			  
+			  if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+					$stmt .= ',?';
+			  }
 
               $now = $_CAMILA['db']->BindTimeStamp(date("Y-m-d H:i:s", time()));
               $data[$count] = $now;
@@ -402,12 +406,15 @@ $(document).ready(function(){
               $data[$count+2] = 'application';
               $data[$count+3] = $_CAMILA['user_surname'];
               $data[$count+4] = $_CAMILA['user_name'];
-	      $data[$count+5] = $now;
+			  $data[$count+5] = $now;
               $data[$count+6] = $_CAMILA['user'];
               $data[$count+7] = 'application';
               $data[$count+8] = $_CAMILA['user_surname'];
               $data[$count+9] = $_CAMILA['user_name'];
               $data[$count+10] = 0;
+			  if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+				$data[$count+11] = camila_generate_uuid();
+			  }
           }
 
           $stmt .= ')';
