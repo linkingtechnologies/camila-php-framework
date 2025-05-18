@@ -38,6 +38,16 @@ class CamilaUserInterface
 		global $_CAMILA;
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
 	}
+
+	function openButtonBar() {
+		global $_CAMILA;
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="buttons">'));
+	}
+	
+	function closeButtonBar() {
+		global $_CAMILA;
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+	}	
 	
 	function insertButton($link, $text, $icon, $br = true, $badge='', $target='_self') {
 		global $_CAMILA;
@@ -259,6 +269,9 @@ class CamilaUserInterface
 		
 		if ($icon == 'thumbs-up')
 			$icon = 'thumb-up';
+		
+		if ($icon == 'chevron-left')
+			$icon = 'arrow-go-back';
 
 		return $icon;
 	}
