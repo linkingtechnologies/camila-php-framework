@@ -1,6 +1,6 @@
 <?php
   /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
    
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -220,19 +220,31 @@ if (!CAMILA_FM_EXPORT_SAVETO_DISABLED)
       exit;
   } else {  
       $_CAMILA['page'] = new CHAW_deck(camila_get_translation('camila.export.options'), HAW_ALIGN_LEFT, HAW_OUTPUT_AUTOMATIC);
-      
-      //$export_deck_title = new CHAW_text(camila_get_translation('camila.export.options'), $_CAMILA['page_title_attributes']);
-      //$export_deck_title->set_br(2);
-      //$export_deck_title->set_color($_CAMILA['page_title_color'], $_CAMILA['page_title_boxcolor']);
-	  //$export_deck_title->set_color('white', '#000080');
-      //$_CAMILA['page']->add_text($export_deck_title);
 	  
+	  $camilaUI->openBox();
 	  $camilaUI->insertTitle(camila_get_translation('camila.export.options'),'cog');
-	  $camilaUI->insertLineBreak();
+	  //$camilaUI->insertLineBreak();
 
       $myForm = new CHAW_form($_SERVER['PHP_SELF']);
       $export_format = camila_export_hidden_fields($myForm);
-      
+	  
+	  $url = $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'];
+
+	  $parsed_url = parse_url($url);
+	  parse_str($parsed_url['query'], $query_params);
+	  unset($query_params[$export_format]);
+	  $new_query = http_build_query($query_params);
+	  $new_url = $parsed_url['path'];
+	  if (!empty($new_query)) {
+		  $new_url .= '?' . $new_query;
+	  }
+	  
+	  $url = './'.$new_url;
+	  
+	  $camilaUI->openButtonBar();
+	  $camilaUI->insertSecondaryButton($url, camila_get_translation('camila.back'), 'chevron-left');
+	  $camilaUI->closeButtonBar();
+
       if (!isset($_REQUEST['camila_xls']) && !isset($_REQUEST['camila_ods']) && !isset($_REQUEST['camila_csv'])) {
           $myInput = new CHAW_input('camila_export_title', $_CAMILA['page_full_title'], camila_get_translation('camila.export.pagetitle'));
           $myInput->set_size(50);
@@ -326,21 +338,12 @@ if (!CAMILA_FM_EXPORT_SAVETO_DISABLED)
       $myForm->add_input($myInput);
       
       $theSubmission = new CHAW_submit(camila_get_translation('camila.exportbutton'), $export_format);
-	  $theSubmission->set_css_class('btn btn-md btn-primary');
+	  $theSubmission->set_css_class('btn btn-md btn-primary button is-primary is-small');
       $myForm->add_submit($theSubmission);
       $_CAMILA['page']->add_form($myForm);
 	  
-	  $myText = new CHAW_text('');
-	  $_CAMILA['page']->add_text($myText);
-      
-      $url = $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'];
-      $url = preg_replace("&" . $export_format, '', $url);
-      $url = preg_replace("\?" . $export_format, '', $url);
-      $myLink = new CHAW_link(camila_get_translation('camila.back.page'), $url);
-      $myImage2 = new HAW_image(CAMILA_IMG_DIR . 'wbmp/resultset_previous.wbmp', CAMILA_IMG_DIR . 'png/resultset_previous.png', '-');
-      $myLink->add_image($myImage2);
-	  $myLink->set_css_class('btn btn-md btn-default');
-      $_CAMILA['page']->add_link($myLink);
+	  $camilaUI->closeBox();
+
   }
   
   $_CAMILA['page']->use_simulator(CAMILA_CSS_DIR . 'skin0.css');
