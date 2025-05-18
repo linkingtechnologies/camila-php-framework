@@ -18,7 +18,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 
 $camilaUI = new CamilaUserInterface();
-$camilaUI->insertLineBreak();
+$camilaUI->openBox();
    
 $form = new dbform(CAMILA_TABLE_USERS, 'id', 'id,username,surname,name,grp,level,visibility_type,token', 'username', 'asc', 'username <> ' . $_CAMILA['db']->qstr($_CAMILA['user']), true, true, true, false, true);
 $form->mapping=camila_get_translation('camila.mapping.admin.users');
@@ -49,4 +49,5 @@ $form->clear();
 $form->process();
 $form->draw();
 
+$camilaUI->closeBox();
 ?>

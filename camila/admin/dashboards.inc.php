@@ -1,6 +1,6 @@
 <?php
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ $_CAMILA['page']->camila_export_enabled = false;
 $camilaUI->insertLineBreak();
 $camilaUI->insertLineBreak();
 
+
 if (isset($_REQUEST['json'])) {
 	$exit = false;
 	switch($_REQUEST['json']) {
@@ -39,18 +40,16 @@ if (isset($_REQUEST['json'])) {
 		exit();
 }
 else
-{		  
-if (isset($_REQUEST['dashboard']))
-
 {
-	$currentTab = $camilaUI->printHomeMenu(CAMILA_DIR.'/admin/conf/menu.xml');
-    require(CAMILA_DIR.'/admin/dashboard_' . $_REQUEST['dashboard'] . '.inc.php');
-} else {
-	$defaultId = 'worktables';
-	$currentTab = $camilaUI->printHomeMenu(CAMILA_DIR.'/admin/conf/menu.xml', $defaultId);
-	require(CAMILA_DIR.'/admin/dashboard_' . $defaultId . '.inc.php');
-}
-
-$camilaUI->insertLineBreak();
+	//$camilaUI->openBox();
+	if (isset($_REQUEST['dashboard'])){
+		$currentTab = $camilaUI->printHomeMenu(CAMILA_DIR.'/admin/conf/menu.xml');
+		require(CAMILA_DIR.'/admin/dashboard_' . $_REQUEST['dashboard'] . '.inc.php');
+	} else {
+		$defaultId = 'worktables';
+		$currentTab = $camilaUI->printHomeMenu(CAMILA_DIR.'/admin/conf/menu.xml', $defaultId);
+		require(CAMILA_DIR.'/admin/dashboard_' . $defaultId . '.inc.php');
+	}
+	//$camilaUI->closeBox();
 }
 ?>

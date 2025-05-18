@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
    along with Camila PHP Framework; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 
+$camilaUI->openBox();
 
 $form = new dbform(CAMILA_APPLICATION_PREFIX.'camila_bookmarks', 'id', 'id,sequence,base_url,title,url', 'sequence', 'asc', 'lang = ' . $_CAMILA['db']->qstr($_CAMILA['lang']), true, true, true, false, true);
 $form->mapping=camila_get_translation('camila.mapping.admin.users');
@@ -30,5 +31,7 @@ new form_hidden($form, 'lang', $_CAMILA['lang']);
 
 $form->process();
 $form->draw();
+
+$camilaUI->closeBox();
 
 ?>

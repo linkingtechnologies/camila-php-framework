@@ -1017,7 +1017,7 @@ class report
 			
 			
 			$_CAMILA['page']->camila_add_js("<script type='text/javascript'>$(document).ready(function () {\n $('body').stickyHScroll();\n});</script>", 'sticky-hscroll-init');
-			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="hidden-xs hidden-sm"><span class="cf-table-arrow-left"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></span><span class="cf-table-arrow-right"><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span></span></div><div class="table-responsive sticky-hscroll">'));	
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="hidden-xs hidden-sm"><span class="cf-table-arrow-left"><span class="glyphicon glyphicon-chevron-left ri-arrow-left-s-line" aria-hidden="true"></span></span><span class="cf-table-arrow-right"><span class="glyphicon glyphicon-chevron-right ri-arrow-right-s-line" aria-hidden="true"></span></span></div><div class="table-responsive sticky-hscroll">'));	
             $_CAMILA['page']->add_table($this->table);
 			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));	
             //$json  = new Services_JSON();

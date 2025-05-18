@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2022 Umberto Bresciani
+    Copyright (C) 2006-2025 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,23 +16,34 @@
     along with Camila PHP Framework. If not, see <http://www.gnu.org/licenses/>. */
 
 $camilaWT  = new CamilaWorkTable();
-	
-$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="row">'));
-$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-4">'));
 
-$camilaUI->insertButton('cf_worktable_admin.php', camila_get_translation('camila.admin.title.worktables'),'wrench');
+if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+	$camilaUI->openBox();
+	$camilaUI->openMenuSection('');
+	$camilaUI->addItemToMenuSection('cf_worktable_admin.php', camila_get_translation('camila.admin.title.worktables'));
+	$camilaUI->addItemToMenuSection('cf_worktable_admin_cat.php', camila_get_translation('camila.admin.title.categories'));
+	$camilaUI->addItemToMenuSection('?admin&dashboard=bookmarks', camila_get_translation('camila.admin.title.bookmarks'));
+	$result->MoveNext();
+	$camilaUI->closeMenuSection();
+	$camilaUI->closeBox();
+} else {
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="row">'));
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-4">'));
 
-$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
-$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-4">'));
+	$camilaUI->insertButton('cf_worktable_admin.php', camila_get_translation('camila.admin.title.worktables'),'wrench');
 
-$camilaUI->insertButton('cf_worktable_admin_cat.php', camila_get_translation('camila.admin.title.categories'), 'wrench');
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-4">'));
 
-$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
-$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-4">'));
+	$camilaUI->insertButton('cf_worktable_admin_cat.php', camila_get_translation('camila.admin.title.categories'), 'wrench');
 
-$camilaUI->insertButton('?admin&dashboard=bookmarks', camila_get_translation('camila.admin.title.bookmarks'), 'wrench');
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-4">'));
 
-$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+	$camilaUI->insertButton('?admin&dashboard=bookmarks', camila_get_translation('camila.admin.title.bookmarks'), 'wrench');
 
-$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div><br/>'));
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div><br/>'));
+}
 ?>
