@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,74 +17,7 @@
    along with Camila PHP Framework; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 
-
 require_once(CAMILA_DIR.'ui.class.inc.php');
-//$_CAMILA['skin'] = $_CAMILA['user_preferences']['c_sk'];
-
-//if ($_CAMILA['javascript_enabled'] == 1 && $_CAMILA['skin'] == 0)
-//    $_CAMILA['skin'] = CAMILA_DEFAULT_JS_SKIN;
-
-$_CAMILA['page']= new CHAW_deck();
-
-$camilaUI = new CamilaUserInterface();
-$camilaUI->insertTitle(camila_get_translation('camila.prefs'),'user');
-$camilaUI->insertLineBreak();
-$_CAMILA['page']->camila_export_enabled = false;
-
-//$export_deck_title = new CHAW_text(camila_get_translation('camila.prefs'), $_CAMILA["page_title_attributes"]);
-//$export_deck_title->set_br(2);
-//$export_deck_title->set_color($_CAMILA['page_title_color'], $_CAMILA['page_title_boxcolor']);
-//$export_deck_title->set_color('white', '#000080');
-//$_CAMILA['page']->add_text($export_deck_title);
-
-
-$myForm = new CHAW_form('cf_redirect.php');
-
-/*$text = new CHAW_text(camila_get_translation('camila.prefs.js'));
-$text->set_br(0);
-$myForm->add_text($text);
-
-$mySelect = new CHAW_select('camila_javascript');
-if ($_CAMILA['javascript_enabled'] == 1)
-  $mySelect->add_option(camila_get_translation('camila.enabled2'), "on", HAW_SELECTED);
-else
-  $mySelect->add_option(camila_get_translation('camila.enabled2'), "on");
-
-if ($_CAMILA['javascript_enabled'] != 1)
-  $mySelect->add_option(camila_get_translation('camila.disabled2'), "off", HAW_SELECTED);
-else
-  $mySelect->add_option(camila_get_translation('camila.disabled2'), "off");
-$myForm->add_select($mySelect);
-
-$text = new CHAW_text('');
-$text->set_br(2);
-$myForm->add_text($text);
-
-$text = new CHAW_text(camila_get_translation('camila.prefs.skin'));
-$text->set_br(0);
-$myForm->add_text($text);
-$mySelect = new CHAW_select('camila_skin_number');
-
-if ($_CAMILA['skin'] == 2)
-  $mySelect->add_option(camila_get_translation('camila.prefs.skin2'), "2", HAW_SELECTED);
-else
-  $mySelect->add_option(camila_get_translation('camila.prefs.skin2'), "2");
-
-if ($_CAMILA['skin'] == 1)
-  $mySelect->add_option(camila_get_translation('camila.prefs.skin1'), "1", HAW_SELECTED);
-else
-  $mySelect->add_option(camila_get_translation('camila.prefs.skin1'), "1");
-
-if ($_CAMILA['skin'] == 0)
-  $mySelect->add_option(camila_get_translation('camila.prefs.skin0'), "-", HAW_SELECTED);
-else
-  $mySelect->add_option(camila_get_translation('camila.prefs.skin0'), "-");
-
-$myForm->add_select($mySelect);
-$text = new CHAW_text('');
-$text->set_br(2);
-$myForm->add_text($text);
-*/
 
 if ($_CAMILA['user_preferences']['c_ff'] == '')
     $_CAMILA['user_preferences']['c_ff'] = CAMILA_FACE;
@@ -92,13 +25,26 @@ if ($_CAMILA['user_preferences']['c_ff'] == '')
 if ($_CAMILA['user_preferences']['c_tf'] == '')
     $_CAMILA['user_preferences']['c_tf'] = CAMILA_TABLE_FACE;
 
+$_CAMILA['page']= new CHAW_deck();
+$_CAMILA['page']->camila_export_enabled = false;
+
+$camilaUI = new CamilaUserInterface();
+$camilaUI->openBox();
+$camilaUI->insertTitle(camila_get_translation('camila.prefs'),'user');
+$camilaUI->openButtonBar();
+$camilaUI->insertSecondaryButton('./', camila_get_translation('camila.back'), 'chevron-left');
+if (CAMILA_USER_CAN_CHANGE_PWD) {
+	$camilaUI->insertSecondaryButton('cf_changepwd.php', camila_get_translation('camila.login.changepwd'), 'lock');
+}
+$camilaUI->closeButtonBar();
+
+$myForm = new CHAW_form('cf_redirect.php');
 
 $text = new CHAW_text(camila_get_translation('camila.prefs.fonttype'));
 $text->set_br(0);
 $myForm->add_text($text);
 $mySelect = new CHAW_select('camila_font_face');
 $mySelect3 = new CHAW_select('camila_table_font_face');
-
 
 $_fields = explode(',','Arial,Times,Verdana');
 
@@ -186,18 +132,12 @@ $url = str_replace("\?"."camila_preferences", "", $url);
 $myInput = new CHAW_hidden('camila_redirect', $url);
 $myForm->add_input($myInput);
 $theSubmission = new CHAW_submit(camila_get_translation('camila.save'), 'submit');
-$theSubmission->set_css_class('btn btn-md btn-default');
+$theSubmission->set_css_class('btn btn-md btn-default button is-primary is-small');
 $myForm->add_submit($theSubmission);
 $_CAMILA['page']->add_form($myForm);
 
-if (CAMILA_USER_CAN_CHANGE_PWD) {
-    //$myLink = new CHAW_link(camila_get_translation('camila.login.changepwd'),'cf_changepwd.php');
-	//$myLink->set_css_class('btn btn-md btn-default');
-    //$myLink->set_br(3);
-    //$_CAMILA['page']->add_link($myLink);
-	
-	$camilaUI->insertButton('cf_changepwd.php', camila_get_translation('camila.login.changepwd'), 'lock');
-}
+
+$camilaUI->closeBox();
 
 $_CAMILA['page']->use_simulator(CAMILA_CSS_DIR . 'skin2.css');
 require(CAMILA_DIR . 'deck_settings.php');
