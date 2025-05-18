@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,25 +17,30 @@
    along with Camila PHP Framework; if not, write to the Free Software
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
 
-//  require_once(CAMILA_DIR . 'datagrid/form.class.php');
-//  require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
-//  require_once(CAMILA_DIR . 'datagrid/elements/form/filebox.php');
-//  require_once(CAMILA_DIR . 'datagrid/elements/form/textbox.php');
-//  require_once(CAMILA_DIR . 'datagrid/elements/form/template_file_listbox.php');
-//  require_once(CAMILA_DIR . 'datagrid/elements/form/checklist.php');
-//  require_once(CAMILA_DIR . 'datagrid/elements/form/text_separator.php');
-  
-//  require_once(CAMILA_DIR.'ui.class.inc.php');
-
-  //$export_deck_title = new CHAW_text(camila_get_translation('camila.export.options'), $_CAMILA['page_title_attributes']);
-  //$export_deck_title->set_br(2);
-  //$export_deck_title->set_css_class('page-header');
-  //$export_deck_title->set_color('white', '#000080');
-  //$_CAMILA['page']->add_text($export_deck_title);
 
   $camilaUI = new CamilaUserInterface();
+  $camilaUI->openBox();
   $camilaUI->insertTitle(camila_get_translation('camila.export.options'),'cog');
-  $camilaUI->insertLineBreak();
+
+  $export_format = 'camila_xml2pdf';
+  $url = $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'];
+  
+  $parsed_url = parse_url($url);
+  parse_str($parsed_url['query'], $query_params);
+  unset($query_params[$export_format]);
+  $new_query = http_build_query($query_params);
+  $new_url = $parsed_url['path'];
+  if (!empty($new_query)) {
+	  $new_url .= '?' . $new_query;
+  }
+  
+  $url = './'.$new_url;
+  
+  $camilaUI->openButtonBar();
+  $camilaUI->insertSecondaryButton($url, camila_get_translation('camila.back'), 'chevron-left');
+  $camilaUI->closeButtonBar();
+  
+  //$camilaUI->insertLineBreak();
 
   $form = new phpform('camila');
   $form->submitbutton = camila_get_translation('camila.export.xml2pdf');
@@ -60,18 +65,10 @@
 
   $form->draw();
   
-  $myText = new CHAW_text('');
-  $_CAMILA['page']->add_text($myText);
-
-  $export_format = 'camila_xml2pdf';
-  $url = $_SERVER['PHP_SELF'] . '?' . $_SERVER['QUERY_STRING'];
-  $url = preg_replace("&" . $export_format, '', $url);
-  $url = preg_replace("\?" . $export_format, '', $url);
-  $myLink = new CHAW_link(camila_get_translation('camila.back.page'), $url);
-  $myLink->set_css_class('btn btn-md btn-default');
-  $myImage = new HAW_image(CAMILA_IMG_DIR.'wbmp/resultset_previous.wbmp', CAMILA_IMG_DIR.'png/resultset_previous.png', '-');
-  $myLink->add_image($myImage);
-  $_CAMILA['page']->add_link($myLink);
+  //$myText = new CHAW_text('');
+  //$_CAMILA['page']->add_text($myText);
+  
+  $camilaUI->closeBox();
 
   $_CAMILA['page']->use_simulator(CAMILA_CSS_DIR . 'skin0.css');
 
