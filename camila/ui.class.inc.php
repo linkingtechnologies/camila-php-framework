@@ -47,8 +47,23 @@ class CamilaUserInterface
 	function closeButtonBar() {
 		global $_CAMILA;
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
-	}	
+	}
 	
+	function openMenuSection($title) {
+		global $_CAMILA;
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<aside class="menu"><p class="menu-label">'.$title.'</p><ul class="menu-list">'));
+	}
+	
+	function addItemToMenuSection($url, $title) {
+		global $_CAMILA;
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<li><a href="'.$url.'">'.$title.'</a></li>'));
+	}
+
+	function closeMenuSection() {
+		global $_CAMILA;
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</ul></aside>'));
+	}
+
 	function insertButton($link, $text, $icon, $br = true, $badge='', $target='_self') {
 		global $_CAMILA;
 
