@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2022 Umberto Bresciani
+    Copyright (C) 2006-2025 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,8 +21,11 @@ $_CAMILA['page']->camila_export_enabled = false;
 
 $camilaUI = new CamilaUserInterface();
 $camilaUI->insertLineBreak();
+$camilaUI->insertLineBreak();
 
+$camilaUI->openBox();
+$camilaUI->insertTitle(camila_get_translation('camila.worktable.reconfig'),'cog');
 $configurator = new configurator();
 $configurator->configure_table($_REQUEST['camila_custom'], false, $_REQUEST['camila_returl']);
-
+$camilaUI->closeBox();
 ?>

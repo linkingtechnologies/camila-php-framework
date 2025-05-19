@@ -810,8 +810,8 @@ class configurator
         }
         
         if (!isset($_REQUEST['camila_delete']) && $id != '') {
-			$myText = new CHAW_text('');
-			$_CAMILA['page']->add_text($myText);
+			//$myText = new CHAW_text('');
+			//$_CAMILA['page']->add_text($myText);
             $myText = new CHAW_text(camila_get_translation('camila.wizard.configurecolumns'));
 			$myText->set_br(2);
             $_CAMILA['page']->add_text($myText);
@@ -878,7 +878,11 @@ class configurator
             $form->fields['order_dir']->value   = $order_dir;
             
             $form->process();
+			
+			//$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="box">'));
             $form->draw();
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+
         }
         
         $dbform                         = new dbform(CAMILA_TABLE_WORKC, 'id', 'sequence,name,name_abbrev,type,listbox_options,maxlength,required,readonly,must_be_unique,default_value,field_options,autosuggest_wt_name,autosuggest_wt_colname', 'sequence', 'asc', '(wt_id=' . $_CAMILA['db']->qstr($id) . ' and is_deleted<>' . $_CAMILA['db']->qstr('y') . ')', true, false, true, false, false);
