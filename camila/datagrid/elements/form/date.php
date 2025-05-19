@@ -1,8 +1,6 @@
 <?php
-  require_once(CAMILA_DIR.'datagrid/elements/form/field.php');
-
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -21,9 +19,8 @@
 
   class form_date extends form_field
   {
-      var $calendar_theme_file = 'calendar-system.css';
-      var $calendar_lang_file = 'lang/calendar-it.js';
-      var $calendar_setup_file = 'calendar-setup.js';
+      var $calendar_theme_file = 'flatpickr.min.css';
+      var $calendar_lang_file = 'l10n/it.js';
       var $form;
 
       function __construct(&$form, $field, $title, $required = false, $validation)
@@ -54,8 +51,7 @@
           ksort($f);
           reset($f);
           $count = 0;
-          //while (list($k, $v) = each($f)) {
-		  foreach ($f as $k => $v) {
+		  foreach($f as $k => $v) {
               $fmt.=$v;
               $fmt2.='%'.$v;
               $tFormat.=camila_get_translation('camila.dateformat.placeholder.'.$v);
@@ -68,7 +64,7 @@
           }
 
           if ($this->value!='' && $this->value!='0000-00-00') {
-              $tDate = $_CAMILA['db']->UserDate($this->value , $fmt);
+              $tDate = $_CAMILA['db']->UserDate($this->value, $fmt);
           }
           else
               $this->value = '';
@@ -85,18 +81,17 @@
             $form->add_input($myInput);
 
             global $_CAMILA;
-            $code  = ( '<link rel="stylesheet" type="text/css" media="all" href="' .CAMILA_LIB_DIR .'jscalendar/' . $this->calendar_theme_file . '" />');
-            $code .= ( '<script src=\''.CAMILA_LIB_DIR.'jscalendar/calendar.js\'></script>' );
-            $code .= ( '<script src=\''.CAMILA_LIB_DIR.'jscalendar/' . $this->calendar_lang_file .'\'></script>' );
-            $code .= ( '<script src=\''.CAMILA_LIB_DIR.'jscalendar/' . $this->calendar_setup_file . '\'></script>' );
+
+            $code  = ('<link rel="stylesheet" type="text/css" media="all" href="' .CAMILA_LIB_DIR .'/flatpickr/' . $this->calendar_theme_file . '" />');
+            $code .= ('<script src=\''.CAMILA_LIB_DIR.'/flatpickr/flatpickr.js\'></script>');
+			if ($_CAMILA['lang'] != 'en') {
+				$code .= ('<script src=\''.CAMILA_LIB_DIR.'flatpickr/' . $this->calendar_lang_file .'\'></script>');
+			}
             $_CAMILA['page']->camila_add_js($code,'jscalendar');
 
-            $code = ( '<script>xParent(\''.$this->key.'\',true).removeChild(xNextSib(\''.$this->key.'\',\'br\'))</script>' );
-            $js = new CHAW_js($code);
+            $code = '<script>flatpickr("#'.$this->key.'", {dateFormat: "'.$fmt.'",locale: "it"})</script>';
+			$js = new CHAW_js($code);
             $form->add_userdefined($js);
-
-            $popup = new CHAW_js("<a href=\"#\" id=\"f-calendar-trigger-" . $this->key . "\"><img src=\"".CAMILA_LIB_DIR."jscalendar/img.gif\" alt=\"\" align=\"middle\" border=\"0\"></a><script type=\"text/javascript\">Calendar.setup({\"ifFormat\":\"".$fmt2."\",\"daFormat\":\"".$fmt2."\",\"firstDay\":1,\"showsTime\":false,\"showOthers\":false,\"timeFormat\":12,\"inputField\":\"" . $this->key . "\",\"button\":\"f-calendar-trigger-" . $this->key . "\"});</script>");
-            $form->add_userdefined($popup);
         } else {
               $myText = new CHAW_text($this->title.$this->labelseparator.' '.$tDate);
               $form->add_text($myText);	
@@ -123,7 +118,6 @@
           ksort($f);
           reset($f);
           $count = 0;
-          //while (list($k, $v) = each($f)) {
 		  foreach ($f as $k => $v) {
               $fmt.=$v;
               if ($count<2) {
