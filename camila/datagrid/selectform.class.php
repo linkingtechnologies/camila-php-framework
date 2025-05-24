@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ function camila_selectformdeletelink(&$field, &$row, $fields)
 	if (isset($_REQUEST['dashboard']))
 		$url .= '&dashboard='.$_REQUEST['dashboard'];
     $myLink = new CHAW_link(strtoupper(camila_get_translation('camila.deletebutton')), $url);
-	$myLink->set_css_class('btn btn-xs btn-default btn-danger');
+	$myLink->set_css_class('btn btn-xs btn-default btn-danger button is-danger is-small');
     $myLink->set_br(0);
     $row->add_column($myLink);
 }

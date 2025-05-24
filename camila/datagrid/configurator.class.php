@@ -142,7 +142,8 @@ function camila_configurator_reconfig(&$field, &$row, $fields)
 {
     global $_CAMILA;
     $myLink = new CHAW_link(camila_get_translation('camila.worktable.reconfig'), 'cf_worktable_wizard_step2.php?camila_custom=' . $field->value);
-    $myLink->set_br(0);
+    $myLink->set_css_class('button is-primary is-small');
+	$myLink->set_br(0);
     $row->add_column($myLink);
 }
 
@@ -151,7 +152,8 @@ function camila_configurator_delete(&$field, &$row, $fields)
 {
     global $_CAMILA;
     $myLink = new CHAW_link(camila_get_translation('camila.worktable.delete'), 'cf_worktable_admin.php?camila_custom=' . $field->value . '&camila_worktable_op=delete');
-    $myLink->set_br(0);
+    $myLink->set_css_class('button is-danger is-small');
+	$myLink->set_br(0);
     $row->add_column($myLink);
 }
 
