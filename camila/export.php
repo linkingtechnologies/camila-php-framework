@@ -124,7 +124,7 @@ if (!CAMILA_FM_EXPORT_SAVETO_DISABLED)
       $myForm->add_text($text);
 
       $theSubmission = new CHAW_submit('Salva', 'camila_save');
-	  $theSubmission->set_css_class('btn btn-md btn-primary');
+	  $theSubmission->set_css_class('btn btn-md btn-primary button is-small is-primary');
       $myForm->add_submit($theSubmission);
       $_CAMILA['page']->add_form($myForm);
 
@@ -175,7 +175,7 @@ if (!CAMILA_FM_EXPORT_SAVETO_DISABLED)
           $url = ereg_replace("\?" . $_REQUEST['camila_export_format'], '', $url);
           $myLink = new CHAW_link(camila_get_translation('camila.back.page'), $url);
           $myImage2 = new HAW_image(CAMILA_IMG_DIR . 'wbmp/resultset_previous.wbmp', CAMILA_IMG_DIR . 'png/resultset_previous.png', '-');
-          $myLink->set_css_class('btn btn-md btn-default');
+          $myLink->set_css_class('btn btn-md btn-default button is-small');
 		  $myLink->add_image($myImage2);
           
 		  $_CAMILA['page']->add_link($myLink);
@@ -210,7 +210,7 @@ if (!CAMILA_FM_EXPORT_SAVETO_DISABLED)
           $myLink = new CHAW_link(camila_get_translation('camila.fm.fileexists.cancel'), $url);
           $myImage2 = new HAW_image(CAMILA_IMG_DIR . 'wbmp/resultset_previous.wbmp', CAMILA_IMG_DIR . 'png/resultset_previous.png', '-');
           $myLink->add_image($myImage2);
-          $myLink->set_css_class('btn btn-md btn-default');
+          $myLink->set_css_class('btn btn-md btn-default button is-small');
 		  $_CAMILA['page']->add_link($myLink);
       }
 

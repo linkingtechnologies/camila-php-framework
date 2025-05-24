@@ -573,9 +573,9 @@ $(document).ready(function(){
                   $link = $_CAMILA['page_url'] . '&camila_update=new';
 
               if ($this->caninsert) {
-                      $myLink = new CHAW_link(camila_get_translation('camila.report.insertnew'), $link);
+                  $myLink = new CHAW_link(camila_get_translation('camila.report.insertnew'), $link);
 	              $myLink->set_br(2);
-				  $myLink->set_css_class('btn btn-md btn-default');
+				  $myLink->set_css_class('btn btn-md btn-default button is-small is-primary');
 	              $_CAMILA['page']->add_link($myLink);
               }
 
