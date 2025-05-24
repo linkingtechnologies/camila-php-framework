@@ -1083,7 +1083,7 @@ class report
 			$myDivOpen = new HAW_raw(HAW_HTML, '<div class="buttons is-flex is-flex-wrap-wrap is-align-items-center">');
 			$_CAMILA['page']->add_raw($myDivOpen);
 		}
-			
+	
         if ($this->rows > 0 && !$_CAMILA['page']->camila_exporting()) {
 
             if ($this->page > 2) {
@@ -1169,11 +1169,18 @@ class report
 		
         }
 		
-		//???
-		/*if ($this->rows < 0 && !$_CAMILA['page']->camila_exporting()) {
-			$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
-			$_CAMILA['page']->add_raw($myDivOpen);
-		}*/
+		if ($this->rows < 0 && !$_CAMILA['page']->camila_exporting()) {
+			//$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
+			//$_CAMILA['page']->add_raw($myDivOpen);
+			
+			if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
+				$myDivOpen = new HAW_raw(HAW_HTML, '<div class="dropdown"><div class="dropdown-trigger"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="icon is-small ml-1"><i class="ri-arrow-down-s-line"></i></span></button></div><div class="dropdown-menu" id="dropdown-menu" role="menu"><div class="dropdown-content">');
+				$_CAMILA['page']->add_raw($myDivOpen);
+			} else {
+				$myDivOpen = new HAW_raw(HAW_HTML, '<div class="btn-group dropdown"><button type="button" data-toggle="dropdown" class="btn btn-default '.$this->bootstrapbuttonsize.' dropdown-toggle button is-light is-small">'.camila_get_translation('camila.worktable.options').' <span class="caret"></span></button><ul class="dropdown-menu"><li>');
+				$_CAMILA['page']->add_raw($myDivOpen);
+			}
+		}
 
         if (!$_CAMILA['page']->camila_exporting()) {
             if ($this->defaultfields != '') {          
