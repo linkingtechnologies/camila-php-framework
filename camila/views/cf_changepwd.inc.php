@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2022 Umberto Bresciani
+    Copyright (C) 2006-2025 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,21 +24,28 @@ if (CAMILA_USER_CAN_CHANGE_PWD) {
 
 	$camilaAuth = new CamilaAuth();
 	$camilaAuth->db = $_CAMILA['db'];
-	//$camilaAuth->userTable = CAMILA_TABLE_USERS;
-	//$camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
-	//$camilaAuth->authUserTable = CAMILA_AUTH_TABLE_USERS;
+	
+	$camilaUI = new CamilaUserInterface();
+	
+	$camilaUI->insertLineBreak();
+	$camilaUI->insertLineBreak();
+
+	$camilaUI->openBox();
+	$camilaUI->insertTitle(camila_get_translation('camila.login.changepwd'),'user');
+	
+	$camilaUI->openButtonBar();
+	$camilaUI->insertSecondaryButton('./', camila_get_translation('camila.back'), 'chevron-left');
+	$camilaUI->closeButtonBar();
 
 	$username = $camilaAuth->getUsernameFromSession();
-
-	$text = new CHAW_text($username);
-	$text->set_br(2);
-	$_CAMILA['page']->add_text($text);
 	
 	$form = new phpform('cf_changepwd');
 	$form->submitbutton = camila_get_translation('camila.updatebutton');
 	$form->drawrules = false;
 	$form->preservecontext = true;
-
+	new form_textbox($form, 'username', camila_get_translation('camila.login.username'));
+	$form->fields['username']->value = $username;
+	$form->fields['username']->updatable = false;
 	new form_password($form, 'old', camila_get_translation('camila.form.oldpassword'), true, 30, 200);
 	new form_password($form, 'new', camila_get_translation('camila.form.password'), true, 30, 200);
 	new form_password($form, 'confirmnew', camila_get_translation('camila.form.confirmpassword'), true, 30, 200);
@@ -51,8 +58,6 @@ if (CAMILA_USER_CAN_CHANGE_PWD) {
 		$new2 = $form->fields['new']->originalValue;
 		$confirmnew = $form->fields['confirmnew']->value;
 		$confirmnew2 = $form->fields['confirmnew']->originalValue;
-		//echo $new;
-		//echo $confirmnew;
 		if ($new2 != $confirmnew2) {
 			camila_error_text(camila_get_translation('camila.formvalidationerror911'));
 		}
@@ -71,6 +76,8 @@ if (CAMILA_USER_CAN_CHANGE_PWD) {
 	}
 	else
 		$form->draw();
+	
+	$camilaUI->closeBox();
 }
 
 ?>

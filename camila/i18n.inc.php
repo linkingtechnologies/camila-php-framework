@@ -19,7 +19,7 @@
 
   }
 
-    function camila_get_translation($string)
+  function camila_get_translation($string)
   {
       global $_CAMILA;
 
@@ -47,27 +47,19 @@
       return $tr;
   }
 
-    function camila_error_text($msg)
+  function camila_error_text($msg)
   {
       global $_CAMILA;
       if (is_object($_CAMILA['page'])) {
           $msg=\ForceUTF8\Encoding::toUTF8($msg);
           $text = new CHAW_text($msg, HAW_TEXTFORMAT_BOLD);
-          //$text->set_color('red');
-          //$text->set_br(2);
+		  $text->set_br(0);
           $msg = str_replace("\n", '\n', $msg);
 
-		  $myHtmlCode = '<div class="alert alert-danger notification is-danger" role="alert"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span><span class="sr-only">Error:</span>';
+		  $myHtmlCode = '<div class="alert alert-danger notification is-danger" role="alert"><i class="ri-error-warning-line"></i>';
 		  $myDiv = new HAW_raw(HAW_HTML, $myHtmlCode);
 		  $_CAMILA['page']->add_raw($myDiv);
-	
-		  
-          $_CAMILA['page']->add_text($text);
-          /*$_CAMILA['page']->camila_add_js("<script type=\"text/javascript\">\n");
-          $_CAMILA['page']->camila_add_js("  camila_addDOMLoadEvent ( function()\n");
-          $_CAMILA['page']->camila_add_js("  {alert ('" . str_replace("'", "\'", $msg) . "') })");
-          $_CAMILA['page']->camila_add_js("</script>\n");*/
-		  
+          $_CAMILA['page']->add_text($text);		  
 		  $myHtmlCode = '</div>';
 		  $myDiv = new HAW_raw(HAW_HTML, $myHtmlCode);
 		  $_CAMILA['page']->add_raw($myDiv);
@@ -75,7 +67,6 @@
           echo $msg;
       }
   }
-
 
   function camila_information_text($msg)
   {
@@ -90,14 +81,11 @@
 	  $myDiv = new HAW_raw(HAW_HTML, $myHtmlCode);
 	  $_CAMILA['page']->add_raw($myDiv);
       $text = new CHAW_text($msg, HAW_TEXTFORMAT_BOLD);
-      //$text->set_br(2);
-      //$text->set_color('red');
       $_CAMILA['page']->add_text($text);
 	  $myHtmlCode = '</div>';
 	  $myDiv = new HAW_raw(HAW_HTML, $myHtmlCode);
 	  $_CAMILA['page']->add_raw($myDiv);
 	}
   }
-
 
 ?>

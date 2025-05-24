@@ -921,6 +921,7 @@ class configurator
         
         if ($id != '') {
             $myLink = new CHAW_link(camila_get_translation('camila.worktable.field.addnew'), 'cf_worktable_wizard_step2.php?camila_custom=' . $id . '&camila_addfield=y');
+			$myLink->set_css_class('button is-small');
             $myLink->set_br(2);
             $_CAMILA['page']->add_link($myLink);
         }
