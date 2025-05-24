@@ -75,7 +75,7 @@
       function draw_delete($button_text)
       {
           $theSubmission = new CHAW_submit($button_text, 'submit_delete');
-		  $theSubmission->set_css_class('btn btn-danger button is-danger');
+		  $theSubmission->set_css_class('btn btn-danger button is-small is-danger');
           $this->form->add_submit($theSubmission);
       }
 
@@ -119,7 +119,6 @@
 
           if ($this->drawheadersubmitbutton) {
 			  
-			  //Nascondo tasto se non posso aggiornare
 			  if (!$this->canupdate && $this->mode == 'update')
 				  return;
 
@@ -129,7 +128,7 @@
               }
 
               if (isset($_REQUEST['camila_delete']) && $this->mode != 'insert')
-                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-small is-primary" type="submit" name="submit_button_header" id="hawinputsubmitheader">'.camila_get_translation('camila.deletebutton').'</button><br /><br />');
+                  $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-small is-danger" type="submit" name="submit_button_header" id="hawinputsubmitheader">'.camila_get_translation('camila.deletebutton').'</button><br /><br />');
               else
                   $js = new CHAW_js('<button class="btn btn-md btn-primary btn-space button is-small is-primary" type="submit" name="submit_button_header" id="hawinputsubmitheader">'.camila_get_translation('camila.' . $this->mode . 'button').'</button><br /><br />');
 

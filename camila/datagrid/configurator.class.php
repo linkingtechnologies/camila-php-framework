@@ -2216,7 +2216,6 @@ class configurator
     
     function is_configuration_sheet($data, $sheetnum)
     {
-        
         $confCell = \ForceUTF8\Encoding::toUTF8($data->val(17, 1, $sheetnum));
         $text     = camila_get_translation('camila.worktable.configuration');
         //if (!isUTF8($text))
@@ -2228,14 +2227,13 @@ class configurator
     
     function operation($id, $operation, $returl)
     {
-        
         global $_CAMILA;
         
         if ($operation == 'delete') {
             require_once(CAMILA_DIR . 'datagrid/form.class.php');
             require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
             
-            $form3               = new phpform('camila', 'cf_worktable_admin.php');
+            $form3 = new phpform('camila', 'cf_worktable_admin.php');
             $form3->submitbutton = camila_get_translation('camila.worktable.delete');
             $form3->drawrules    = false;
             new form_hidden($form3, 'custom', $id);
@@ -2244,7 +2242,6 @@ class configurator
                 new form_hidden($form3, 'returl', $returl);
             
             if ($form3->process()) {
-                
                 $result = $_CAMILA['db']->Execute('select tablename,scriptname from ' . CAMILA_TABLE_WORKT . ' where id=' . $_CAMILA['db']->qstr($id));
                 if ($result === false)
                     camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
@@ -2297,7 +2294,7 @@ class configurator
             require_once(CAMILA_DIR . 'datagrid/form.class.php');
             require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
             
-            $form3               = new phpform('camila', 'cf_worktable_admin.php');
+            $form3 = new phpform('camila', 'cf_worktable_admin.php');
             $form3->submitbutton = camila_get_translation('camila.worktable.delete');
             $form3->drawrules    = false;
             new form_hidden($form3, 'custom', $id);
