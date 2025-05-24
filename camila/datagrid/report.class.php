@@ -1611,6 +1611,9 @@ class report
     function _editcolumns()
     {
         global $_CAMILA;
+		$camilaUI = new CamilaUserInterface();
+		$camilaUI->openBox();
+		$camilaUI->insertTitle(camila_get_translation('camila.report.navbox.addremcols'),'cog');
         $form = new CHAW_form($_SERVER['PHP_SELF']);
         
         foreach ($_REQUEST as $key => $value) {
@@ -1673,9 +1676,11 @@ class report
         $text->set_br(2);
         $form->add_text($text);
         
-        $theSubmission = new CHAW_submit('Ok', 'camila_save');
+        $theSubmission = new CHAW_submit(camila_get_translation('camila.save'), 'camila_save');
+		$theSubmission->set_css_class('button is-small is-primary');
         $form->add_submit($theSubmission);
         $_CAMILA['page']->add_form($form);
+		$camilaUI->closeBox();
     }
 }
 ?>
