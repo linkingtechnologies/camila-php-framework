@@ -13,7 +13,7 @@
         scrollbar.show();
         if (top(element) < top(scrollbar) && bottom(element) > bottom(scrollbar)) {
             scrollbar.find('div').css('width', element.get(0).scrollWidth + 'px');
-            scrollbar.css({left: element.offset().left, width: element.outerWidth()});
+            scrollbar.css({ left: element.offset().left, width: element.outerWidth() });
             scrollbar.scrollLeft(scrollLeft);
         } else {
             scrollbar.hide();
@@ -42,32 +42,53 @@
             scrollbar.find('div').css('height', '1px');
             onscroll(element, scrollbar, scrollLeft);
 
-            scrollbar.bind('scroll.sticky-hscroll-' + id, function () {
+            // Synchronize scrollbar and element scroll positions
+            scrollbar.on('scroll.sticky-hscroll-' + id, function () {
                 element.scrollLeft(scrollbar.scrollLeft());
             });
-            element.bind('scroll.sticky-hscroll-' + id, function () {
+            element.on('scroll.sticky-hscroll-' + id, function () {
                 scrollLeft = element.scrollLeft();
             });
-            $(document).bind('scroll.sticky-hscroll-' + id, function () {
+
+            // Adjust scrollbar position on scroll and resize
+            $(document).on('scroll.sticky-hscroll-' + id, function () {
                 onscroll(element, scrollbar, scrollLeft);
             });
-            $(window).bind('resize.sticky-hscroll-' + id, function () {
+            $(window).on('resize.sticky-hscroll-' + id, function () {
                 onscroll(element, scrollbar, scrollLeft);
             });
 
-            element.bind('DOMNodeRemoved, DOMNodeRemovedFromDocument', function () {
-                $(document).unbind('.sticky-hscroll-' + id);
-                $(window).unbind('.sticky-hscroll-' + id);
-                scrollbar.unbind('.sticky-hscroll-' + id);
-                element.unbind('.sticky-hscroll-' + id);
-                scrollbar.remove();
+            // Use MutationObserver to detect when the element is removed from the DOM
+            var observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
+                    mutation.removedNodes.forEach(function (removed) {
+                        if (removed === element[0]) {
+                            // Clean up all associated event handlers and elements
+                            $(document).off('.sticky-hscroll-' + id);
+                            $(window).off('.sticky-hscroll-' + id);
+                            scrollbar.off('.sticky-hscroll-' + id);
+                            element.off('.sticky-hscroll-' + id);
+                            scrollbar.remove();
+                            observer.disconnect();
+                        }
+                    });
+                });
             });
+
+            // Start observing the element's parent for child removals
+            if (element[0].parentNode) {
+                observer.observe(element[0].parentNode, {
+                    childList: true
+                });
+            }
         });
     }
 
     $.fn.stickyHScroll = function () {
         var container = this;
         init(container);
+
+        // Re-initialize on scroll and resize to catch new elements
         $(document).scroll(function () {
             init(container);
         });

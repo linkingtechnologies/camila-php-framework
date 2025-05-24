@@ -1013,7 +1013,7 @@ class report
             //    $js = new CHAW_js($code);
             //    $_CAMILA['page']->add_userdefined($js);
             
-			$_CAMILA['page']->camila_add_js("<script type='text/javascript' src='".CAMILA_LIB_DIR."sticky-hscroll/sticky-hscroll.js'></script>\n", 'sticky-hscroll');
+			$_CAMILA['page']->camila_add_js("<script type='text/javascript' src='".CAMILA_DIR."js/sticky-hscroll.js'></script>\n", 'sticky-hscroll');
 			
 			
 			$_CAMILA['page']->camila_add_js("<script type='text/javascript'>$(document).ready(function () {\n $('body').stickyHScroll();\n});</script>", 'sticky-hscroll-init');
