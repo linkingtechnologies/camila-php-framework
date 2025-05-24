@@ -1611,6 +1611,7 @@ class report
     function _editcolumns()
     {
         global $_CAMILA;
+		$_CAMILA['page']->camila_export_enabled = false;
 		$camilaUI = new CamilaUserInterface();
 		$camilaUI->openBox();
 		$camilaUI->insertTitle(camila_get_translation('camila.report.navbox.addremcols'),'cog');
