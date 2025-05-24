@@ -1584,12 +1584,12 @@ class configurator
             case 'date':
                 //$this->add_require('date');
                 $script = "new form_date(\$form, '$field', '$name', $required, '$validation');";
-                $this->menuitems_script .= "\$jarr=Array();\n";
-                $this->menuitems_script .= "\$jarr['url'] = \"javascript:camila_inline_update_selected('" . $field . "','')\";\n";
-                $this->menuitems_script .= "\$jarr['visible'] = 'yes';\n";
-                $this->menuitems_script .= "\$jarr['short_title'] = 'MODIFICA " . $name . "...';\n";
-                $this->menuitems_script .= "\$jarr['parent'] = 'index.php';\n";
-                $this->menuitems_script .= "\$report->menuitems[]=\$jarr;\n";
+                //$this->menuitems_script .= "\$jarr=Array();\n";
+                //$this->menuitems_script .= "\$jarr['url'] = \"javascript:camila_inline_update_selected('" . $field . "','')\";\n";
+                //$this->menuitems_script .= "\$jarr['visible'] = 'yes';\n";
+                //$this->menuitems_script .= "\$jarr['short_title'] = 'MODIFICA " . $name . "...';\n";
+                //$this->menuitems_script .= "\$jarr['parent'] = 'index.php';\n";
+                //$this->menuitems_script .= "\$report->menuitems[]=\$jarr;\n";
                 break;
             
             case 'datetime':
@@ -1603,23 +1603,22 @@ class configurator
                 //$this->add_require('static_listbox');
                 $script = "new form_static_listbox(\$form, '$field', '$name', '$options', $required, '$validation');";
                 
-                $this->menuitems_script .= "\$jarr=Array();\n";
+                /*$this->menuitems_script .= "\$jarr=Array();\n";
                 $this->menuitems_script .= "\$jarr['url'] = '" . $field . "';\n";
                 $this->menuitems_script .= "\$jarr['visible'] = 'yes';\n";
                 $this->menuitems_script .= "\$jarr['short_title'] = 'MODIFICA " . $name . "';\n";
                 $this->menuitems_script .= "\$jarr['parent'] = 'index.php';\n";
-                $this->menuitems_script .= "\$report->menuitems[]=\$jarr;\n";
+                $this->menuitems_script .= "\$report->menuitems[]=\$jarr;\n";*/
                 
-                $opts = explode(',', $options);
+                /*$opts = explode(',', $options);
                 foreach ($opts as $key => $value) {
                     $this->menuitems_script .= "\$jarr=Array();\n";
                     $this->menuitems_script .= "\$jarr['url'] = \"javascript:camila_inline_update_selected('" . $field . "','" . str_replace("\"", "\\\"", $value) . "')\";\n";
-                    //$this->menuitems_script .= "\$jarr['url'] = \"javascript:camila_inline_update_selected('".$field."','".$value."')\";\n";
                     $this->menuitems_script .= "\$jarr['visible'] = 'yes';\n";
                     $this->menuitems_script .= "\$jarr['short_title'] = '" . $value . "';\n";
                     $this->menuitems_script .= "\$jarr['parent'] = '" . $field . "';\n";
                     $this->menuitems_script .= "\$report->menuitems[]=\$jarr;\n";
-                }
+                }*/
                 
                 
                 break;
@@ -1659,12 +1658,12 @@ class configurator
                 //$this->add_require('textbox');
                 $script = "new form_textbox(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";
                 
-                $this->menuitems_script .= "\$jarr=Array();\n";
-                $this->menuitems_script .= "\$jarr['url'] = \"javascript:camila_inline_update_selected('" . $field . "','')\";\n";
-                $this->menuitems_script .= "\$jarr['visible'] = 'yes';\n";
-                $this->menuitems_script .= "\$jarr['short_title'] = 'MODIFICA " . $name . "...';\n";
-                $this->menuitems_script .= "\$jarr['parent'] = 'index.php';\n";
-                $this->menuitems_script .= "\$report->menuitems[]=\$jarr;\n";
+                //$this->menuitems_script .= "\$jarr=Array();\n";
+                //$this->menuitems_script .= "\$jarr['url'] = \"javascript:camila_inline_update_selected('" . $field . "','')\";\n";
+                //$this->menuitems_script .= "\$jarr['visible'] = 'yes';\n";
+                //$this->menuitems_script .= "\$jarr['short_title'] = 'MODIFICA " . $name . "...';\n";
+                //$this->menuitems_script .= "\$jarr['parent'] = 'index.php';\n";
+                //$this->menuitems_script .= "\$report->menuitems[]=\$jarr;\n";
                 
         }
         

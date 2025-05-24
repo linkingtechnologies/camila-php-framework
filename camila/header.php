@@ -32,8 +32,8 @@ $camilaAuth->userTable = CAMILA_TABLE_USERS;
 $camilaAuth->authUserTable = CAMILA_AUTH_TABLE_USERS;
 $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
 
-$useSmartMenus = true;
-$smartMenusTheme = 'sm-camila';
+//$useSmartMenus = true;
+//$smartMenusTheme = 'sm-camila';
 
   function camila_ob_file_callback($buffer)
   {
@@ -739,50 +739,38 @@ $smartMenusTheme = 'sm-camila';
 	  
 
       if ($_CAMILA['user_loggedin'] == 1) {
-          $camila_menu_id = $_CAMILA['skin'];
+          //$camila_menu_id = $_CAMILA['skin'];
 		  
-		  $code = "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."dommenu/domLib.js\"></script>\n";
-          $code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."dommenu/domMenu.js\"></script>\n";
+		  //$code = "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."dommenu/domLib.js\"></script>\n";
+          //$code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."dommenu/domMenu.js\"></script>\n";
 
-		  $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/menu.js\"></script>\n";
-		  $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/menu" . $camila_menu_id . ".js\"></script>\n";
-			//$code .="<link href=\"".CAMILA_LIB_DIR."smartmenus/libs/demo-assets/bootstrap/css/bootstrap.min.css\" rel=\"stylesheet\">\n";
+		  //$code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/menu.js\"></script>\n";
+		  //$code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/menu" . $camila_menu_id . ".js\"></script>\n";
 
-		  if ($useSmartMenus) {
 		    $_CAMILA['mainmenu'] = $jarr;
-			
-			$code .="<link href=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.css\" rel=\"stylesheet\">\n";
+
+			//$code .="<link href=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.css\" rel=\"stylesheet\">\n";
 
 		    $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/jquery/jquery.min.js?v=2025\"></script>\n";
 
 			if (!defined('CAMILA_APPLICATION_UI_KIT') || (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bootstrap3')) {
 				$code .="<script src=\"".CAMILA_LIB_DIR."bootstrap/js/bootstrap.min.js\"></script>\n";
 			}
-		    $code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."smartmenus/jquery.smartmenus.js?v?2025\"></script>\n";
-			$code .="<script src=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.js?v=2025\"></script>\n";
+		    //$code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."smartmenus/jquery.smartmenus.js?v?2025\"></script>\n";
+			//$code .="<script src=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.js?v=2025\"></script>\n";
 
-			//$code .="<script src=\"".CAMILA_LIB_DIR."x-editable/bootstrap3-editable/js/bootstrap-editable.js\"></script>\n";
-			//$code .="<link href=\"".CAMILA_LIB_DIR."x-editable/bootstrap3-editable/css/bootstrap-editable.css\" rel=\"stylesheet\">\n";
 
 			$code .="<script src=\"".CAMILA_DIR."js/jquery/jquery.poshytip.js\"></script>\n";
 			$code .="<script src=\"".CAMILA_DIR."js/x-editable/jquery-editable-poshytip.min.js\"></script>\n";
 			$code .="<link href=\"".CAMILA_DIR."css/x-editable/jquery-editable.css\" rel=\"stylesheet\">\n";
 
-			//$code .="<script scr=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.js\"></script>\n";
-			//$code .="<script type=\"text/javascript\">\$(function() {\$('#main-menu').smartmenus({subMenusSubOffsetX: 1,subMenusSubOffsetY: -8});});</script>";
-
-			//$code .="<link href=\"".CAMILA_LIB_DIR."/smartmenus/css/sm-core-css.css\" rel=\"stylesheet\" type=\"text/css\" />\n";
-			//$code .="<link href=\"".CAMILA_LIB_DIR."smartmenus/css/sm-core-css.css\" rel=\"stylesheet\" type=\"text/css\" />\n";
-			//$code .="<link href=\"".CAMILA_DIR."css/smartmenus/".$smartMenusTheme."/".$smartMenusTheme.".css\" rel=\"stylesheet\" type=\"text/css\" />\n";
-		  }
-		  else
+		  /*else
 		  {
 		    $json = new Services_JSON();
             $jarr2 = $json->encode($jarr);
             $code .= "<script>camila_addDOMLoadEvent ( function() {";          
-            //$code .= "var a = '" . chunk_split(str_replace(array("'","\\u0000","\\"), array("\'","","\\\\"), $jarr2), 100, "'+\n'") . "'; camilamenu_init(a);} )</script>";
             $code .= "var a = '" . str_replace(array("'","\\u0000"), array("\'",""), $jarr2) . "'; camilamenu_init(a);} )</script>";
-		  }
+		  }*/
           $_CAMILA['page']->camila_add_js($code);
       }
 	  
@@ -893,7 +881,7 @@ if (!$_CAMILA['page']->camila_exporting())
   $js = new CHAW_js($code);
   $_CAMILA['page']->add_userdefined($js);
 
-  $_CAMILA['page']->smartMenusTheme = $smartMenusTheme;
+  //$_CAMILA['page']->smartMenusTheme = $smartMenusTheme;
 
 
 require('../../camila/views/cf_worktable_rebuild.inc.php');

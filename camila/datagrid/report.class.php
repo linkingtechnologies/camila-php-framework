@@ -1009,7 +1009,7 @@ class report
 			
             
             
-            //                  $code = "<div id='camilatablemenu' class='camilaWorkTableRSMenu'><p><b>Menu 1</b></p><p><a href=''>item 1</a></p><p><a href=''>item 2</a></p><p><a href=''>item 3</a></p></div>";
+            //    $code = "<div id='camilatablemenu' class='camilaWorkTableRSMenu'><p><b>Menu 1</b></p><p><a href=''>item 1</a></p><p><a href=''>item 2</a></p><p><a href=''>item 3</a></p></div>";
             //    $js = new CHAW_js($code);
             //    $_CAMILA['page']->add_userdefined($js);
             
@@ -1023,7 +1023,7 @@ class report
             //$json  = new Services_JSON();
             //$jarr2 = $json->encode($this->menuitems);
 			
-			if ($_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP)
+			/*if ($_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP)
 			{
 				$jarr2 = json_encode($this->menuitems);
 				$code  = "<script>camila_addDOMLoadEvent ( function() {";
@@ -1035,7 +1035,7 @@ class report
 					""
 				), $jarr2) . "'; camilatablemenu_init(a);} )</script>";
 				$_CAMILA['page']->camila_add_js($code);
-            }
+            }*/
             
             $text = new CHAW_text('');
             $_CAMILA['page']->add_text($text);
