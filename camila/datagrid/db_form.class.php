@@ -340,7 +340,7 @@ $(document).ready(function(){
           $first = false;
 
           reset($this->fields);
-          //while ($afield = each($this->fields)) {
+		  $uuidFound = false;
 		  foreach ($this->fields as $key => $val) {
 			  $afield = [$key, $val];
               if ((!$afield[1]->updatable && !isset($afield[1]->defaultvalue)) || $afield[1]->field == '' || (substr(trim($afield[1]->field), 0, strlen('camilafield_')) == 'camilafield_') )
@@ -354,13 +354,16 @@ $(document).ready(function(){
                   $stmt .= $afield[1]->field;
               else
                   $stmt .= $this->table.'.'.$afield[1]->field;
+			  
+			  if ($afield[1]->field == 'uuid')
+				$uuidFound = true;
           }
 
           
 
           if ($_CAMILA['page']->camila_worktable) {
               $stmt .= ', created, created_by, created_src, created_by_surname, created_by_name, last_upd, last_upd_by, last_upd_src, last_upd_by_surname, last_upd_by_name, mod_num'; 
-			  	if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+			  	if (!$uuidFound && defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
 					$stmt .= ', uuid';
 				}
 		  }
@@ -373,7 +376,6 @@ $(document).ready(function(){
           $data = Array();
           
           reset($this->fields);
-          //while ($afield = each($this->fields)) {
 		  foreach ($this->fields as $key => $val) {
 			  $afield = [$key, $val];
               if ((!$afield[1]->updatable && !isset($afield[1]->defaultvalue)) || $afield[1]->field == '' || (substr(trim($afield[1]->field), 0, strlen('camilafield_')) == 'camilafield_'))
@@ -384,8 +386,7 @@ $(document).ready(function(){
                   $first = true;
  
               $stmt .= '?';
-			  //print_r($this->dbfields[$afield[1]->field]);
-			  //2017
+
               if (($this->dbfields[$afield[1]->field]['not_null'] == '0' || $isPostgres )&& $this->fields[$afield[1]->field]->value == '')
                   $data[$count] = null;
               else
@@ -396,7 +397,7 @@ $(document).ready(function(){
           if ($_CAMILA['page']->camila_worktable) {
               $stmt .= ',?,?,?,?,?,?,?,?,?,?,?';
 			  
-			  if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+			  if (!$uuidFound && defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
 					$stmt .= ',?';
 			  }
 
@@ -412,7 +413,7 @@ $(document).ready(function(){
               $data[$count+8] = $_CAMILA['user_surname'];
               $data[$count+9] = $_CAMILA['user_name'];
               $data[$count+10] = 0;
-			  if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+			  if (!$uuidFound && defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
 				$data[$count+11] = camila_generate_uuid();
 			  }
           }
