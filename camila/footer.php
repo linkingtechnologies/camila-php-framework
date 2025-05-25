@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2022 Umberto Bresciani
+   Copyright (C) 2006-2025 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 
   $text = new CHAW_text('');
   $text->set_br(2);
-
   $_CAMILA['page']->add_text($text);
 
   if (!$_CAMILA['auth_page'] && $_CAMILA['page']->camila_export_enabled && $_CAMILA['output'] == HAW_OUTPUT_AUTOMATIC && !$_CAMILA['page']->camila_exporting() /*($_CAMILA['page_url'] != CAMILA_LOGIN_HOME)*/ /*&& ($_CAMILA['page_url'] != CAMILA_HOME)*/ && (count($_POST) == 0 || isset($_REQUEST['camila_phpform_sent']))) {
@@ -28,13 +27,18 @@
       //$code = "<div id='camilabottomtoolbar'>";
 	  $code = '<section class="footery">'."\n";
 	  $code .= '<div class="container">'."\n";
+	  $code .= '<div class="is-flex is-flex-wrap-wrap is-size-7">';
 
       $js = new CHAW_js($code);
       $_CAMILA['page']->add_userdefined($js);
 
-      $text = new CHAW_text(camila_get_translation('camila.export.convertto'), HAW_TEXTFORMAT_SMALL);
+
+	$html = '<span class="is-size-7 mb-2 pr-2">'.camila_get_translation('camila.export.convertto').'</span>';
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
+	
+      /*$text = new CHAW_text(camila_get_translation('camila.export.convertto'), HAW_TEXTFORMAT_SMALL);
       $text->set_br(0);
-      $_CAMILA['page']->add_text($text);
+      $_CAMILA['page']->add_text($text);*/
 
       /*if ($_CAMILA['page']->camila_num_tables > 0 || $_CAMILA['page']->camila_csv_export_enabled) {
           $myLink = new CHAW_link('CSV', camila_get_export_link('csv'));
@@ -46,69 +50,77 @@
       }*/
 
       if ($_CAMILA['page']->camila_num_tables > 0 || $_CAMILA['page']->camila_xls_export_enabled || $_CAMILA['page']->camila_worktable) {
-          $myLink = new CHAW_link('XLS', camila_get_export_link('xls'));
+          camila_insert_export_link(camila_get_export_link('xls'), 'XLSX', camila_get_translation('camila.export.xls'), 'file-excel-2');
+		  /*$myLink = new CHAW_link('XLS', camila_get_export_link('xls'));
           $myLink->set_br(0);
           $_CAMILA['page']->add_link($myLink);
           $text = new CHAW_text(camila_get_translation('camila.export.xls'), HAW_TEXTFORMAT_SMALL);
           $text->set_br(0);
-          $_CAMILA['page']->add_text($text);
+          $_CAMILA['page']->add_text($text);*/
       }
 	  
 	  if ($_CAMILA['page']->camila_num_tables > 0 || $_CAMILA['page']->camila_ods_export_enabled || $_CAMILA['page']->camila_worktable) {
-          $myLink = new CHAW_link('ODS', camila_get_export_link('ods'));
+		  camila_insert_export_link(camila_get_export_link('ods'), 'ODS', camila_get_translation('camila.export.ods'), 'file-excel-2');
+          /*$myLink = new CHAW_link('ODS', camila_get_export_link('ods'));
           $myLink->set_br(0);
           $_CAMILA['page']->add_link($myLink);
           $text = new CHAW_text(camila_get_translation('camila.export.ods'), HAW_TEXTFORMAT_SMALL);
           $text->set_br(0);
-          $_CAMILA['page']->add_text($text);
+          $_CAMILA['page']->add_text($text);*/
       }
 
       if ($_CAMILA['page']->camila_pdf_export_enabled) {
-          $myLink = new CHAW_link('PDF', camila_get_export_link('pdf'));
+		  camila_insert_export_link(camila_get_export_link('pdf'), 'PDF', camila_get_translation('camila.export.pdf'), 'file-pdf-2');
+          /*$myLink = new CHAW_link('PDF', camila_get_export_link('pdf'));
           $myLink->set_br(0);
           $_CAMILA['page']->add_link($myLink);
           $text = new CHAW_text(camila_get_translation('camila.export.pdf'), HAW_TEXTFORMAT_SMALL);
           $text->set_br(0);
-          $_CAMILA['page']->add_text($text);
+          $_CAMILA['page']->add_text($text);*/
       }
 
       if ($_CAMILA['page']->camila_rtf_export_enabled) {
-          $myLink = new CHAW_link('RTF', camila_get_export_link('rtf'));
+		  camila_insert_export_link(camila_get_export_link('rtf'), 'RTF', camila_get_translation('camila.export.rtf'), 'file-word-2');
+          /*$myLink = new CHAW_link('RTF', camila_get_export_link('rtf'));
           $myLink->set_br(0);
           $_CAMILA['page']->add_link($myLink);
           $text = new CHAW_text(camila_get_translation('camila.export.rtf'), HAW_TEXTFORMAT_SMALL);
           $text->set_br(0);
-          $_CAMILA['page']->add_text($text);
+          $_CAMILA['page']->add_text($text);*/
       }
 
       if ($_CAMILA['page']->camila_xml2pdf_export_enabled) {
-          $myLink = new CHAW_link(camila_get_translation('camila.export.xml2pdf'), camila_get_export_link('xml2pdf'));
+		  camila_insert_export_link(camila_get_export_link('xml2pdf'), camila_get_translation('camila.export.xml2pdf'), camila_get_translation('camila.export.xml2pdf'), 'pages');
+		  
+          /*$myLink = new CHAW_link(camila_get_translation('camila.export.xml2pdf'), camila_get_export_link('xml2pdf'));
           $myLink->set_br(0);
           $_CAMILA['page']->add_link($myLink);
           $text = new CHAW_text(camila_get_translation('camila.export.separator'), HAW_TEXTFORMAT_SMALL);
           $text->set_br(0);
-          $_CAMILA['page']->add_text($text);
+          $_CAMILA['page']->add_text($text);*/
       }
 
       if ($_CAMILA['page']->camila_worktable_filter != '') {
-          $myLink = new CHAW_link(camila_get_translation('camila.export.bookmark'), $_SERVER['PHP_SELF'].'?camila_bookmark='.urlencode($_CAMILA['page']->camila_worktable_filter));
+		  camila_insert_export_link($_SERVER['PHP_SELF'].'?camila_bookmark='.urlencode($_CAMILA['page']->camila_worktable_filter), camila_get_translation('camila.export.bookmark'), camila_get_translation('camila.export.bookmark'), 'bookmark');
+          /*$myLink = new CHAW_link(camila_get_translation('camila.export.bookmark'), $_SERVER['PHP_SELF'].'?camila_bookmark='.urlencode($_CAMILA['page']->camila_worktable_filter));
           $myLink->set_br(0);
           $_CAMILA['page']->add_link($myLink);
           $text = new CHAW_text(camila_get_translation('camila.export.separator'), HAW_TEXTFORMAT_SMALL);
           $text->set_br(0);
-          $_CAMILA['page']->add_text($text);
+          $_CAMILA['page']->add_text($text);*/
       }
-
-      $myLink = new CHAW_link('HTML', camila_get_export_link('print'));
+	  
+	  camila_insert_export_link(camila_get_export_link('print'), camila_get_translation('camila.export.print'), camila_get_translation('camila.export.print'), 'printer', false);
+      /*$myLink = new CHAW_link('HTML', camila_get_export_link('print'));
       $myLink->set_br(0);
       $_CAMILA['page']->add_link($myLink);
       $text = new CHAW_text(camila_get_translation('camila.export.print'), HAW_TEXTFORMAT_SMALL);
       $_CAMILA['page']->add_text($text);
       $text = new CHAW_text('');      
-      $_CAMILA['page']->add_text($text);
+      $_CAMILA['page']->add_text($text);*/
 
 
-      //$code = "</div>";
+      $code = "</div>";
 	  $code = "</div>\n";
 	  $code .= "</section>";
       $js = new CHAW_js($code);
@@ -171,5 +183,12 @@
       include(CAMILA_DIR . 'export.php');
   }
 
+function camila_insert_export_link($link, $text, $desc, $icon, $separator = true) {
+	global $_CAMILA;
+	$html = '<span class="mr-2"><a href="'.$link.'" title="'.$desc.'" class="has-text-dark"><i class="ri-'.$icon.'-line mr-1"></i>'.$text.'</a></span>';
+	if ($separator)
+		$html .= '<span class="mr-2">'.camila_get_translation('camila.export.separator').'</span>';
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
+}
 
 ?>

@@ -359,15 +359,15 @@ camila.form.oldpassword = Vecchia Password
 
 
 camila.export.convertto = Converti pagina in: 
-camila.export.csv = (OpenOffice.org Calc) |
-camila.export.xls = (MS Excel) |
-camila.export.ods = (Open/Libre Office) |
-camila.export.pdf = (Acrobat Reader) |
-camila.export.rtf = (MS Word e OpenOffice.org Writer) |
+camila.export.csv = Open/Libre Office Calc
+camila.export.xls = Microsoft Excel
+camila.export.ods = Open/Libre Office
+camila.export.pdf = Acrobat Reader
+camila.export.rtf = Microsoft Word e OpenOffice.org Writer
 camila.export.xml2pdf = Applica Modello
 camila.export.bookmark = Salva come segnalibro
 camila.export.separator = |
-camila.export.print = (versione stampabile)
+camila.export.print = Versione stampabile
 camila.export.options = Opzioni di esportazione
 camila.export.saveoptions = Opzioni di salvataggio: 
 camila.export.pagetitle = Titolo del documento: 
