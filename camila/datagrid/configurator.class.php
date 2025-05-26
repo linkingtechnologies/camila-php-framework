@@ -1638,7 +1638,7 @@ class configurator
 			
 			case 'html-textarea';				
 				//$this->add_require('tinymce_textarea');
-				$toolbar = "menubar:false, plugins: 'code link image table preview',toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link unlink | image | table | preview | code'";
+				//$toolbar = "menubar:false, plugins: 'code link image table preview',toolbar: 'undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link unlink | image | table | preview | code'";
                 //$script = "new form_tinymce_textarea(\$form, '$field', '$name', $required, \"selector: 'textarea[name=$table"."_"."$field]', $toolbar\", 10, 80, $maxlength, '$validation');";
                 //FIX ME: Replacement for tinymce needed!
 				$script = "new form_textarea(\$form, '$field', '$name', $required, 10, 80, $maxlength, '$validation');";
