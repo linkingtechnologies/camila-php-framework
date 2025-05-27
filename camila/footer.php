@@ -91,7 +91,6 @@
 
       if ($_CAMILA['page']->camila_xml2pdf_export_enabled) {
 		  camila_insert_export_link(camila_get_export_link('xml2pdf'), camila_get_translation('camila.export.xml2pdf'), camila_get_translation('camila.export.xml2pdf'), 'pages');
-		  
           /*$myLink = new CHAW_link(camila_get_translation('camila.export.xml2pdf'), camila_get_export_link('xml2pdf'));
           $myLink->set_br(0);
           $_CAMILA['page']->add_link($myLink);
@@ -185,7 +184,7 @@
 
 function camila_insert_export_link($link, $text, $desc, $icon, $separator = true) {
 	global $_CAMILA;
-	$html = '<span class="mr-2"><a href="'.$link.'" title="'.$desc.'" class="has-text-dark"><i class="ri-'.$icon.'-line mr-1"></i>'.$text.'</a></span>';
+	$html = '<span class="mr-2"><a href="'.htmlspecialchars($link).'" title="'.htmlspecialchars($desc).'" class="has-text-dark"><i class="ri-'.$icon.'-line mr-1"></i>'.$text.'</a></span>';
 	if ($separator)
 		$html .= '<span class="mr-2">'.camila_get_translation('camila.export.separator').'</span>';
 	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));

@@ -653,7 +653,7 @@ $(document).ready(function(){
                   $check = camila_token($_REQUEST['camila_delete']);
               }
              if ($check != $_REQUEST['camila_token'] && $_REQUEST['camila_update'] != 'new')
-                 camila_error_page(camila_get_translation(camila.pageforbidden));
+                 camila_error_page(camila_get_translation('camila.pageforbidden'));
 
           }
 
