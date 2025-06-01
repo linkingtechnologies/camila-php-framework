@@ -44,6 +44,10 @@
 		</field>
 		<field name="autosuggest_wt_name" type="C" size="100">
 		</field>
+		<field name="parent_wt_colnames" type="C" size="250">
+		</field>
+		<field name="parent_wt_names" type="C" size="250">
+		</field>
 		<field name="is_deleted" type="C" size="1">
 		</field>
 		<field name="sequence" type="I">
