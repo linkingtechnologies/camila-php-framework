@@ -61,9 +61,11 @@ class report_icon extends report_field {
           $wbmp=str_replace('png/', 'wbmp/', $icon);
           $wbmp=str_replace('.png', '.wbmp', $wbmp);
           $image = new CHAW_image($wbmp,$icon, '');
+		  //$image->set_html_height(16);
+		  //$image->set_html_width(16);
 
         if (!in_array($this->field, $this->report->keys) && $this->report->inline_editing) {
-            $image->set_css_class('cf_editText');
+            $image->set_css_class('cf_editText cf_bool');
         }
 
         if ($this->inline && $this->report->inline_editing) {

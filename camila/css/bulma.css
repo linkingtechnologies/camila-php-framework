@@ -44,3 +44,7 @@ hr {
   background-color: #005bb5;
   border-color: #005bb5;
 }
+
+.cf_bool {
+	width: 20px;
+}
