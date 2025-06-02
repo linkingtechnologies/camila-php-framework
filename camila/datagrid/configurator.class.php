@@ -288,12 +288,6 @@ class configurator
     
     function start_wizard($source = 'xls')
     {
-        //require_once(CAMILA_DIR . 'datagrid/form.class.php');        
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/filebox.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/textbox.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/static_listbox.php');
-
         global $_CAMILA;
 
         if ($_REQUEST['configurator_step'] == '2' && (($_REQUEST['configurator_wtname'] != '' && $_REQUEST['configurator_wtdesc'] != '') || $_REQUEST['configurator_filename'] != '')) {
@@ -757,14 +751,6 @@ class configurator
             $this->db = $_CAMILA['db'];
         }
         
-        //require_once(CAMILA_DIR . 'datagrid/db_form.class.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/textbox.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/integer.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/static_listbox.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/sql_listbox.php');
-		//require_once(CAMILA_DIR . 'datagrid/elements/form/textarea.php');
-        
         if ($_REQUEST['camila_addfield'] == 'y') {
             
             $result = $_CAMILA['db']->Execute('select * from ' . CAMILA_TABLE_WORKC . ' where wt_id=' . $_CAMILA['db']->qstr($id));
@@ -1104,11 +1090,7 @@ class configurator
             $success4 = false;
         }
         
-        //require_once(CAMILA_DIR . 'datagrid/form.class.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
-        
-		/////
-				$this->camila_delete_files(CAMILA_TMP_DIR);
+		$this->camila_delete_files(CAMILA_TMP_DIR);
 		
         if ($this->interactive) {
 			$myText = new CHAW_text('');
@@ -1156,8 +1138,6 @@ class configurator
         if ($result === false)
             camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
         
-        //require_once(CAMILA_LIB_DIR . 'minitemplator/MiniTemplator.class.php');
-        
         $t = new MiniTemplator;
         $t->readTemplateFromFile(CAMILA_DIR . 'templates/worktable.inc.php');
 		
@@ -1192,8 +1172,7 @@ class configurator
         while (!$result->EOF) {
             if ($vcount > 0)
                 $default_fields .= ',';
-            
-            
+
             if ($rcount > 0) {
                 $report_fields .= ',';
                 $mapping .= '#';
@@ -1202,15 +1181,14 @@ class configurator
                 if ($order_field == '')
                     $order_field = $result->fields['col_name'];
             }
-            
-            
+
             if ($result->fields['type'] != 'formula' && $result->fields['type'] != 'query')
                 $report_fields .= $result->fields['col_name'];
             else if ($result->fields['type'] == 'query') {
                 $report_fields .= $result->fields['col_name'] . ' as cf_query_' . $result->fields['col_name'];
                 if ($qcount > 0)
                     $this->queries .= ',';
-                
+   
                 $this->queries .= '\'' . 'cf_query_' . $result->fields['col_name'] . '\'=>\'' . $result->fields['field_options'] . '\'';
                 $qcount++;
                 
@@ -1253,6 +1231,10 @@ class configurator
                 $mapping .= 'cf_formula_' . $result->fields['col_name'] . '=' . $this->escape($result->fields['name']);
                 $mapping .= '#' . $result->fields['col_name'] . 'as cf_formula_' . $result->fields['col_name'] . '=' . $this->escape($result->fields['name']);
             }
+			
+			if ($result->fields['type'] == 'lookup') {
+
+			}
             
             $rcount++;
             $t->setVariable('form_element', $this->get_form_element($result->fields, CAMILA_TABLE_WORKP . $id, $forceReadonly));
@@ -1273,6 +1255,69 @@ class configurator
             
             $result->MoveNext();
         }
+		
+		//handling lookups
+		$resultL = $this->db->Execute('select wt_id,col_name,field_options from ' . CAMILA_TABLE_WORKC . ' where (type=' . $this->db->qstr('lookup') . ' and is_deleted<>' . $this->db->qstr('y') . ')');
+		if ($resultL === false)
+			camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
+
+		$wtIds = [];
+		$wtCols = [];
+		$wtcCols = [];
+		$hasParent = false;
+
+		while (!$resultL->EOF) {
+			$wtName = trim(strpos($s = $resultL->fields['field_options'], '(') !== false ? substr($s, 0, strpos($s, '(')) : $s);
+			if ($resultTable->fields['id'] == $resultL->fields['wt_id']) {
+				$hasParent = true;
+			}
+			
+			if ($resultTable->fields['short_title'] == $wtName) {
+				$wtIds[] = $resultL->fields['wt_id'];
+				$c = trim(substr($resultL->fields['field_options'], strpos($resultL->fields['field_options'], '(') + 1, strpos($resultL->fields['field_options'], ')') - strpos($resultL->fields['field_options'], '(') - 1));
+				$resultC = $this->db->Execute('select col_name from ' . CAMILA_TABLE_WORKC . ' where (name=' . $this->db->qstr($c) . ' and wt_id=' . $this->db->qstr($resultTable->fields['id']) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
+                if ($resultC === false)
+                    camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
+                else
+                    $wtCols[$resultL->fields['wt_id']] = $resultC->fields['col_name'];
+				$wtcCols[$resultL->fields['wt_id']] = $resultL->fields['col_name'];
+
+			}
+			$resultL->MoveNext();
+		}
+
+		if (!empty($wtIds)) {
+			$html = "<div class='buttons pt-5'>";
+			$parentButtons = "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html."\"));";;
+
+			$t->setVariable('is_parent', 'true');
+			$ids = implode(',', array_fill(0, count($wtIds), '?'));
+			$resultL2 = $this->db->Execute('select id,short_title from ' . CAMILA_TABLE_WORKT . ' where id IN (' . $ids . ')', $wtIds);
+			if ($resultL2 === false)
+				camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
+			
+			while (!$resultL2->EOF) {
+				$u = 'cf_worktable'.$resultL2->fields['id'].'.php?camila_update=new';
+				$l = $resultL2->fields['short_title'];
+				$f = $wtCols[$resultL2->fields['id']];
+				$html1="<a href='$u";
+				$html2="' class='button is-info is-small'><span class='icon'><i class='ri-add-line'></i></span><span>$l</span></a>";
+				$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html1."\".'&pt=".$resultTable->fields['id']."&cf=".$wtcCols[$resultL2->fields['id']]."&pf='.urlencode('".$wtCols[$resultL2->fields['id']]."').'&pid='.\$form->fields['id']->value.\"".$html2."\"));";;
+				$resultL2->MoveNext();
+			}
+			$html= "</div>";
+			$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html."\"));";;
+			$t->setVariable('form_parent_buttons_script', $parentButtons);	
+		} else {
+			$t->setVariable('is_parent', 'false');
+		}
+		
+		if ($hasParent) {
+			$t->setVariable('has_parent', 'true');
+		} else {
+			$t->setVariable('has_parent', 'false');
+		}
+		
 
 		if (!empty($recordReadOnlyIfNotNullFields)) {
 			$formString = '$form->recordReadOnlyIfNotNullFields = Array('. "'" . implode("', '", $recordReadOnlyIfNotNullFields) . "');";
@@ -1312,7 +1357,7 @@ class configurator
             $t->setVariable('form_require', $value);
             $t->addBlock('require');
         }
-        
+
         $result = $this->db->Execute('select distinct autosuggest_wt_name from ' . CAMILA_TABLE_WORKC . ' where (wt_id=' . $this->db->qstr($id) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
         if ($result === false)
             camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
@@ -1450,6 +1495,7 @@ class configurator
         $t->setVariable('queries', $this->queries);
         $t->setVariable('autosuggest_script', $script);
         $t->setVariable('table', CAMILA_TABLE_WORKP . $id);
+		$t->setVariable('table_prefix', CAMILA_TABLE_WORKP);
         $t->setVariable('report_fields', $report_fields);
         $t->setVariable('default_fields', $default_fields);
         $t->setVariable('mapping', $mapping);
@@ -1603,36 +1649,14 @@ class configurator
             
             case 'string-listofvalues':
             case 'integer-listofvalues':
-                //$this->add_require('static_listbox');
-                $script = "new form_static_listbox(\$form, '$field', '$name', '$options', $required, '$validation');";
-                
-                /*$this->menuitems_script .= "\$jarr=Array();\n";
-                $this->menuitems_script .= "\$jarr['url'] = '" . $field . "';\n";
-                $this->menuitems_script .= "\$jarr['visible'] = 'yes';\n";
-                $this->menuitems_script .= "\$jarr['short_title'] = 'MODIFICA " . $name . "';\n";
-                $this->menuitems_script .= "\$jarr['parent'] = 'index.php';\n";
-                $this->menuitems_script .= "\$report->menuitems[]=\$jarr;\n";*/
-                
-                /*$opts = explode(',', $options);
-                foreach ($opts as $key => $value) {
-                    $this->menuitems_script .= "\$jarr=Array();\n";
-                    $this->menuitems_script .= "\$jarr['url'] = \"javascript:camila_inline_update_selected('" . $field . "','" . str_replace("\"", "\\\"", $value) . "')\";\n";
-                    $this->menuitems_script .= "\$jarr['visible'] = 'yes';\n";
-                    $this->menuitems_script .= "\$jarr['short_title'] = '" . $value . "';\n";
-                    $this->menuitems_script .= "\$jarr['parent'] = '" . $field . "';\n";
-                    $this->menuitems_script .= "\$report->menuitems[]=\$jarr;\n";
-                }*/
-                
-                
+                $script = "new form_static_listbox(\$form, '$field', '$name', '$options', $required, '$validation');";                
                 break;
             
             case 'phonenumber';
-                //$this->add_require('phonenumber');
                 $script = "new form_phonenumber(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";
                 break;
             
             case 'textarea';
-                //$this->add_require('textarea');
                 $script = "new form_textarea(\$form, '$field', '$name', $required, 10, 80, $maxlength, '$validation');";
                 break;
 			
@@ -1645,31 +1669,20 @@ class configurator
 				break;
 
             case 'hyperlink';
-                //$this->add_require('weblink');
                 $script = "new form_weblink(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";
                 break;
             
             case 'formula';
-                //$this->add_require('textbox');
                 $script = "new form_textbox(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";
                 break;
             
             case 'query';
-                //$this->add_require('textbox');
                 $script = "new form_textbox(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";
                 break;
             
             default:
-                //$this->add_require('textbox');
                 $script = "new form_textbox(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";
-                
-                //$this->menuitems_script .= "\$jarr=Array();\n";
-                //$this->menuitems_script .= "\$jarr['url'] = \"javascript:camila_inline_update_selected('" . $field . "','')\";\n";
-                //$this->menuitems_script .= "\$jarr['visible'] = 'yes';\n";
-                //$this->menuitems_script .= "\$jarr['short_title'] = 'MODIFICA " . $name . "...';\n";
-                //$this->menuitems_script .= "\$jarr['parent'] = 'index.php';\n";
-                //$this->menuitems_script .= "\$report->menuitems[]=\$jarr;\n";
-                
+                               
         }
         
         
@@ -1823,15 +1836,7 @@ class configurator
     function xls_import($id, $returl = '')
     {
         global $_CAMILA;
-
-        //require_once(CAMILA_DIR . 'datagrid/form.class.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/hidden.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/filebox.php');
-        //require_once(CAMILA_DIR . 'datagrid/elements/form/static_listbox.php');
    
-        //if ($returl != '')
-        //    $form3 = new phpform('camilastep4', $returl);
-        //else
         $form3 = new phpform('camilastep4', 'cf_worktable_wizard_step4.php');
         $form3->drawrules = false;
         new form_hidden($form3, 'custom', $id);

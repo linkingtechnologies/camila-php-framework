@@ -49,14 +49,15 @@ if (camila_form_in_update_mode('${table}')) {
         $form->caninsert = ${caninsert};
         $form->candelete = ${candelete};
         $form->canupdate = ${canupdate};
-    }
-    else
-    if ($_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP)
-    {
+    } else if ($_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) {
         $form->caninsert = true;
         $form->candelete = true;
         $form->canupdate = true;
     }
+	
+	if (${has_parent}) {
+		$form->caninsert = false;
+	}
 
     $form->drawrules = true;
     $form->drawheadersubmitbutton = true;
@@ -70,7 +71,7 @@ if (camila_form_in_update_mode('${table}')) {
         $form->fields['id']->updatable = false;
         $form->fields['id']->forcedraw = true;
     }
-	
+
 	new form_textbox($form, 'uuid', camila_get_translation('camila.worktable.field.uuid'));
 	if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
         if ($_REQUEST['camila_update'] == 'new' && !isset($_REQUEST['camila_phpform_sent'])) {
@@ -86,52 +87,73 @@ if (camila_form_in_update_mode('${table}')) {
     ${form_element}
     <!-- $EndBlock element -->
 
-    if (CAMILA_WORKTABLE_SPECIAL_ICON_ENABLED || $_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP)
-        new form_static_listbox($form, 'cf_bool_is_selected', camila_get_translation('camila.worktable.field.selected'), camila_get_translation('camila.worktable.options.noyes'));
+	if (!${is_parent}) {
+		if (CAMILA_WORKTABLE_SPECIAL_ICON_ENABLED || $_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP)
+			new form_static_listbox($form, 'cf_bool_is_selected', camila_get_translation('camila.worktable.field.selected'), camila_get_translation('camila.worktable.options.noyes'));
 
-    if (CAMILA_WORKTABLE_SELECTED_ICON_ENABLED || $_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP)
-        new form_static_listbox($form, 'cf_bool_is_special', camila_get_translation('camila.worktable.field.special'), camila_get_translation('camila.worktable.options.noyes'));
+		if (CAMILA_WORKTABLE_SELECTED_ICON_ENABLED || $_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP)
+			new form_static_listbox($form, 'cf_bool_is_special', camila_get_translation('camila.worktable.field.special'), camila_get_translation('camila.worktable.options.noyes'));
+	} else {
+		
+	}
+	
+	if($_REQUEST['camila_update'] == 'new') {
+		if (isset($_GET['pid'])) {
 
-    if ($_REQUEST['camila_update'] != 'new') {
+			$result = $_CAMILA['db']->Execute('select '.$_GET['pf'].' as value FROM ${table_prefix}'.$_GET['pt'].' WHERE id = ' . $_CAMILA['db']->qstr($_GET['pid']));
+			if ($result === false)
+				camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
 
-    new form_datetime($form, 'created', camila_get_translation('camila.worktable.field.created'));
-    if (is_object($form->fields['created'])) $form->fields['created']->updatable = false;
+			if (is_object($form->fields[$_GET['cf']])) {
+				$form->fields[$_GET['cf']]->defaultvalue = $result->fields['value'];;
+				$form->fields[$_GET['cf']]->updatable = false;
+				$form->fields[$_GET['cf']]->forcedraw = true;
+			}
+		}
 
-    new form_textbox($form, 'created_by', camila_get_translation('camila.worktable.field.created_by'));
-    if (is_object($form->fields['created_by'])) $form->fields['created_by']->updatable = false;
-
-    new form_textbox($form, 'created_by_surname', camila_get_translation('camila.worktable.field.created_by_surname'));
-    if (is_object($form->fields['created_by_surname'])) $form->fields['created_by_surname']->updatable = false;
-
-    new form_textbox($form, 'created_by_name', camila_get_translation('camila.worktable.field.created_by_name'));
-    if (is_object($form->fields['created_by_name'])) $form->fields['created_by_name']->updatable = false;
-
-    new form_static_listbox($form, 'created_src', camila_get_translation('camila.worktable.field.created_src'), camila_get_translation('camila.worktable.options.recordmodsrc'));
-    if (is_object($form->fields['created_src'])) $form->fields['created_src']->updatable = false;
-
-    new form_datetime($form, 'last_upd', camila_get_translation('camila.worktable.field.last_upd'));
-    if (is_object($form->fields['last_upd'])) $form->fields['last_upd']->updatable = false;
-
-    new form_textbox($form, 'last_upd_by', camila_get_translation('camila.worktable.field.last_upd_by'));
-    if (is_object($form->fields['last_upd_by'])) $form->fields['last_upd_by']->updatable = false;
-
-    new form_textbox($form, 'last_upd_by_surname', camila_get_translation('camila.worktable.field.last_upd_by_surname'));
-    if (is_object($form->fields['last_upd_by_surname'])) $form->fields['last_upd_by_surname']->updatable = false;
-
-    new form_textbox($form, 'last_upd_by_name', camila_get_translation('camila.worktable.field.last_upd_by_name'));
-    if (is_object($form->fields['last_upd_by_name'])) $form->fields['last_upd_by_name']->updatable = false;
-
-    new form_textbox($form, 'last_upd_by_name', camila_get_translation('camila.worktable.field.last_upd_by_name'));
-    if (is_object($form->fields['last_upd_by_name'])) $form->fields['last_upd_by_name']->updatable = false;
-
-    new form_static_listbox($form, 'last_upd_src', camila_get_translation('camila.worktable.field.last_upd_src'), camila_get_translation('camila.worktable.options.recordmodsrc'));
-    if (is_object($form->fields['last_upd_src'])) $form->fields['last_upd_src']->updatable = false;
-
-    new form_textbox($form, 'mod_num', camila_get_translation('camila.worktable.field.mod_num'));
-    if (is_object($form->fields['mod_num'])) $form->fields['mod_num']->updatable = false;
+	}
 
 
-}
+
+    if ($_REQUEST['camila_update'] != 'new' && !${is_parent}) {
+
+		new form_datetime($form, 'created', camila_get_translation('camila.worktable.field.created'));
+		if (is_object($form->fields['created'])) $form->fields['created']->updatable = false;
+
+		new form_textbox($form, 'created_by', camila_get_translation('camila.worktable.field.created_by'));
+		if (is_object($form->fields['created_by'])) $form->fields['created_by']->updatable = false;
+
+		new form_textbox($form, 'created_by_surname', camila_get_translation('camila.worktable.field.created_by_surname'));
+		if (is_object($form->fields['created_by_surname'])) $form->fields['created_by_surname']->updatable = false;
+
+		new form_textbox($form, 'created_by_name', camila_get_translation('camila.worktable.field.created_by_name'));
+		if (is_object($form->fields['created_by_name'])) $form->fields['created_by_name']->updatable = false;
+
+		new form_static_listbox($form, 'created_src', camila_get_translation('camila.worktable.field.created_src'), camila_get_translation('camila.worktable.options.recordmodsrc'));
+		if (is_object($form->fields['created_src'])) $form->fields['created_src']->updatable = false;
+
+		new form_datetime($form, 'last_upd', camila_get_translation('camila.worktable.field.last_upd'));
+		if (is_object($form->fields['last_upd'])) $form->fields['last_upd']->updatable = false;
+
+		new form_textbox($form, 'last_upd_by', camila_get_translation('camila.worktable.field.last_upd_by'));
+		if (is_object($form->fields['last_upd_by'])) $form->fields['last_upd_by']->updatable = false;
+
+		new form_textbox($form, 'last_upd_by_surname', camila_get_translation('camila.worktable.field.last_upd_by_surname'));
+		if (is_object($form->fields['last_upd_by_surname'])) $form->fields['last_upd_by_surname']->updatable = false;
+
+		new form_textbox($form, 'last_upd_by_name', camila_get_translation('camila.worktable.field.last_upd_by_name'));
+		if (is_object($form->fields['last_upd_by_name'])) $form->fields['last_upd_by_name']->updatable = false;
+
+		new form_textbox($form, 'last_upd_by_name', camila_get_translation('camila.worktable.field.last_upd_by_name'));
+		if (is_object($form->fields['last_upd_by_name'])) $form->fields['last_upd_by_name']->updatable = false;
+
+		new form_static_listbox($form, 'last_upd_src', camila_get_translation('camila.worktable.field.last_upd_src'), camila_get_translation('camila.worktable.options.recordmodsrc'));
+		if (is_object($form->fields['last_upd_src'])) $form->fields['last_upd_src']->updatable = false;
+
+		new form_textbox($form, 'mod_num', camila_get_translation('camila.worktable.field.mod_num'));
+		if (is_object($form->fields['mod_num'])) $form->fields['mod_num']->updatable = false;
+
+	}
 
 	${form_readonly_record_script}
 	
@@ -140,10 +162,11 @@ if (camila_form_in_update_mode('${table}')) {
     $form->process();
     
     $form->draw();
+	
+	${form_parent_buttons_script}
 
 } else {
       $report_fields = '${report_fields}';
-	  //$admin_report_fields = '${admin_report_fields}';
       $default_fields = '${default_fields}';
 
       if (isset($_REQUEST['camila_rest'])) {
@@ -151,9 +174,6 @@ if (camila_form_in_update_mode('${table}')) {
           $report_fields = str_replace('cf_bool_is_selected,', '', $report_fields);
           $default_fields = $report_fields;
       }
-	  
-	  //if ($_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP)
-		//  $default_fields = $admin_report_fields;
 
       if ($_CAMILA['page']->camila_exporting())
           $mapping = '${mapping}';
@@ -168,11 +188,8 @@ if (camila_form_in_update_mode('${table}')) {
 	  if ($_CAMILA['user_visibility_type']=='group')
           $filter= ' where ${group_visibility_field}='.$_CAMILA['db']->qstr($_CAMILA['user_group']);
 
-	  //if ($_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP)
-	//	  $stmt = 'select ' . $admin_report_fields . ' from ${table}';
-	  //else
-		  $stmt = 'select ' . $report_fields . ' from ${table}';
-      
+	  $stmt = 'select ' . $report_fields . ' from ${table}';
+
       $report = new report($stmt.$filter, '', '${order_field}', '${order_dir}', $mapping, null, 'id', $default_fields, '', (isset($_REQUEST['camila_rest'])) ? false : ${canupdate}, (isset($_REQUEST['camila_rest'])) ? false : ${candelete});
 	  
 	  ${report_functions_script}
@@ -180,10 +197,12 @@ if (camila_form_in_update_mode('${table}')) {
 	  ${report_readonly_record_script}
 
       if (${caninsert} && !isset($_REQUEST['camila_rest'])) {
-          $report->additional_links = Array(camila_get_translation('camila.report.insertnew') => basename($_SERVER['PHP_SELF']) . '?camila_update=new');
+		  if (!${has_parent}) {
+			$report->additional_links = Array(camila_get_translation('camila.report.insertnew') => basename($_SERVER['PHP_SELF']) . '?camila_update=new');
 
-          $myImage1 = new CHAW_image(CAMILA_IMG_DIR . 'wbmp/add.wbmp', CAMILA_IMG_DIR . 'png/add.png', '-');
-		  $report->additional_links_css_classes = Array(camila_get_translation('camila.report.insertnew') => 'btn '.CAMILA_UI_DEFAULT_BTN_SIZE.' btn-default btn-primary button is-primary is-small');
+			$myImage1 = new CHAW_image(CAMILA_IMG_DIR . 'wbmp/add.wbmp', CAMILA_IMG_DIR . 'png/add.png', '-');
+			$report->additional_links_css_classes = Array(camila_get_translation('camila.report.insertnew') => 'btn '.CAMILA_UI_DEFAULT_BTN_SIZE.' btn-default btn-primary button is-primary is-small');
+		  }
 
           if (($_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) || CAMILA_WORKTABLE_IMPORT_ENABLED)          
           $report->additional_links[camila_get_translation('camila.worktable.import')] = 'cf_worktable_wizard_step4.php?camila_custom=' . $wt_id . '&camila_returl=' . urlencode($_SERVER['PHP_SELF']);
@@ -209,6 +228,5 @@ if (camila_form_in_update_mode('${table}')) {
 
       $report->process();
       $report->draw();
-
 }
 ?>

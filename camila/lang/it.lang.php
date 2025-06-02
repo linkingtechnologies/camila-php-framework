@@ -133,7 +133,7 @@ camila.worktable.mapping.worktable.admin = id as camila_worktable_delete=ELIMINA
 camila.worktable.sysfields.mapping = created=Data creazione#last_upd=Ultimo aggiornamento#last_upd_by=Utente ult. agg.#last_upd_src=Sorgente Ult. agg.#last_upd_by_name=Nome Utente ult. agg.#last_upd_by_surname=Cognome Utente ult. agg.#mod_num=Num. mod.#id=Cod. riga#created_by=Utente creaz.#created_src=Sorgente creaz.#created_by_surname=Cognome Utente creaz.#created_by_name=Nome Utente creaz.#cf_bool_is_special=contrassegnati come speciali#cf_bool_is_selected=selezionati
 camila.worktable.categories.mapping = short_title=Nome categoria#full_title=Descrizione categoria
 
-camila.worktable.options.fieldtype = string;Testo,string-listofvalues;Testo - Elenco di valori,date;Data,datetime;Data e ora,integer;Numero Intero,autoincrement;Numero Intero progressivo,float;Numero Decimale,integer-listofvalues;Numero Intero - Elenco di valori,phonenumber;Numero di telefono,hyperlink;Collegamento Web,textarea;Testo Lungo,html-textarea;Testo Lungo HTML,formula;Formula,query;Interrogazione
+camila.worktable.options.fieldtype = string;Testo,string-listofvalues;Testo - Elenco di valori,date;Data,datetime;Data e ora,integer;Numero Intero,autoincrement;Numero Intero progressivo,float;Numero Decimale,integer-listofvalues;Numero Intero - Elenco di valori,phonenumber;Numero di telefono,hyperlink;Collegamento Web,textarea;Testo Lungo,html-textarea;Testo Lungo HTML,formula;Formula,query;Interrogazione,lookup;Riferimento Scheda Dati
 camila.worktable.options.order.dir = asc;Crescente,desc;Decrescente
 camila.worktable.options.yesno = y;Sì,n;No
 camila.worktable.options.noyes = n;No,y;Sì
