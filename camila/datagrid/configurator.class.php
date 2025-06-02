@@ -1201,8 +1201,7 @@ class configurator
                 $this->formulas .= '\'' . 'cf_formula_' . $result->fields['col_name'] . '\'=>\'' . $result->fields['field_options'] . '\'';
                 $fcount++;                
             }
-            
-            
+
             if ($result->fields['visible'] == 'y') {
                 
                 if ($result->fields['type'] != 'formula' && $result->fields['type'] != 'query')
@@ -1282,14 +1281,13 @@ class configurator
                 else
                     $wtCols[$resultL->fields['wt_id']] = $resultC->fields['col_name'];
 				$wtcCols[$resultL->fields['wt_id']] = $resultL->fields['col_name'];
-
 			}
 			$resultL->MoveNext();
 		}
 
 		if (!empty($wtIds)) {
-			$html = "<div class='buttons pt-5'>";
-			$parentButtons = "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html."\"));";;
+			$tables = "";
+			$parentButtons = '';
 
 			$t->setVariable('is_parent', 'true');
 			$ids = implode(',', array_fill(0, count($wtIds), '?'));
@@ -1298,17 +1296,43 @@ class configurator
 				camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
 			
 			while (!$resultL2->EOF) {
+				$html = "<div class='buttons pt-5'>";
+				$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html."\"));";
+
 				$u = 'cf_worktable'.$resultL2->fields['id'].'.php?camila_update=new';
 				$l = $resultL2->fields['short_title'];
 				$f = $wtCols[$resultL2->fields['id']];
 				$html1="<a href='$u";
 				$html2="' class='button is-info is-small'><span class='icon'><i class='ri-add-line'></i></span><span>$l</span></a>";
-				$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html1."\".'&pt=".$resultTable->fields['id']."&cf=".$wtcCols[$resultL2->fields['id']]."&pf='.urlencode('".$wtCols[$resultL2->fields['id']]."').'&pid='.\$form->fields['id']->value.\"".$html2."\"));";;
+				$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html1."\".'&pt=".$resultTable->fields['id']."&cf=".$wtcCols[$resultL2->fields['id']]."&pf='.urlencode('".$wtCols[$resultL2->fields['id']]."').'&pid='.\$form->fields['id']->value.\"".$html2."\"));";
+
+				$resultF = $this->db->Execute('select col_name from ' . CAMILA_TABLE_WORKC . ' where (wt_id=' . $this->db->qstr($resultL2->fields['id']) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
+				if ($resultF === false)
+					camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
+				
+				
+				$fieldNames = [];
+				while (!$resultF->EOF) {
+					if ($resultF->fields['col_name'] != $wtcCols[$resultL2->fields['id']]) {
+						$fieldNames[] = $resultF->fields['col_name'];
+					}
+					$resultF->MoveNext();
+				}
+				
+				$stmt = "select ".implode(', ', $fieldNames)." from ".CAMILA_TABLE_WORKP.$resultL2->fields['id'];
+
+				$tables="\$dbtable = new dbtable('".$stmt."');";
+				$tables.="\$dbtable->process();";
+				$tables.="\$dbtable->draw();";
+				
+				$html = '</div>';
+				$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html."\"));";
+				
+				$parentButtons .= $tables;
+
 				$resultL2->MoveNext();
 			}
-			$html= "</div>";
-			$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html."\"));";;
-			$t->setVariable('form_parent_buttons_script', $parentButtons);	
+			$t->setVariable('form_parent_buttons_script', $parentButtons);
 		} else {
 			$t->setVariable('is_parent', 'false');
 		}
@@ -1782,7 +1806,7 @@ class configurator
             
             require(CAMILA_DIR . 'datagrid/report.class.php');
             
-            $report_fields            = 'id as camila_worktable_reconfig,id as camila_worktable_import,id as camila_worktable_rebuild,id as camila_worktable_delete,short_title,full_title,category,sequence';//,share_key,share_caninsert,share_canupdate,share_candelete';
+            $report_fields            = 'id as camila_worktable_reconfig,id as camila_worktable_import,sequence,short_title,full_title,category,id as camila_worktable_rebuild,id as camila_worktable_delete';//,share_key,share_caninsert,share_canupdate,share_candelete';
             $default_fields           = $report_fields;
             $mapping                  = camila_get_translation('camila.worktable.mapping.worktable.admin');
             $stmt                     = 'select ' . $report_fields . ' from ' . CAMILA_TABLE_WORKT;

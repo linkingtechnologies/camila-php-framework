@@ -14,6 +14,10 @@ function camila_autoloader($class) {
 		case 'report':
 			include(CAMILA_DIR . 'datagrid/report.class.php');
 			break;
+		
+		case 'dbtable':
+			include(CAMILA_DIR . 'datagrid/db_table.class.php');
+			break;
 
 		case 'configurator':
 			include(CAMILA_DIR . 'datagrid/configurator.class.php');
