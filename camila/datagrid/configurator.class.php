@@ -225,7 +225,7 @@ class configurator
     var $default_maxlength = Array('integer' => 5, 'string' => 255, 'date' => '10', 'hyperlink' => 250);
     var $default_size = Array('integer' => 5, 'string' => 30, 'date' => 10, 'hyperlink' => 30, 'phonenumber' => 30, 'autoincrement' => 5, 'formula' => 1, 'query' => 1);
     var $column_size = Array('C' => 250);
-    
+
     var $fields = Array();
     var $requires = Array();
     var $boundsheets = Array();
@@ -1611,6 +1611,9 @@ class configurator
         
         if ($size == '')
             $size = $this->default_size[$rs['type']];
+		
+		if ($size == '')
+            $size = $this->default_size['string'];
         
         switch ($rs['type']) {
             case 'autoincrement':
