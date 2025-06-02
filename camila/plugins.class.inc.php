@@ -50,10 +50,6 @@ class CamilaPlugins
 		return $result->fields['type'];
 	}
 	
-	public static function getPluginInformation($pluginId) {
-		return new SimpleXMLElement(file_get_contents(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/conf/plugin.xml'));
-	}
-	
 	public static function getRepositoryInformation($pluginId) {
 		return json_decode(file_get_contents(CAMILA_APP_PATH . '/plugins/'.$pluginId.'/conf/repo.json'), true);
 	}
@@ -87,7 +83,6 @@ class CamilaPlugins
 		$record  = Array();
 		$record['id'] = $pluginId;
         $record['status'] = 'active';
-        $record['type']  = (String)CamilaPlugins::getPluginInformation($pluginId)->info->type;
 
         $insertSQL = $camilaApp->db->AutoExecute(CAMILA_TABLE_PLUGINS, $record, 'INSERT');
 		if (!$insertSQL) {

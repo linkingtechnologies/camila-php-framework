@@ -48,3 +48,7 @@ hr {
 .cf_bool {
 	width: 20px;
 }
+
+.table-bordered td {
+  vertical-align: middle;
+}
