@@ -89,13 +89,14 @@ class CamilaPlugins
 			camila_information_text(camila_get_translation('camila.worktable.db.error'));
         }
 		
-		$pluginType = self::getPluginType($db, $pluginId);
-		if ($pluginType == 'index')
-		{
-			$myfile = fopen(CAMILA_PLUGINS_DIR.'/'.$pluginType.'.txt', "w") or die("Unable to open file!");
-			fwrite($myfile, $pluginId);
-			fclose($myfile);
-		}
+		//$pluginType = self::getPluginType($db, $pluginId);
+		//if ($pluginType == 'index')
+		//{
+		$pluginType = 'index';
+		$myfile = fopen(CAMILA_PLUGINS_DIR.'/'.$pluginType.'.txt', "w") or die("Unable to open file!");
+		fwrite($myfile, $pluginId);
+		fclose($myfile);
+		//}
 	}
 }
 
