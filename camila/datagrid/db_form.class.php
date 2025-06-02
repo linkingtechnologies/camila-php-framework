@@ -602,7 +602,7 @@ $(document).ready(function(){
 				  $text->set_br(1);
 				  $_CAMILA['page']->add_text($text);
 				  $myLink = new CHAW_link(camila_get_translation('camila.back.table'), $_REQUEST['camila_returl']);
-				  $myLink->set_css_class('btn btn-md btn-default');
+				  $myLink->set_css_class('btn btn-md btn-default button is-info is-small');
 	              $myLink->set_br(1);
 	              $_CAMILA['page']->add_link($myLink);
 	          }

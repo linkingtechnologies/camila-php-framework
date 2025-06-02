@@ -31,8 +31,7 @@ function camila_configurator_worktable_description_db_onupdate($lform)
     if (!$updateSQL) {
         camila_information_text(camila_get_translation('camila.worktable.db.error'));
     }
-    
-    
+
     return true;
 }
 
@@ -115,17 +114,17 @@ function camila_configurator_worktable_title_db_onupdate($lform)
     
     
     $record = Array();
-    if ($lform->fields['share_key']->value != '')
+    /*if ($lform->fields['share_key']->value != '')
         $record['share_key'] = $lform->fields['share_key']->value;
     if ($lform->fields['share_caninsert']->value != '')
         $record['share_caninsert'] = $lform->fields['share_caninsert']->value;
     if ($lform->fields['share_canupdate']->value != '')
         $record['share_canupdate'] = $lform->fields['share_canupdate']->value;
     if ($lform->fields['share_candelete']->value != '')
-        $record['share_candelete'] = $lform->fields['share_candelete']->value;
+        $record['share_candelete'] = $lform->fields['share_candelete']->value;*/
 	
-	if ($lform->fields['filter']->value != '')
-        $record['filter'] = $lform->fields['share_candelete']->value;
+	/*if ($lform->fields['filter']->value != '')
+        $record['filter'] = $lform->fields['share_candelete']->value;*/
     
     $updateSQL = $_CAMILA['db']->AutoExecute(CAMILA_TABLE_PAGES, $record, 'UPDATE', 'url=' . $_CAMILA['db']->qstr($scriptname));
     
@@ -178,6 +177,7 @@ function camila_configurator_import(&$field, &$row, $fields)
 {
     global $_CAMILA;
     $myLink = new CHAW_link(camila_get_translation('camila.worktable.import'), 'cf_worktable_wizard_step4.php?camila_custom=' . $field->value);
+	$myLink->set_css_class('button is-small');
     $myLink->set_br(0);
     $row->add_column($myLink);
 }
@@ -187,6 +187,7 @@ function camila_configurator_rebuild(&$field, &$row, $fields)
 {
     global $_CAMILA;
     $myLink = new CHAW_link(camila_get_translation('camila.worktable.rebuild'), 'cf_worktable_admin.php?camila_custom=' . $field->value . '&camila_worktable_op=rebuild');
+	$myLink->set_css_class('button is-danger is-small');
     $myLink->set_br(0);
     $row->add_column($myLink);
 }
@@ -225,7 +226,7 @@ class configurator
     var $default_maxlength = Array('integer' => 5, 'string' => 255, 'date' => '10', 'hyperlink' => 250);
     var $default_size = Array('integer' => 5, 'string' => 30, 'date' => 10, 'hyperlink' => 30, 'phonenumber' => 30, 'autoincrement' => 5, 'formula' => 1, 'query' => 1);
     var $column_size = Array('C' => 250);
-
+    
     var $fields = Array();
     var $requires = Array();
     var $boundsheets = Array();
@@ -1766,10 +1767,10 @@ class configurator
             new form_textbox($dbform, 'full_title', camila_get_translation('camila.worktable.desc'), true, 40, 40);
             new form_static_listbox($dbform, 'category', camila_get_translation('camila.worktable.category'), $options);
             new form_textbox($dbform, 'filter', camila_get_translation('camila.worktable.visibility.filter'), false, 40, 250);
-            new form_textbox($dbform, 'share_key', camila_get_translation('camila.worktable.share.key'), false, 40, 40);
-            new form_static_listbox($dbform, 'share_caninsert', camila_get_translation('camila.worktable.share.caninsert'), camila_get_translation('camila.worktable.options.noyes'));
-            new form_static_listbox($dbform, 'share_canupdate', camila_get_translation('camila.worktable.share.canupdate'), camila_get_translation('camila.worktable.options.noyes'));
-            new form_static_listbox($dbform, 'share_candelete', camila_get_translation('camila.worktable.share.candelete'), camila_get_translation('camila.worktable.options.noyes'));
+            //new form_textbox($dbform, 'share_key', camila_get_translation('camila.worktable.share.key'), false, 40, 40);
+            //new form_static_listbox($dbform, 'share_caninsert', camila_get_translation('camila.worktable.share.caninsert'), camila_get_translation('camila.worktable.options.noyes'));
+            //new form_static_listbox($dbform, 'share_canupdate', camila_get_translation('camila.worktable.share.canupdate'), camila_get_translation('camila.worktable.options.noyes'));
+            //new form_static_listbox($dbform, 'share_candelete', camila_get_translation('camila.worktable.share.candelete'), camila_get_translation('camila.worktable.options.noyes'));
 
 			$dbform->formupdatelinktext = camila_get_translation('camila.worktable.field.formupdatelinktext');
             $dbform->onupdate           = 'camila_configurator_worktable_title_db_onupdate';
@@ -1781,7 +1782,7 @@ class configurator
             
             require(CAMILA_DIR . 'datagrid/report.class.php');
             
-            $report_fields            = 'id as camila_worktable_delete,id as camila_worktable_reconfig,id as camila_worktable_import,id as camila_worktable_rebuild,short_title,full_title,category,sequence,share_key,share_caninsert,share_canupdate,share_candelete';
+            $report_fields            = 'id as camila_worktable_reconfig,id as camila_worktable_import,id as camila_worktable_rebuild,id as camila_worktable_delete,short_title,full_title,category,sequence';//,share_key,share_caninsert,share_canupdate,share_candelete';
             $default_fields           = $report_fields;
             $mapping                  = camila_get_translation('camila.worktable.mapping.worktable.admin');
             $stmt                     = 'select ' . $report_fields . ' from ' . CAMILA_TABLE_WORKT;
