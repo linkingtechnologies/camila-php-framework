@@ -1321,7 +1321,7 @@ class configurator
 				
 				$stmt = "select ".implode(', ', $fieldNames)." from ".CAMILA_TABLE_WORKP.$resultL2->fields['id'];
 
-				$tables="\$dbtable = new dbtable('".$stmt."');";
+				$tables="\$dbtable = new dbtable('".$stmt."'.\$filter);";
 				$tables.="\$dbtable->process();";
 				$tables.="\$dbtable->draw();";
 				

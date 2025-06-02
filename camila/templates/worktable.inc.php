@@ -5,6 +5,15 @@ $wt_id = substr($_SERVER['PHP_SELF'], 12, -4);
 $wt_short_title = '${wt_short_title}';
 $wt_full_title = '${wt_full_title}';
 
+$filter = '';
+
+if ($_CAMILA['user_visibility_type']=='personal')
+	$filter= ' where ${personal_visibility_field}='.$_CAMILA['db']->qstr($_CAMILA['user']);
+
+if ($_CAMILA['user_visibility_type']=='group')
+	$filter= ' where ${group_visibility_field}='.$_CAMILA['db']->qstr($_CAMILA['user_group']);
+
+
 if (intval($wt_id) > 0)
     $_CAMILA['page']->camila_worktable_id = $wt_id;
 
@@ -163,7 +172,9 @@ if (camila_form_in_update_mode('${table}')) {
     
     $form->draw();
 	
-	${form_parent_buttons_script}
+	if($_REQUEST['camila_update'] != 'new') {
+		${form_parent_buttons_script}
+	}
 
 } else {
       $report_fields = '${report_fields}';
@@ -179,14 +190,6 @@ if (camila_form_in_update_mode('${table}')) {
           $mapping = '${mapping}';
       else
           $mapping = '${mapping_abbrev}';
-
-      $filter = '';
-
-      if ($_CAMILA['user_visibility_type']=='personal')
-          $filter= ' where ${personal_visibility_field}='.$_CAMILA['db']->qstr($_CAMILA['user']);
-	  
-	  if ($_CAMILA['user_visibility_type']=='group')
-          $filter= ' where ${group_visibility_field}='.$_CAMILA['db']->qstr($_CAMILA['user_group']);
 
 	  $stmt = 'select ' . $report_fields . ' from ${table}';
 
