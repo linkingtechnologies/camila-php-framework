@@ -1284,6 +1284,7 @@ class configurator
 			}
 			$resultL->MoveNext();
 		}
+		
 
 		if (!empty($wtIds)) {
 			$tables = "";
@@ -1296,21 +1297,14 @@ class configurator
 				camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
 			
 			while (!$resultL2->EOF) {
-				$html = "<div class='buttons pt-5'>";
+				
+				$html = "<div class='pt-5'></div>";
 				$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html."\"));";
-
-				$u = 'cf_worktable'.$resultL2->fields['id'].'.php?camila_update=new';
-				$l = $resultL2->fields['short_title'];
-				$f = $wtCols[$resultL2->fields['id']];
-				$html1="<a href='$u";
-				$html2="' class='button is-info is-small'><span class='icon'><i class='ri-add-line'></i></span><span>$l</span></a>";
-				$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html1."\".'&pt=".$resultTable->fields['id']."&cf=".$wtcCols[$resultL2->fields['id']]."&pf='.urlencode('".$wtCols[$resultL2->fields['id']]."').'&pid='.\$form->fields['id']->value.\"".$html2."\"));";
-
+				
 				$resultF = $this->db->Execute('select col_name from ' . CAMILA_TABLE_WORKC . ' where (wt_id=' . $this->db->qstr($resultL2->fields['id']) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
 				if ($resultF === false)
 					camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
-				
-				
+
 				$fieldNames = [];
 				while (!$resultF->EOF) {
 					if ($resultF->fields['col_name'] != $wtcCols[$resultL2->fields['id']]) {
@@ -1320,16 +1314,25 @@ class configurator
 				}
 				
 				$stmt = "select ".implode(', ', $fieldNames)." from ".CAMILA_TABLE_WORKP.$resultL2->fields['id'];
-
-				$tables="\$dbtable = new dbtable('".$stmt."'.\$filter);";
+				$tables="\$dbtable = new dbtable('".$stmt."'.\$filter, '".$resultL2->fields['short_title']."');";
 				$tables.="\$dbtable->process();";
 				$tables.="\$dbtable->draw();";
+				
+				$parentButtons .= $tables;
+
+				$html = "<div class='buttons pt-5'>";
+				$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html."\"));";
+
+				$u = 'cf_worktable'.$resultL2->fields['id'].'.php?camila_update=new';
+				$l = camila_get_translation('camila.report.insertnew');
+				$f = $wtCols[$resultL2->fields['id']];
+				$html1="<a href='$u";
+				$html2="' class='button is-info is-primary is-small'>$l</a>";
+				$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html1."\".'&pt=".$resultTable->fields['id']."&cf=".$wtcCols[$resultL2->fields['id']]."&pf='.urlencode('".$wtCols[$resultL2->fields['id']]."').'&pid='.\$form->fields['id']->value.\"".$html2."\"));";
 				
 				$html = '</div>';
 				$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html."\"));";
 				
-				$parentButtons .= $tables;
-
 				$resultL2->MoveNext();
 			}
 			$t->setVariable('form_parent_buttons_script', $parentButtons);

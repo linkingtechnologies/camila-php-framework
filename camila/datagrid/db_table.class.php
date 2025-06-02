@@ -23,9 +23,10 @@ class dbtable
     private $conn;
     private $result;
 
-    public function __construct($sql)
+    public function __construct($sql, $title = '')
     {
         $this->sql = $sql;
+		$this->title = $title;
     }
 
     public function process()
@@ -39,11 +40,18 @@ class dbtable
 
     public function draw()
     {
+		global $_CAMILA;
+		
         if (!$this->result) {
             throw new Exception("You must call process() before draw()");
         }
+		
+		if ($this->title != '') {
+            $text = new CHAW_text($this->title, HAW_TEXTFORMAT_BIG);
+            $text->set_br(2);
+            $_CAMILA['page']->add_text($text);
+        }
 
-		global $_CAMILA;
         $table = new CHAW_table();
 
         $fields = $this->result->FieldCount();
@@ -55,17 +63,24 @@ class dbtable
         $table->add_row($headerRow);
 
         // Data rows
+		$count = 0;
         while (!$this->result->EOF) {
             $row = new CHAW_row();
-            $rowData = $this->result->GetRowAssoc(false); // false = lowercase keys
+            $rowData = $this->result->GetRowAssoc(false);
 			foreach ($rowData as $value) {
 				$cell = new CHAW_text($value);
 				$row->add_column($cell);
 			}
             $table->add_row($row);
-            $this->result->MoveNext(); // go to next row
+            $this->result->MoveNext();
+			$count++;
         }
-
-        $_CAMILA['page']->add_table($table);
+		
+		if ($count>0) {
+			$_CAMILA['page']->add_table($table);
+		} else {
+			$text = new CHAW_text(camila_get_translation('camila.nodatafound'));
+			$_CAMILA['page']->add_text($text);
+		}
     }
 }
