@@ -17,7 +17,7 @@
    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA */
   
   require_once CAMILA_VENDOR_DIR . 'autoload.php';
-  
+
   use PhpOffice\PhpSpreadsheet\Helper\Sample;
   use PhpOffice\PhpSpreadsheet\IOFactory;
   use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -114,15 +114,48 @@
 			  //$xmlfile = CAMILA_TMPL_DIR . '/' . $_CAMILA['lang'] . '/' . $_REQUEST['camila_xml2pdf'];
 			  $xmlfile = $camilaTemplate->getXmlTemplatePath($_REQUEST['camila_xml2pdf']);
 
-			  $xml = '';
+			  
+			$xmlFirstNode = ''; 
+			$reader = new XMLReader();
+			$reader->open($xmlfile);
 
-			  if ($_REQUEST['filename'] != '')
+			while ($reader->read()) {
+				if ($reader->nodeType === XMLReader::ELEMENT) {
+					$xmlFirstNode = $reader->name;
+					break;
+				}
+			}
+
+			$reader->close();
+			
+			if ($_REQUEST['filename'] != '')
 			  {
 				  $this->title = $this->filter_filename($_REQUEST['filename'], true);
 			  }
+			
+			if ($xmlFirstNode == 'reports') {
+				$camilaWT  = new CamilaWorkTable();
+				$camilaWT->db = $_CAMILA['db'];
+				$lang = $_CAMILA['lang'];
+
+				$info = pathinfo($xmlfile);
+				$reportName = $info['filename'];	
+				$folder = pathinfo($xmlfile, PATHINFO_DIRNAME);
+				$reportDir = dirname($folder);
+
+				$camilaReport = new CamilaReport($lang, $camilaWT, $reportDir, $reportName);
+				$camilaReport->shouldGenerateToc = false;
+				$camilaReport->shouldGenerateHeader = false;
+				$camilaReport->shouldGenerateFooter = false;
+				$camilaReport->outputFileName = $this->title.'.pdf';
+				$camilaReport->outputPdfToBrowser();
+			} else {
+				
+				$xml = '';
 
 			  $t = new MiniTemplator;
 			  $t->readTemplateFromFile($xmlfile);
+
 
 			  if ($_REQUEST['camila_xml2pdf_checklist_options_0'] != 'y')
 			  {
@@ -369,6 +402,7 @@
 			  $obj = new Xml2Pdf($xml);
 			  $pdf = $obj->render();
 			  $pdf->Output($this->title . '.pdf', 'I');
+			}
 		  }
       }
 	  
