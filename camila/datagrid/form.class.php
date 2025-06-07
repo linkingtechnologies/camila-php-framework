@@ -70,6 +70,12 @@
 		  
 		  $theSubmission->set_css_class('btn btn-md btn-primary button is-primary is-small');
           $this->form->add_submit($theSubmission);
+		  
+		  if ($this->mode == 'insert') {
+			  $js = new CHAW_js('<button class="button is-small is-secondary" type="submit" name="submitandnew_button_header" id="hawinputsubmitandnewheader">'.camila_get_translation('camila.insertandnewbutton').'</button>');
+              $this->form->add_userdefined($js);
+          }
+		  
       }
 
       function draw_delete($button_text)
@@ -193,7 +199,6 @@
           reset($this->fields);
           $myRule = new CHAW_rule('100%');
 
-          //while ($field = each($this->fields)) {
 		  foreach ($this->fields as $key => $val) {
 			$field = [$key, $val];
 
@@ -205,7 +210,6 @@
               }
           }
 
-		  //$this->submitbutton->set_br(0);
 		  if ($drawSubmit)
 			  $this->draw_submit($this->submitbutton);
           $this->draw_footer();
@@ -262,7 +266,6 @@
       function clear()
       {
           reset($this->fields);
-          //while ($field = each($this->fields)) {
 		  foreach ($this->fields as $key => $val) {
 			  $field = [$key, $val];
               if ($this->fields[$field[1]->field]->cleanable)
@@ -270,7 +273,6 @@
           }
 
           reset($this->fields);
-          //while ($field = each($this->fields)) {
 		  foreach ($this->fields as $key => $val) {
 			  $field = [$key, $val];
               if ($this->fields[$field[1]->field]->defaultvalue != '')

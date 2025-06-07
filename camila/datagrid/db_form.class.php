@@ -288,7 +288,6 @@ $(document).ready(function(){
           reset($this->keyvalue);
 
           $i = 0;
-          //while ($akey = each($this->keyvalue)) {
 		  foreach ($this->keyvalue as $key => $val) {
               $akey = [$key, $val];
 			  if ($i > 0)
@@ -316,14 +315,12 @@ $(document).ready(function(){
 
           reset($vals);
           reset($this->fields);
-          //while ($afield = each($this->fields)) {
 		  foreach ($this->fields as $key => $val) {
 			  $afield = [$key, $val];
               if (isset($_REQUEST['camila_print']))
                   $this->fields[$afield[1]->field]->updatable = false;
               if (!$afield[1]->dummy && $afield[1]->field != '') {
                   //$val = each($vals);
-				  //$this->fields[$afield[1]->field]->value = $val[1];
 				  $this->fields[$afield[1]->field]->value = $vals[$afield[1]->field];
               }
           }
@@ -436,7 +433,6 @@ $(document).ready(function(){
           $count = 0;
 
           reset($this->fields);
-          //while ($afield = each($this->fields)) {
 		  foreach ($this->fields as $key => $val) {
 			  $afield = [$key, $val];
               if (!$afield[1]->updatable || $afield[1]->field == '' || (substr(trim($afield[1]->field), 0, strlen('camilafield_')) == 'camilafield_'))
@@ -475,13 +471,10 @@ $(document).ready(function(){
 
           reset($this->keyvalue);
           $i = 0;
-          //while ($akey = each($this->keyvalue)) {
 		  foreach ($this->keyvalue as $key => $val) {
 			  $akey = [$key, $val];
               if ($i > 0)
                   $stmt .= ' AND ';
-
-              //$stmt .= trim($this->keys[$i]) . " = '{$akey[1]}'";
 
               $stmt .= trim($this->keys[$i]) . " = ?";
 
@@ -513,7 +506,6 @@ $(document).ready(function(){
           reset($this->keyvalue);
 
           $i = 0;
-          //while ($akey = each($this->keyvalue)) {
 		  foreach ($this->keyvalue as $key => $val) {
 			  $akey = [$key, $val];
               if ($i > 0)
@@ -548,9 +540,16 @@ $(document).ready(function(){
               parent::add_hidden('camila_returl', $_REQUEST['camila_returl']);
           if (isset($_REQUEST['camila_preferences']) )
               parent::add_hidden('camila_preferences', $_REQUEST['camila_preferences']);
-		  
-		  $this->insert_suggest_modal();
 
+		  if (isset($_GET['camila_update']) && $_GET['camila_update'] == 'new') {
+			$params = $_GET;
+			unset($params['camila_update']);
+			parent::add_hidden('camila_addparams', http_build_query($params));
+		  } else {
+			parent::add_hidden('camila_addparams', '');
+		  }
+
+		  $this->insert_suggest_modal();
       }
 
       function draw($drawSubmit=true)
@@ -572,19 +571,25 @@ $(document).ready(function(){
                   $link = basename($_SERVER['PHP_SELF']) . '?camila_update=new';
               else
                   $link = $_CAMILA['page_url'] . '&camila_update=new';
+			  
+			  if (isset($_REQUEST['camila_addparams']) && $_REQUEST['camila_addparams'] != '') {
+				  $link .= '&'.html_entity_decode($_REQUEST['camila_addparams']);
+			  }
+			  
 
-              if ($this->caninsert) {
+              if (($this->caninsert) || (isset($_REQUEST['camila_addparams']) && $_REQUEST['camila_addparams'] != '')) {
                   $myLink = new CHAW_link(camila_get_translation('camila.report.insertnew'), $link);
 	              $myLink->set_br(2);
 				  $myLink->set_css_class('btn btn-md btn-default button is-small is-primary');
 	              $_CAMILA['page']->add_link($myLink);
+				  
+				  if (isset($_REQUEST['submitandnew_button_header'])) {
+					$_CAMILA['page']->set_redirection(1, $link);
+				  }
               }
 
 
-              if (isset($_REQUEST['submitandnew_button_header']) && $this->caninsert) {
-
-                  $_CAMILA['page']->set_redirection(1, $link);
-              }
+              
 
               return;
           }
@@ -593,8 +598,6 @@ $(document).ready(function(){
               $this->selform->draw();
 
           global $_CAMILA;
-
-		  
 
           if ($this->selform == 0 || isset($_REQUEST['camila_delete']) || isset($_GET['camila_update']) || $_REQUEST[$this->table.'_sess_mode'] == 'update' || $_REQUEST[$this->table.'_sess_mode'] == 'insert') {
               if (!isset($_REQUEST['camila_popup']) && !$_CAMILA['page']->camila_exporting() && (isset ($_REQUEST['camila_returl']) && $_REQUEST['camila_returl'] != '') && (!is_object($this->validator) || count($this->validator->getErrors()) == 0)) {
@@ -721,8 +724,6 @@ $(document).ready(function(){
 
               $temp = $_REQUEST[$this->table.'_sess_key'];
 
-              //if (get_magic_quotes_gpc())
-              //    $temp = stripslashes($temp);
               $this->keyvalue = unserialize($temp);
           }
 
@@ -736,7 +737,6 @@ $(document).ready(function(){
                       $this->selform->value = $this->keyvalue;
 
                   // update data
-				  //echo '.'.$this->onupdate;
                   if (isset($this->onupdate)) {
                       if (call_user_func($this->onupdate, $this))
                           $this->update_data();
@@ -746,12 +746,10 @@ $(document).ready(function(){
                   $this->_data_updated = true;
 
                   reset($this->fields);
-                  //while ($field = each($this->fields)) {
 				  foreach ($this->fields as $key => $val) {
 					  $field = [$key, $val];
                       if ((substr(trim($field[1]->field), 0, strlen('camilafield_')) == 'camilafield_')) {
                           $this->fields[$field[1]->field]->process();
-                          //$req[$this->fields[$field[1]->field]->field] = $this->fields[$field[1]->field]->value;
                       }
                   }
               } elseif ($this->mode == 'insert') {
@@ -768,12 +766,10 @@ $(document).ready(function(){
                   }
 
                   reset($this->fields);
-                  //while ($field = each($this->fields)) {
 				  foreach ($this->fields as $key => $val) {
 					  $field = [$key, $val];
                       if ((substr(trim($field[1]->field), 0, strlen('camilafield_')) == 'camilafield_')) {
                           $this->fields[$field[1]->field]->process();
-                          ////                              //$req[$this->fields[$field[1]->field]->field] = $this->fields[$field[1]->field]->value;
                       }
                   }
 
