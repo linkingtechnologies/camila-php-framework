@@ -23,10 +23,11 @@ class dbtable
     private $conn;
     private $result;
 
-    public function __construct($sql, $title = '')
+    public function __construct($sql, $title = '', $worktableId = '')
     {
         $this->sql = $sql;
 		$this->title = $title;
+		$this->worktableId = $worktableId;
     }
 
     public function process()
@@ -56,6 +57,9 @@ class dbtable
 
         $fields = $this->result->FieldCount();
         $headerRow = new CHAW_row();
+		if (isset ($this->worktableId) && $this->worktableId != '') {
+			$headerRow->add_column(new Chaw_Text(''));
+		}
         for ($i = 0; $i < $fields; $i++) {
             $field = $this->result->FetchField($i);
             $headerRow->add_column(new Chaw_Text($field->name));
@@ -67,9 +71,21 @@ class dbtable
         while (!$this->result->EOF) {
             $row = new CHAW_row();
             $rowData = $this->result->GetRowAssoc(false);
-			foreach ($rowData as $value) {
-				$cell = new CHAW_text($value);
-				$row->add_column($cell);
+			foreach ($rowData as $key => $value) {
+				if ($key == 'id' && $this->worktableId != '') {
+					$arr=[];
+					$arr['camilakey_id'] = $value;
+					$reqs = 'camila_delete=' . urlencode(serialize($arr)) . '&camila_token=' . camila_token(serialize($arr));
+					$cell = new CHAW_link('X', 'cf_worktable'.$this->worktableId.'.php?'.$reqs);
+					$row->add_column($cell);
+					
+					$reqs = 'camila_update=' . urlencode(serialize($arr)) . '&camila_token=' . camila_token(serialize($arr));
+					$cell = new CHAW_link($value, 'cf_worktable'.$this->worktableId.'.php?'.$reqs);
+					$row->add_column($cell);
+				} else {
+					$cell = new CHAW_text($value);
+					$row->add_column($cell);
+				}
 			}
             $table->add_row($row);
             $this->result->MoveNext();

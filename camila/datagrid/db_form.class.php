@@ -602,10 +602,10 @@ $(document).ready(function(){
           if ($this->selform == 0 || isset($_REQUEST['camila_delete']) || isset($_GET['camila_update']) || $_REQUEST[$this->table.'_sess_mode'] == 'update' || $_REQUEST[$this->table.'_sess_mode'] == 'insert') {
               if (!isset($_REQUEST['camila_popup']) && !$_CAMILA['page']->camila_exporting() && (isset ($_REQUEST['camila_returl']) && $_REQUEST['camila_returl'] != '') && (!is_object($this->validator) || count($this->validator->getErrors()) == 0)) {
 	              $text = new CHAW_text('');
-				  $text->set_br(1);
+				  $text->set_br(2);
 				  $_CAMILA['page']->add_text($text);
 				  $myLink = new CHAW_link(camila_get_translation('camila.back.table'), $_REQUEST['camila_returl']);
-				  $myLink->set_css_class('btn btn-md btn-default button is-info is-small');
+				  $myLink->set_css_class('btn btn-md btn-default button is-secondary is-small');
 	              $myLink->set_br(1);
 	              $_CAMILA['page']->add_link($myLink);
 	          }
