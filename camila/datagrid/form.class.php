@@ -134,7 +134,11 @@
 
               $this->form->add_userdefined($js);
 
-          }
+          } else {
+			  global $_CAMILA;
+			  $text = new CHAW_Text('');
+			  $_CAMILA['page']->add_text($text);
+		  }
 
       }
 
