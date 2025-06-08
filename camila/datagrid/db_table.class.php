@@ -44,7 +44,7 @@ class dbtable
 			$where = '(' . $this->filter . ') AND ';
 
 		if ($_CAMILA['user_visibility_type'] == 'personal') {
-			require_once(CAMILA_WORKTABLES_DIR . '/' . CAMILA_APPLICATION_PREFIX . 'worktable' . $this->worktableId . '.visibility.inc.php');
+			require(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $this->worktableId . '.visibility.inc.php');
 			if (preg_match('/(\d+)$/', $this->worktableId, $matches)) {
 				$wd = $matches[1];
 				if (array_key_exists($wd, $camila_vp)) {
@@ -54,7 +54,7 @@ class dbtable
 		}
 
 		if ($_CAMILA['user_visibility_type'] == 'group') {
-			require_once(CAMILA_WORKTABLES_DIR . '/' . CAMILA_APPLICATION_PREFIX . 'worktable' . $this->worktableId . '.visibility.inc.php');
+			require(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $this->worktableId . '.visibility.inc.php');
 			if (preg_match('/(\d+)$/', $this->worktableId, $matches)) {
 				$wd = $matches[1];
 				if (array_key_exists($wd, $camila_vg)) {
@@ -65,13 +65,19 @@ class dbtable
 		
 		$this->filter = $where;
 		
-		$stmt = $this->sql . ' WHERE ' . $this->filter;
+		$stmt = $this->sql;
 		
-		if ($this->orderby != '')
+		if ($this->filter != '') {
+			$stmt .= ' WHERE ' . $this->filter; 
+		}
+		
+		if ($this->orderby != '') {
 			$stmt.= ' ORDER BY ' . $this->orderby;
-		
-		if ($this->direction != '')
-			$stmt.= ' ' . $this->direction;
+			
+			if ($this->direction != '')
+				$stmt.= ' ' . $this->direction;
+		}
+		//echo $stmt;
 
         $this->result = $_CAMILA['db']->Execute($stmt);
         if (!$this->result) {

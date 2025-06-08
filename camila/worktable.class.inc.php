@@ -181,12 +181,76 @@ class CamilaWorkTable
 		$this->db->SetFetchMode($old);
 		return $arr;
 	}
+	
+	function guessTableNameFromQuery($sql)
+	{
+		// Normalize spaces and case
+		$sql = preg_replace('/\s+/', ' ', strtolower(trim($sql)));
+
+		// Match FROM followed by a table name (with or without alias)
+		if (preg_match('/\bfrom\s+([a-zA-Z0-9_."]+)/', $sql, $matches)) {
+			// Remove quotes or schema prefix if present
+			$table = $matches[1];
+
+			// If table is in format schema.table, take only the table
+			if (strpos($table, '.') !== false) {
+				$parts = explode('.', $table);
+				$table = end($parts);
+			}
+
+			// Remove quotes if present
+			return trim($table, '"');
+		}
+
+		return null; // Table not found
+	}
 
 	function startExecuteQuery($sql,$prefix = true,$fetchMode=ADODB_FETCH_NUM)
 	{
 		$old = $this->db->SetFetchMode($fetchMode);
 		$query = $this->parseWorktableSqlStatement($sql, $prefix);
+
+		global $_CAMILA;
+		
+		if ($_CAMILA['user_visibility_type'] == 'personal' || $_CAMILA['user_visibility_type'] == 'group') {
+			$table = $this->guessTableNameFromQuery($query);
+			if ($table != '') {
+				if (str_starts_with($table, CAMILA_TABLE_WORKP)) {
+					$worktableId = substr($table, strlen(CAMILA_TABLE_WORKP));
+					if (is_numeric($worktableId)) {
+	
+						$addWhere = '';
+
+						if ($_CAMILA['user_visibility_type'] == 'personal') {
+							require(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $worktableId . '.visibility.inc.php');
+							if (preg_match('/(\d+)$/', $worktableId, $matches)) {
+								$wd = $matches[1];
+								if (array_key_exists($wd, $camila_vp)) {
+									$addWhere .= $camila_vp[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user']);
+								}
+							}	
+						}
+
+						if ($_CAMILA['user_visibility_type'] == 'group') {
+							require(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $worktableId . '.visibility.inc.php');
+							if (preg_match('/(\d+)$/', $worktableId, $matches)) {
+								$wd = $matches[1];
+								if (array_key_exists($wd, $camila_vg)) {
+									$addWhere .= $camila_vg[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user_group']);
+								}
+							}
+						}
+						
+						if ($addWhere != '') {
+							$query = $this->addWhereClauseSafely($query, $addWhere);
+						}
+					}
+				}
+			}
+		}
+
 		//echo $query;
+		
 		$result = $this->db->Execute($query);
 		return $result;
 	}
@@ -251,6 +315,8 @@ class CamilaWorkTable
 			$count++;
 		}
 		$query .= ')';
+		
+		
 
 		//echo $query;
 		$result = $this->startExecuteQuery($query,false);
@@ -483,6 +549,51 @@ class CamilaWorkTable
 		$this->db->SetFetchMode($old);
 		return $rId;
     }
+	
+	function addWhereClauseSafely($query, $newCondition)
+	{
+		// Clauses that must come after WHERE
+		$clauses = [
+			' group by',
+			' having',
+			' order by',
+			' limit',
+			' offset',
+			' fetch first',
+			' for update',
+			' union',
+			' intersect',
+			' except'
+		];
+
+		// Normalize spaces for consistent matching
+		$queryLower = strtolower($query);
+
+		// Default insert position is end of query
+		$insertPos = strlen($query);
+
+		// Find the earliest clause after WHERE
+		foreach ($clauses as $clause) {
+			$pos = stripos($queryLower, $clause);
+			if ($pos !== false && $pos < $insertPos) {
+				$insertPos = $pos;
+			}
+		}
+
+		// Split query
+		$before = substr($query, 0, $insertPos);
+		$after = substr($query, $insertPos);
+
+		// Add WHERE or AND depending on existing WHERE
+		if (stripos($before, ' where ') === false) {
+			$before .= ' WHERE ' . $newCondition;
+		} else {
+			$before .= ' AND ' . $newCondition;
+		}
+
+		return $before . $after;
+	}
+
 	
 	function isUTF8($string)
 	{
