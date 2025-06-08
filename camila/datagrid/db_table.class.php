@@ -23,9 +23,13 @@ class dbtable
     private $conn;
     private $result;
 
-    public function __construct($sql, $title = '', $worktableId = '')
+    public function __construct($sql, $filter = '', $orderby = '', $direction = 'asc', $mapping = '', $title = '', $worktableId = '')
     {
         $this->sql = $sql;
+		$this->filter = $filter;
+		$this->orderby = $orderby;
+		$this->direction = $direction;
+		$this->mapping = $mapping;
 		$this->title = $title;
 		$this->worktableId = $worktableId;
     }
@@ -33,6 +37,30 @@ class dbtable
     public function process()
     {
 		global $_CAMILA;
+
+		$this->filter;
+		
+		$where = '';
+		if ($_CAMILA['user_visibility_type'] == 'personal') {
+			require_once(CAMILA_WORKTABLES_DIR . '/' . CAMILA_APPLICATION_PREFIX . 'worktable' . $this->worktableId . '.visibility.inc.php');
+			if (preg_match('/(\d+)$/', $this->worktableId, $matches)) {
+				$wd = $matches[1];
+				if (array_key_exists($wd, $camila_vp)) {
+					$where .= $camila_vp[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user']);
+				}
+			}	
+		}
+
+		if ($_CAMILA['user_visibility_type'] == 'group') {
+			require_once(CAMILA_WORKTABLES_DIR . '/' . CAMILA_APPLICATION_PREFIX . 'worktable' . $this->worktableId . '.visibility.inc.php');
+			if (preg_match('/(\d+)$/', $this->worktableId, $matches)) {
+				$wd = $matches[1];
+				if (array_key_exists($wd, $camila_vg)) {
+					$where .= $camila_vg[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user_group']);
+				}
+			}
+		}
+		
         $this->result = $_CAMILA['db']->Execute($this->sql);
         if (!$this->result) {
             throw new Exception("Query error: " . $this->conn->ErrorMsg());

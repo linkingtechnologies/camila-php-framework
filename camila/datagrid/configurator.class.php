@@ -1315,9 +1315,9 @@ class configurator
 					}
 					$resultF->MoveNext();
 				}
-				
+
 				$stmt = "select id,".implode(', ', $fieldNames)." from ".CAMILA_TABLE_WORKP.$resultL2->fields['id'];
-				$tables="\$dbtable = new dbtable('".$stmt."'.\$filter, '".$resultL2->fields['short_title']."','".$resultL2->fields['id']."');";
+				$tables="\$dbtable = new dbtable('".$stmt."',\$filter,'','','','".$resultL2->fields['short_title']."','".$resultL2->fields['id']."');";
 				$tables.="\$dbtable->process();";
 				$tables.="\$dbtable->draw();";
 				
