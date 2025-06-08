@@ -37,10 +37,12 @@ class dbtable
     public function process()
     {
 		global $_CAMILA;
-
-		$this->filter;
 		
 		$where = '';
+
+		if ($this->filter != '')
+			$where = '(' . $this->filter . ') AND ';
+
 		if ($_CAMILA['user_visibility_type'] == 'personal') {
 			require_once(CAMILA_WORKTABLES_DIR . '/' . CAMILA_APPLICATION_PREFIX . 'worktable' . $this->worktableId . '.visibility.inc.php');
 			if (preg_match('/(\d+)$/', $this->worktableId, $matches)) {
@@ -61,9 +63,19 @@ class dbtable
 			}
 		}
 		
-        $this->result = $_CAMILA['db']->Execute($this->sql);
+		$this->filter = $where;
+		
+		$stmt = $this->sql . ' WHERE ' . $this->filter;
+		
+		if ($this->orderby != '')
+			$stmt.= ' ORDER BY ' . $this->orderby;
+		
+		if ($this->direction != '')
+			$stmt.= ' ' . $this->direction;
+
+        $this->result = $_CAMILA['db']->Execute($stmt);
         if (!$this->result) {
-            throw new Exception("Query error: " . $this->conn->ErrorMsg());
+            throw new Exception("Query error: " . $_CAMILA['db']->ErrorMsg());
         }
     }
 
