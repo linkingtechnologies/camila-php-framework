@@ -19,10 +19,33 @@
 
 $camilaUI = new CamilaUserInterface();
 $camilaUI->openBox();
-   
+
+$string = camila_get_translation('camila.login.options.group');
+
+// Split and clean parts
+$parts = explode(';', $string);
+$parts = array_map(function($item) {
+    return trim(rtrim($item, ','));
+}, $parts);
+
+$result = [];
+
+for ($i = 0; $i < count($parts); $i += 2) {
+    // Default key/value
+    $key = $parts[$i] ?? '';
+    $value = $parts[$i + 1] ?? '';
+
+    if (!isset($parts[$i + 1])) {
+        $key = '';
+        $value = $parts[$i] ?: '<>';
+    }
+
+    $result[] = '"' . $key . '": ' . $value;
+}
+
+
 $form = new dbform(CAMILA_TABLE_USERS, 'id', 'id,username,surname,name,grp,level,visibility_type,token', 'username', 'asc', 'username <> ' . $_CAMILA['db']->qstr($_CAMILA['user']), true, true, true, false, true);
 $form->mapping=camila_get_translation('camila.mapping.admin.users');
-
 
 new form_textbox($form, 'id', camila_get_translation('camila.worktable.field.id'), true, 50, 50);
 
@@ -31,9 +54,16 @@ new form_textbox($form, 'surname', camila_get_translation('camila.login.surname'
 new form_textbox($form, 'name', camila_get_translation('camila.login.name'), false, 50,50);
 new form_password($form, 'password', camila_get_translation('camila.login.password'));
 new form_static_listbox($form, 'level', camila_get_translation('camila.login.level'), camila_get_translation('camila.login.options.level'));
-new form_static_listbox($form, 'grp', camila_get_translation('camila.login.group'), camila_get_translation('camila.login.options.group'));
+//new form_static_listbox($form, 'grp', camila_get_translation('camila.login.group'), camila_get_translation('camila.login.options.group'));
+new form_textbox($form, 'grp', camila_get_translation('camila.login.group'), false, 20);
+if (is_object($form->fields['grp']))
+	$form->fields['grp']->help = implode("<br/>", $result);
+
+if (is_object($form->fields['grp']))
+	$form->fields['grp']->defaultvalue = 'default';
+
 new form_static_listbox($form, 'visibility_type', camila_get_translation('camila.login.visibility'), camila_get_translation('camila.login.options.visibility'));
-//new form_textbox($form, 'grp', camila_get_translation('camila.login.group'), false, 20);
+
 if (is_object($form->fields['grp']))
     $form->fields['grp']->defaultvalue = 'default';
 
