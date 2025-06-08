@@ -10,7 +10,7 @@ $filter = '';
 if ($_CAMILA['user_visibility_type']=='personal')
 	$filter= ' where ${personal_visibility_field}='.$_CAMILA['db']->qstr($_CAMILA['user']);
 
-if ($_CAMILA['user_visibility_type']=='group')
+if ($_CAMILA['user_visibility_type']=='group' && '${group_visibility_field}' != '')
 	$filter= ' where ${group_visibility_field}='.$_CAMILA['db']->qstr($_CAMILA['user_group']);
 
 

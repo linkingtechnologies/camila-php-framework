@@ -1130,7 +1130,7 @@ class configurator
         $this->menuitems_script = '';
         $this->formulas         = 'Array(';
         $this->queries          = 'Array(';
-        
+
         $resultTable = $this->db->Execute('select * from ' . CAMILA_TABLE_WORKT . ' where id=' . $this->db->qstr($id));
         if ($resultTable === false)
             camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
@@ -1138,7 +1138,7 @@ class configurator
         $result = $this->db->Execute('select * from ' . CAMILA_TABLE_WORKC . ' where (wt_id=' . $this->db->qstr($id) . ' and is_deleted<>' . $this->db->qstr('y') . ') order by sequence');
         if ($result === false)
             camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
-        
+
         $t = new MiniTemplator;
         $t->readTemplateFromFile(CAMILA_DIR . 'templates/worktable.inc.php');
 		
@@ -1146,7 +1146,9 @@ class configurator
 		$t->setVariable('wt_full_title', $resultTable->fields['full_title']);
         
         $report_fields = 'id,';
-        
+
+		$visibility_script = "\$camila_vg=[];\n\$camila_vp=[];\n";
+
         if (CAMILA_WORKTABLE_SPECIAL_ICON_ENABLED)
             $report_fields .= 'cf_bool_is_special,';
         
@@ -1166,7 +1168,7 @@ class configurator
         $vcount         = 0;
         $fcount         = 0;
         $qcount         = 0;
-		$groupvisibilityfield = 'grp';
+		$groupvisibilityfield = '';
 		$personalvisibilityfield = 'created_by';
 		$recordReadOnlyIfNotNullFields = [];
 
@@ -1239,13 +1241,14 @@ class configurator
             $rcount++;
             $t->setVariable('form_element', $this->get_form_element($result->fields, CAMILA_TABLE_WORKP . $id, $forceReadonly));
 
-			if (stripos(strtolower($result->fields['field_options']), $this->camila_get_translation('camila.worktable.field.groupvisibilityfield')) !== false) {
+			if (stripos($result->fields['field_options'], $this->camila_get_translation('camila.worktable.field.groupvisibilityfield')) !== false) {
 				$groupvisibilityfield = $result->fields['col_name'];
+				$visibility_script .= "\$camila_vg['".$id."']='".$groupvisibilityfield."';\n";
 			}
-			
-			if (stripos(strtolower($result->fields['field_options']), $this->camila_get_translation('camila.worktable.field.groupvisibilityfield')) !== false) {
+
+			/*if (stripos(strtolower($result->fields['field_options']), $this->camila_get_translation('camila.worktable.field.groupvisibilityfield')) !== false) {
 				$groupvisibilityfield = $result->fields['col_name'];
-			}
+			}*/
 			
 			if (stripos(strtolower($result->fields['field_options']), $this->camila_get_translation('camila.worktable.field.recordreadonlifnotnullfields')) !== false) {
 				$recordReadOnlyIfNotNullFields[] = $result->fields['col_name'];
@@ -1546,6 +1549,14 @@ class configurator
         //fix me... fixUtf8?
 		fwrite($fh, \ForceUTF8\Encoding::toUTF8($output));
         //fclose($fh);
+		
+		$t2 = new MiniTemplator;
+        $t2->readTemplateFromFile(CAMILA_DIR . 'templates/visibility.inc.php');
+		$t2->setVariable('visibility_script', $visibility_script);
+		$output2 = '';
+		$t2->generateOutputToString($output2);
+        $fh = fopen(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $id . '.visibility.inc.php', 'wb');
+		fwrite($fh, \ForceUTF8\Encoding::toUTF8($output2));
 		
 		if (function_exists('opcache_reset'))
 			opcache_reset();

@@ -62,13 +62,28 @@ if (isset($_REQUEST['camila_autosuggest'])) {
  
     if ($_REQUEST['objectid'] != '')
         $where = 'id=' . $_CAMILA['db']->qstr($_REQUEST['objectid']);
-    
-    if ($_CAMILA['user_visibility_type'] == 'personal')
-        $where .= ' and ' . CAMILA_WORKTABLE_EXT_TABLE_PERSONAL_VISIBILITY_FIELD . '=' . $_CAMILA['db']->qstr($_CAMILA['user']);
+	
+    if ($_CAMILA['user_visibility_type'] == 'personal') {
+		require_once(CAMILA_WORKTABLES_DIR . '/' . $_REQUEST['table'] . '.visibility.inc.php');
+		if (preg_match('/(\d+)$/', $_REQUEST['table'], $matches)) {
+			$wd = $matches[1];
+			if (array_key_exists($wd, $camila_vp)) {
+				$where .= ' and ' . $camila_vp[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user']);
+				//$where .= ' and ' . CAMILA_WORKTABLE_EXT_TABLE_PERSONAL_VISIBILITY_FIELD . '=' . $_CAMILA['db']->qstr($_CAMILA['user']);
+			}
+		}	
+	}
 
-	if ($_CAMILA['user_visibility_type'] == 'group')
-        $where .= ' and ' . CAMILA_WORKTABLE_EXT_TABLE_GROUP_VISIBILITY_FIELD . '=' . $_CAMILA['db']->qstr($_CAMILA['user_group']);
-    
+	if ($_CAMILA['user_visibility_type'] == 'group') {
+		require_once(CAMILA_WORKTABLES_DIR . '/' . $_REQUEST['table'] . '.visibility.inc.php');
+		if (preg_match('/(\d+)$/', $_REQUEST['table'], $matches)) {
+			$wd = $matches[1];
+			if (array_key_exists($wd, $camila_vg)) {
+				$where .= ' and ' . $camila_vg[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user_group']);
+				//$where .= ' and ' . CAMILA_WORKTABLE_EXT_TABLE_GROUP_VISIBILITY_FIELD . '=' . $_CAMILA['db']->qstr($_CAMILA['user_group']);
+			}
+		}
+	}
 	
 	//echo $query . ' from ' . $_REQUEST['table'] . ' where ' . $where;
 	if (isset($_REQUEST['src']) && $_REQUEST['src'] == 'modal')
