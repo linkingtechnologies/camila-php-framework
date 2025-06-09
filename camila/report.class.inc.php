@@ -38,9 +38,11 @@ class CamilaReport
 	private $reportList;
 	private $currentReport;
 	private $lang;
-	
+
 	public $shouldGenerateToc = false;
 	public $shouldGenerateHeader = false;
+	public $headerHtml;
+
 	public $shouldGenerateFooter = false;
 	public $outputFileName;
 
@@ -217,7 +219,7 @@ class CamilaReport
 
         return $html;
     }
-	
+
 	function queryWorktableDatabase($result)
 	{
 		$arr = array();
@@ -231,7 +233,6 @@ class CamilaReport
 		}
 		return $arr;
 	}
-	
 	
 	function createGraph($name, $obj, $data, $filename = null) {
 		if (count($data)>0)
@@ -326,7 +327,7 @@ class CamilaReport
 		}
 		
 		if ($notEmptyCount == 0) {
-			$html .= '<td><p>Nessun dato disponibile.</p></td>';
+			$html .= '<td><p>'.camila_get_translation('camila.nodatafound').'</p></td>';
 		}
 		
 		if ($gCount>1) {
@@ -344,7 +345,7 @@ class CamilaReport
 	private function generatePhpWordTable($container, $result, $graph, $totalWidth = 9065, $fontStyle)
 	{
 		if ($result->RecordCount() <= 0) {
-			$container->addText("Nessun dato disponibile.", $fontStyle);
+			$container->addText(camila_get_translation('camila.nodatafound'), $fontStyle);
 			return;
 		}
 
@@ -486,7 +487,7 @@ class CamilaReport
 			}
 			if (!$contentAdded) {
 					$cell = $table->addCell($equalWidth, $cellStyle);
-					$cell->addText("Nessun dato disponibile.");
+					$cell->addText(camila_get_translation('camila.nodatafound'));
 			}
 		} else {
 			// Single graph/table → render directly
@@ -505,7 +506,7 @@ class CamilaReport
 						$this->generatePhpWordTable($section, $result2, $graph, $totalWidth + 100, $fontStyleNormal);
 					}
 				} else {
-					$section->addText("No data available.");
+					$section->addText(camila_get_translation('camila.nodatafound'));
 				}
 			}
 		}
@@ -551,31 +552,9 @@ class CamilaReport
 		]);
 
         // Add header and footer
-		$t = new CamilaTemplate($this->lang);
-		$params = $t->getParameters();
-
-		$logoPath = CAMILA_TMPL_DIR . '/images/'.$this->lang.'/'.$params['logo']; // Percorso assoluto o accessibile
-		$evento = htmlspecialchars($params['evento']);
-		$comune = htmlspecialchars($params['comune']);
-		$segreteria = htmlspecialchars($params['segreteriacampo'] . ' ' . $params['nomecampo']);
-		$headerHtml = '
-		<table width="100%" style="border: none;">
-		  <tr>
-			<td width="60" style="vertical-align: top;">
-			  <img src="' . $logoPath . '" width="55" height="55">
-			</td>
-			<td style="vertical-align: top; font-size: 12pt; padding-left: 10px;">
-			  <div><strong>' . $evento . '</strong></div>
-			  <div><strong>' . $comune . '</strong></div>
-			  <div style="color: red;"><strong>' . $segreteria . '</strong></div>
-			</td>
-		  </tr>
-		</table>
-		<div style="height: 15px;"></div>';
-
 		if ($this->shouldGenerateHeader)
-			$mpdf->SetHTMLHeader($headerHtml);
-		
+			$mpdf->SetHTMLHeader($this->headerHtml);
+
 		if ($this->shouldGenerateFooter)
 			$mpdf->SetFooter('{PAGENO} | |' . CAMILA_APPLICATION_NAME . "\n".'<br/>Report del '.date('m/d/Y') . ' ore ' . date('H:i'));
 		
@@ -650,7 +629,7 @@ class CamilaReport
 						}
 						else
 						{
-							$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<p><i>Nessun dato disponibile.</i></p>'));
+							$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<p><i>'.camila_get_translation('camila.nodatafound').'</i></p>'));
 							//$camilaUI->insertWarning($v3->title . ' - Nessun dato!');
 						}
 						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
@@ -715,34 +694,20 @@ class CamilaReport
 
 		$section = $phpWord->addSection();
 
-		if ($this->shouldGenerateHeader)
+		if ($this->shouldGenerateHeader) {
 			$header = $section->addHeader();
-		
+			$this->convertHtmlTableToPhpWord($header, $this->headerHtml);
+		}
+
 		if ($this->shouldGenerateFooter)
 			$footer = $section->addFooter();
-
-		$t = new CamilaTemplate($this->lang);
-		$table = $header->addTable();
-		$table->addRow();
-		$params = $t->getParameters();
-		$directory = CAMILA_TMPL_DIR . '/images/'.$this->lang;
-		$cell1 = $table->addCell(1000); 
-		$cell1->addImage(
-			$directory.'/'.$params['logo'],
-			['width' => 40, 'height' => 40, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::LEFT]
-		);
-		$cell2 = $table->addCell(8000);
-		$cell2->addText($params['evento'], ['bold' => true], ['lineHeight' => 1.2]);
-		$cell2->addText($params['comune'], ['bold' => true], ['lineHeight' => 1.2]);
-		$cell2->addText($params['segreteriacampo']. ' ' . $params['nomecampo'], ['bold' => true, 'color' => 'FF0000'], ['lineHeight' => 1.2]);
-		$cell2->addText('', null, ['spaceAfter' => 200]);
 
 		if ($this->shouldGenerateFooter)
 			$footer->addPreserveText('{PAGE} | ' . CAMILA_APPLICATION_NAME . ' | Report del ' . date('d/m/Y') . ' ore ' . date('H:i'));
 		
 		if ($this->shouldGenerateToc) {
+			$section->addText('Indice', ['bold' => true, 'size' => 16], ['spaceAfter' => 200]);
 			$section->addTOC(['spaceAfter' => 200]);
-			$section->addText('Indice', ['bold' => true, 'size' => 16]);
 		}
 
 		// Content
@@ -792,6 +757,244 @@ class CamilaReport
         $writer->save('php://output');
 		exit;
     }
+
+	/**
+	 * Converts HTML <table> elements to PHPWord tables inside the given container (header, section, footer).
+	 *
+	 * @param object $container PHPWord container (Section, Header, Footer)
+	 * @param string $html The HTML string to parse
+	 * @param string $basePath Base path for resolving image sources
+	 */
+	function convertHtmlTableToPhpWord($container, $html, $basePath = '')
+	{
+		$dom = new DOMDocument();
+		@$dom->loadHTML($html);
+
+		$tables = $dom->getElementsByTagName('table');
+
+		// Calculate usable width based on container
+		$usableWidth = 9600; // fallback
+		if (method_exists($container, 'getStyle')) {
+			$style = $container->getStyle();
+			if ($style !== null) {
+				$pageWidth = $style->getPageSizeW(); // e.g. 11906 for A4
+				$marginLeft = $style->getMarginLeft();
+				$marginRight = $style->getMarginRight();
+				$usableWidth = $pageWidth - $marginLeft - $marginRight;
+			}
+		}
+
+		foreach ($tables as $htmlTable) {
+			$style = [
+				'borderSize' => 6,
+				'borderColor' => '000000',
+				'cellMargin' => 80,
+			];
+
+			$styleAttr = $htmlTable->getAttribute('style') ?? '';
+			$normalized = strtolower(str_replace(' ', '', $styleAttr));
+			$rules = explode(';', $normalized);
+
+			foreach ($rules as $rule) {
+				if (str_contains($rule, 'border:none')) {
+					$style['borderSize'] = 0;
+					$style['borderColor'] = 'FFFFFF';
+					$style['borderInsideH'] = 0;
+					$style['borderInsideV'] = 0;
+				} elseif (preg_match('/border:(\d+)pxsolid#?([a-f0-9]{3,6})/', $rule, $m)) {
+					$style['borderSize'] = (int)$m[1];
+					$style['borderColor'] = strtoupper($m[2]);
+				} elseif (str_contains($rule, 'border-collapse:collapse')) {
+					$style['borderInsideH'] = $style['borderSize'];
+					$style['borderInsideV'] = $style['borderSize'];
+				} elseif (preg_match('/cellpadding:(\d+)/', $rule, $m)) {
+					$style['cellMargin'] = (int)$m[1];
+				}
+			}
+
+			$table = $container->addTable($style);
+
+			foreach ($htmlTable->getElementsByTagName('tr') as $tr) {
+				$table->addRow();
+
+				foreach ($tr->getElementsByTagName('td') as $td) {
+					$width = 4500;
+					$valign = 'top';
+					$align = null;
+
+					// Width from attribute
+					if ($td->hasAttribute('width')) {
+						$widthAttr = trim($td->getAttribute('width'));
+						if (str_ends_with($widthAttr, '%')) {
+							$percent = (float)rtrim($widthAttr, '%');
+							$width = round($usableWidth * ($percent / 100));
+						} else {
+							$width = (int)$widthAttr * 50;
+						}
+					}
+
+					// Width & align from inline style
+					$cellStyle = strtolower($td->getAttribute('style') ?? '');
+					if (preg_match('/width:\s*([\d.]+)%/', $cellStyle, $m)) {
+						$width = round($usableWidth * ((float)$m[1] / 100));
+					} elseif (preg_match('/width:\s*(\d+)px/', $cellStyle, $m)) {
+						$width = (int)$m[1] * 50;
+					}
+
+					if (preg_match('/vertical-align:\s*(top|middle|bottom)/i', $cellStyle, $m)) {
+						$valign = strtolower($m[1]) === 'middle' ? 'center' : strtolower($m[1]);
+					}
+					if (preg_match('/text-align:\s*(left|center|right)/i', $cellStyle, $m)) {
+						$align = strtolower($m[1]);
+					}
+
+					$cell = $table->addCell($width, ['valign' => $valign]);
+					$this->parseCellContent($cell, $td, $basePath, $align);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Parses HTML content inside a <td> and adds it to the PHPWord cell.
+	 *
+	 * @param Cell $cell The PHPWord cell to add content to
+	 * @param DOMElement $td The HTML <td> element
+	 * @param string $basePath Base path to resolve image paths
+	 * @param string|null $align Optional text alignment: left, center, right
+	 */
+	function parseCellContent($cell, $td, $basePath, $align = null)
+	{
+		$alignmentMap = [
+			'left' => Jc::LEFT,
+			'center' => Jc::CENTER,
+			'right' => Jc::RIGHT,
+		];
+		$textAlign = $alignmentMap[$align] ?? null;
+
+		foreach ($td->childNodes as $child) {
+			if ($child instanceof DOMElement) {
+				$tag = strtolower($child->tagName);
+				$text = trim($child->textContent);
+				$bold = $child->getElementsByTagName('strong')->length > 0;
+				$color = '000000';
+
+				// Extract color if present
+				if ($child->hasAttribute('style') &&
+					preg_match('/color:\s*(#[a-f0-9]{3,6}|red)/i', $child->getAttribute('style'), $m)) {
+					$color = strtolower($m[1]) === 'red' ? 'FF0000' : strtoupper(str_replace('#', '', $m[1]));
+				}
+
+				switch ($tag) {
+					case 'img':
+						$src = $child->getAttribute('src');
+						if (!empty($basePath) && !str_starts_with($src, '/')) {
+							$src = rtrim($basePath, '/') . '/' . $src;
+						}
+
+						if (file_exists($src)) {
+							[$realWidth, $realHeight] = getimagesize($src);
+
+							// Defaults
+							$width = (int)$child->getAttribute('width');
+							$height = (int)$child->getAttribute('height');
+
+							// Inline CSS
+							$style = strtolower($child->getAttribute('style') ?? '');
+							if (preg_match('/width:\s*(\d+)px/', $style, $m)) {
+								$width = (int)$m[1];
+							}
+							if (preg_match('/height:\s*(\d+)px/', $style, $m)) {
+								$height = (int)$m[1];
+							}
+
+							// Auto-scale
+							if ($width && !$height) {
+								$scale = $width / $realWidth;
+								$height = round($realHeight * $scale);
+							} elseif (!$width && $height) {
+								$scale = $height / $realHeight;
+								$width = round($realWidth * $scale);
+							}
+
+							// Default fallback
+							if (!$width && !$height) {
+								$maxWidth = 100;
+								if ($realWidth > $maxWidth) {
+									$scale = $maxWidth / $realWidth;
+									$width = $maxWidth;
+									$height = round($realHeight * $scale);
+								} else {
+									$width = $realWidth;
+									$height = $realHeight;
+								}
+							}
+
+							$cell->addImage($src, [
+								'width' => $width,
+								'height' => $height,
+								'alignment' => Jc::LEFT,
+							]);
+						}
+						break;
+					case 'div':
+						$style = strtolower($child->getAttribute('style') ?? '');
+
+						// If div is used only for spacing (empty + height), add vertical space
+						if (preg_match('/height:\s*(\d+)px/', $style, $m) && $text === '') {
+							$spaceTwips = (int)$m[1] * 20; // convert px to twips
+							$cell->addText('', [], ['spaceBefore' => $spaceTwips]);
+							break;
+						}
+
+						// Normal content
+						if ($text) {
+							$cell->addText($text, [
+								'bold' => $bold,
+								'color' => $color,
+								'size' => 11,
+							], [
+								'alignment' => $textAlign,
+								'spaceAfter' => 0,
+							]);
+						}
+						break;
+					case 'span':
+					case 'p':
+					case 'strong':
+						if ($text) {
+							$cell->addText($text, [
+								'bold' => $bold,
+								'color' => $color,
+								'size' => 11,
+							], [
+								'alignment' => $textAlign,
+								'spaceAfter' => 0,
+							]);
+						}
+						break;
+
+					default:
+						if ($text) {
+							$cell->addText($text, [], [
+								'alignment' => $textAlign,
+								'spaceAfter' => 0,
+							]);
+						}
+						break;
+				}
+			} elseif ($child instanceof DOMText) {
+				$text = trim($child->wholeText);
+				if ($text) {
+					$cell->addText($text, [], [
+						'alignment' => $textAlign,
+						'spaceAfter' => 0,
+					]);
+				}
+			}
+		}
+	}
+
 
 }
 ?>
