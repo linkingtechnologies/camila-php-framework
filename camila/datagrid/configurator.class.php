@@ -1278,7 +1278,7 @@ class configurator
 			if ($resultTable->fields['short_title'] == $wtName) {
 				$wtIds[] = $resultL->fields['wt_id'];
 				$c = trim(substr($resultL->fields['field_options'], strpos($resultL->fields['field_options'], '(') + 1, strpos($resultL->fields['field_options'], ')') - strpos($resultL->fields['field_options'], '(') - 1));
-				$resultC = $this->db->Execute('select col_name from ' . CAMILA_TABLE_WORKC . ' where (name=' . $this->db->qstr($c) . ' and wt_id=' . $this->db->qstr($resultTable->fields['id']) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
+				$resultC = $this->db->Execute('select col_name from ' . CAMILA_TABLE_WORKC . ' where (LOWER(name)=' . $this->db->qstr(strtolower($c)) . ' and wt_id=' . $this->db->qstr($resultTable->fields['id']) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
                 if ($resultC === false)
                     camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
                 else
