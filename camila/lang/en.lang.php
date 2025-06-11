@@ -147,6 +147,7 @@ camila.worktable.export.dataonly = Export File Card data only
 camila.worktable.export.confonly = Export File Card configurationonly
 
 camila.worktable.field.default.id = row id
+camila.worktable.field.default.parentid = parent row id
 camila.worktable.field.default.j = d
 camila.worktable.field.default.d = dd
 camila.worktable.field.default.z = ddd

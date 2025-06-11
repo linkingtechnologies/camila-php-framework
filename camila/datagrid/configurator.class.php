@@ -1691,7 +1691,21 @@ class configurator
             
             case 'string-listofvalues':
             case 'integer-listofvalues':
-                $script = "new form_static_listbox(\$form, '$field', '$name', '$options', $required, '$validation');";                
+				global $_CAMILA;
+				$script = "\$options='".$options."';";
+				if (stripos($options, 'select ') === 0) {				
+					$script.= "\$camilaWT  = new CamilaWorkTable();
+					\$camilaWT->db = \$_CAMILA['db'];
+					\$options = str_replace('\${".camila_get_translation('camila.worktable.field.default.parentid')."}', \$_REQUEST['pid'], \$options);
+					\$result = \$camilaWT->startExecuteQuery(\$options);
+					\$vals = [];
+					while (!\$result->EOF) {
+						\$vals[] =	\$result->fields[0];
+						\$result->MoveNext();
+					}
+					\$options = implode(',', \$vals);";
+				}				
+                $script .= "new form_static_listbox(\$form, '$field', '$name', \$options, $required, '$validation');";                
                 break;
             
             case 'phonenumber';

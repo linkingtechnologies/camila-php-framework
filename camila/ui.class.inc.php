@@ -21,6 +21,112 @@ class CamilaUserInterface
     {
     }
 
+	function addGridSection(int $numCols, callable $renderColumnContent)
+	{
+		global $_CAMILA;
+
+		if ($numCols < 1 || $numCols > 6) {
+			throw new InvalidArgumentException('startGridSection: number of columns must be between 1 and 6');
+		}
+
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="row columns">'));
+
+		$colSize = intval(12 / $numCols);
+		$colClass = "column is-12-mobile is-{$colSize}-desktop";
+
+		for ($i = 0; $i < $numCols; $i++) {
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="' . $colClass . '">'));
+			$renderColumnContent($i); // Pass column index (0-based)
+			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+		}
+
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
+	}
+
+function addTimelineSection(array $events, string $commonIcon = 'ri-calendar-line')
+{
+	global $_CAMILA;
+
+	// Load RemixIcon and start Bulma section/container
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '
+	<link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet">
+	<section class="section">
+	  <div class="container">
+	    <div class="timeline is-small">
+	'));
+
+	foreach ($events as $i => $event) {
+		$start = htmlspecialchars($event['start'] ?? '');
+		$end = htmlspecialchars($event['end'] ?? '');
+		$label = htmlspecialchars($event['label'] ?? '');
+		$description = htmlspecialchars($event['description'] ?? '');
+		$badge = $event['badge'] ?? null;
+		$buttons = $event['buttons'] ?? [];
+
+		// Format date range
+		$duration = $start;
+		if ($end && $end !== $start) {
+			$duration .= ' → ' . $end;
+		}
+
+		// Start event item block
+		$html = '<div class="timeline-item">
+			<div class="timeline-marker is-info"></div>
+			<div class="timeline-content">
+				<div class="box" style="border-left: 4px solid #209cee; padding: 1rem 1.5rem;">
+					<div class="columns is-vcentered is-mobile is-multiline">
+
+						<!-- Date and icon column -->
+						<div class="column is-narrow has-text-grey">
+							<i class="' . htmlspecialchars($commonIcon) . '"></i>
+							<span style="margin-left: 0.5em;">' . $duration . '</span>
+						</div>
+
+						<!-- Event details column -->
+						<div class="column">
+							<p><strong>' . $label . '</strong>: ' . $description . '</p>';
+
+		// Optional badge tag
+		if ($badge) {
+			$html .= '<span class="tag ' . htmlspecialchars($badge['class']) . '">' . htmlspecialchars($badge['label']) . '</span>';
+		}
+
+		$html .= '</div>';
+
+		// Optional action buttons (right aligned)
+		if (!empty($buttons)) {
+			$html .= '<div class="column is-narrow has-text-right">';
+			foreach ($buttons as $btn) {
+				$btnLabel = htmlspecialchars($btn['label'] ?? 'Action');
+				$btnUrl = htmlspecialchars($btn['url'] ?? '#');
+				$btnClass = htmlspecialchars($btn['class'] ?? 'is-small is-link');
+				$html .= '<a href="' . $btnUrl . '" class="button ' . $btnClass . '">' . $btnLabel . '</a> ';
+			}
+			$html .= '</div>';
+		}
+
+		// Close columns and box
+		$html .= '</div></div></div></div>';
+
+		// Optional separator between events
+		if ($i < count($events) - 1) {
+			$html .= '<hr style="margin: 1.5rem 0;">';
+		}
+
+		// Output HTML
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
+	}
+
+	// Close timeline structure
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '
+	    </div>
+	  </div>
+	</section>
+	'));
+}
+
+
+
 	function insertImage($src, $br = true) {
 		global $_CAMILA;
 		$html = '<img src="'.$src.'" />';

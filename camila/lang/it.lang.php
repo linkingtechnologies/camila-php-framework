@@ -145,6 +145,7 @@ camila.worktable.export.dataonly = Esporta solo i dati della Scheda Dati
 camila.worktable.export.confonly = Esporta solo la configurazione della Scheda Dati
 
 camila.worktable.field.default.id = codice riga
+camila.worktable.field.default.parentid = codice riga padre
 camila.worktable.field.default.j = g
 camila.worktable.field.default.d = gg
 camila.worktable.field.default.z = ggg
