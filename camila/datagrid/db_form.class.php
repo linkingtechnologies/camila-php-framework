@@ -541,10 +541,14 @@ $(document).ready(function(){
           if (isset($_REQUEST['camila_preferences']) )
               parent::add_hidden('camila_preferences', $_REQUEST['camila_preferences']);
 
-		  if (isset($_GET['camila_update']) && $_GET['camila_update'] == 'new') {
-			$params = $_GET;
-			unset($params['camila_update']);
-			parent::add_hidden('camila_addparams', http_build_query($params));
+		  if ($this->mode == 'insert') {
+			if (isset($_REQUEST['camila_addparams'])) {
+				  parent::add_hidden('camila_addparams', html_entity_decode($_REQUEST['camila_addparams']));
+			} else {
+				$params = $_GET;
+				unset($params['camila_update']);
+				parent::add_hidden('camila_addparams', http_build_query($params));
+			}
 		  } else {
 			parent::add_hidden('camila_addparams', '');
 		  }

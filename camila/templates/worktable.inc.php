@@ -198,8 +198,9 @@ if (camila_form_in_update_mode('${table}')) {
 	  ${report_functions_script}
 
 	  ${report_readonly_record_script}
+	  $caninsert = ${caninsert};
 
-      if (${caninsert} && !isset($_REQUEST['camila_rest'])) {
+      if (($caninsert || $_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) && !isset($_REQUEST['camila_rest'])) {
 		  if (!${has_parent}) {
 			$report->additional_links = Array(camila_get_translation('camila.report.insertnew') => basename($_SERVER['PHP_SELF']) . '?camila_update=new');
 

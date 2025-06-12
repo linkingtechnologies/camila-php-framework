@@ -1696,15 +1696,26 @@ class configurator
 				if (stripos($options, 'select ') === 0) {				
 					$script.= "\$camilaWT  = new CamilaWorkTable();
 					\$camilaWT->db = \$_CAMILA['db'];
-					\$options = str_replace('\${".camila_get_translation('camila.worktable.field.default.parentid')."}', \$_REQUEST['pid'], \$options);
+					if (isset(\$_REQUEST['camila_addparams'])) {
+						\$params_array = [];
+						\$camila_addparams_decoded = html_entity_decode(\$_REQUEST['camila_addparams']);
+						parse_str(\$camila_addparams_decoded, \$params_array);
+
+						if (isset(\$params_array['pid'])) {
+							\$options = str_replace('\${".camila_get_translation('camila.worktable.field.default.parentid')."}', \$params_array['pid'], \$options);
+						}
+					} else {
+						\$options = str_replace('\${".camila_get_translation('camila.worktable.field.default.parentid')."}', \$_REQUEST['pid'], \$options);
+					}
 					\$result = \$camilaWT->startExecuteQuery(\$options);
 					\$vals = [];
 					while (!\$result->EOF) {
 						\$vals[] =	\$result->fields[0];
 						\$result->MoveNext();
 					}
+					\$result = \$camilaWT->endExecuteQuery(\$options);
 					\$options = implode(',', \$vals);";
-				}				
+				}			
                 $script .= "new form_static_listbox(\$form, '$field', '$name', \$options, $required, '$validation');";                
                 break;
             

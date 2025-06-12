@@ -22,6 +22,8 @@ class CamilaWorkTable
     public $db;
 	public $wtTable;
 	public $wtColumn;
+	
+	private $oldFetchMode;
 
     function __construct()
     {
@@ -207,7 +209,7 @@ class CamilaWorkTable
 
 	function startExecuteQuery($sql,$prefix = true,$fetchMode=ADODB_FETCH_NUM)
 	{
-		$old = $this->db->SetFetchMode($fetchMode);
+		$this->oldFetchMode = $this->db->SetFetchMode($fetchMode);
 		$query = $this->parseWorktableSqlStatement($sql, $prefix);
 
 		global $_CAMILA;
@@ -250,13 +252,14 @@ class CamilaWorkTable
 		}
 
 		//echo $query;
-		
+
 		$result = $this->db->Execute($query);
 		return $result;
 	}
 	
 	function endExecuteQuery()
 	{
+		$this->db->SetFetchMode($this->oldFetchMode);
 	}
 
 	function insertRow($worktableName, $lang, $fields, $values, $created_by='')
