@@ -137,6 +137,14 @@ class CamilaReport
 		return $html;
 	}
 
+    private function generateText($result, $graph, $noCustomCode = false)
+    {
+		
+		$html = (string)$graph->html;
+
+        return $html;
+    }
+
     private function generateTable($result, $graph, $noCustomCode = false)
     {
         // Generate the table headers
@@ -269,23 +277,28 @@ class CamilaReport
         $html = '';
 		if (!$noCustomCode)
 			$html.= '<mpdf><div keep-with-next="true"><nobreak>';
-		$html .= '<h2 id="table' . $index . '" style="page-break-after: avoid;">' . htmlspecialchars($title) . '</h2>';
+		if (isset($report->id)) {
+			$html .= '<h2 id="table' . $index . '" style="page-break-after: avoid;">' . htmlspecialchars($title) . '</h2>';
+		}
 		$query = $this->getQuery($report);
 		
 		$title = (string) $report->graphs->graph[0]->title;
 		$rId = (string) $report->id;
+		
+		$result2 = null;
+		$result = null;
+		$data = [];
+		
+		if (isset($report->id)) {
 
-		$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
-		$result = $this->camilaWT->startExecuteQuery($query);
-		$data = $this->queryWorktableDatabase($result);
+			$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
+			$result = $this->camilaWT->startExecuteQuery($query);
+			$data = $this->queryWorktableDatabase($result);
 
-		if (!$result) {
-			throw new Exception('Error executing query: ' . $this->db->ErrorMsg());
+			if (!$result) {
+				throw new Exception('Error executing query: ' . $this->db->ErrorMsg());
+			}
 		}
-
-		// Add the title
-		//$html .= '<h2>' . htmlspecialchars($title) . '</h2>';
-		//$html .= '<div style="page-break-before: avoid; display: flex; justify-content: space-between;">';
 		
 		$gCount = 0;
 		foreach ($report->graphs->graph as $graph) {
@@ -324,9 +337,19 @@ class CamilaReport
 					$notEmptyCount++;
 				}
 			}
+			
+			if ($type === 'text') {
+				if ($gCount>1)
+					$html .= '<td width="50%" style="vertical-align: middle;">';
+				$html .= $this->generateText($result2, $graph, $noCustomCode).'</td>';
+				if ($gCount>1)
+					$html .= '</td>';
+				$notEmptyCount++;
+			}
+			
 		}
 		
-		if ($notEmptyCount == 0) {
+		if (isset($report->id) && $notEmptyCount == 0) {
 			$html .= '<td><p>'.camila_get_translation('camila.nodatafound').'</p></td>';
 		}
 		
@@ -568,12 +591,13 @@ class CamilaReport
 		$count = 1;
         foreach ($this->xmlConfig->report as $index => $report) {
             $title = (string) $report->graphs->graph[0]->title;
-			if ($this->shouldGenerateToc) {
+			if ($this->shouldGenerateToc && isset($report->id)) {
 				$tocHtml .= '<li>' . htmlspecialchars($title) . '</li>';
 			}
             // Add the section title and the table content
             $contentHtml .= '<div style="white-space: nowrap;">'.$this->generateHtmlContent($report, $index, $count. '. ' . $title).'</div>';
-			$count++;
+			if (isset($report->id))
+				$count++;
         }
 
 		if ($this->shouldGenerateToc) {
