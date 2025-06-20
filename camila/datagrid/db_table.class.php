@@ -68,9 +68,9 @@ class dbtable
 
 		if ($this->filter != '') {
 			if ($where != '')
-				$where .= ' AND (' . $this->filter . ') AND ';
+				$where .= ' AND (' . $this->filter . ') ';
 			else
-				$where .= '(' . $this->filter . ') AND ';
+				$where .= '(' . $this->filter . ') ';
 		}
 
 		if ($_CAMILA['user_visibility_type'] == 'personal') {
@@ -78,6 +78,8 @@ class dbtable
 			if (preg_match('/(\d+)$/', $this->worktableId, $matches)) {
 				$wd = $matches[1];
 				if (array_key_exists($wd, $camila_vp)) {
+					if ($where != '')
+						$where .= ' AND ';
 					$where .= $camila_vp[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user']);
 				}
 			}	
@@ -88,6 +90,9 @@ class dbtable
 			if (preg_match('/(\d+)$/', $this->worktableId, $matches)) {
 				$wd = $matches[1];
 				if (array_key_exists($wd, $camila_vg)) {
+					if ($where != '')
+						$where .= ' AND ';
+
 					$where .= $camila_vg[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user_group']);
 				}
 			}

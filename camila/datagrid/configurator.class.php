@@ -52,6 +52,11 @@ function camila_configurator_worktable_title_db_onupdate($lform)
         $record['short_title'] = $lform->fields['short_title']->value;
     if ($lform->fields['full_title']->value != '')
         $record['full_title'] = $lform->fields['full_title']->value;
+
+	if ($lform->fields['filter']->value == 'admin')
+        $record['level'] = 1;
+	else
+		$record['level'] = 5;
     
     $updateSQL = $_CAMILA['db']->AutoExecute(CAMILA_TABLE_PLANG, $record, 'UPDATE', 'page_url=' . $_CAMILA['db']->qstr($scriptname) . ' and lang=' . $_CAMILA['db']->qstr($_CAMILA['lang']));
     
@@ -1641,6 +1646,7 @@ class configurator
         $forcecase  = $rs['force_case'];
         $unique     = $rs['must_be_unique'];
 		$help		= $rs['help'];
+		$visible	= $rs['visible'];
 
         if ($forcecase == 'upper')
             $validation = 'uppercase';
@@ -1659,6 +1665,14 @@ class configurator
 		
 		if ($size == '')
             $size = $this->default_size['string'];
+		
+		$visibleCheckStart = '';
+		$visibleCheckEnd = '';
+
+		if ($visible == 'n') {
+			$visibleCheckStart = "if (\$_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) {\n";
+			$visibleCheckEnd = "};";
+		}
         
         switch ($rs['type']) {
             case 'autoincrement':
@@ -1730,7 +1744,9 @@ class configurator
                 break;
             
             case 'textarea';
-                $script = "new form_textarea(\$form, '$field', '$name', $required, 10, 80, $maxlength, '$validation');";
+				$script = $visibleCheckStart;
+                $script .= "new form_textarea(\$form, '$field', '$name', $required, 10, 80, $maxlength, '$validation');";
+				$script .= $visibleCheckEnd;
                 break;
 			
 			case 'html-textarea';				
