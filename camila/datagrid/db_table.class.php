@@ -22,6 +22,11 @@ class dbtable
     private $sql;
     private $conn;
     private $result;
+	
+	public $lookupParentId;
+	public $lookupParentColumn;
+	public $lookupChildColumn;
+	public $lookupParentTable;
 
     public function __construct($sql, $filter = '', $orderby = '', $direction = 'asc', $mapping = '', $title = '', $worktableId = '')
     {
@@ -39,9 +44,34 @@ class dbtable
 		global $_CAMILA;
 		
 		$where = '';
+		
+		if ($this->lookupParentColumn != '') {
+			
+			$parentName = '???';
+			$stmt = 'SELECT ' . $this->lookupParentColumn . ' FROM ' . $this->lookupParentTable . ' WHERE Id = ' . $_CAMILA['db']->qstr($this->lookupParentId) . ' LIMIT 1';
+			$result = $_CAMILA['db']->Execute($stmt);
+			if (!$result) {
+				throw new Exception("Query error: " . $_CAMILA['db']->ErrorMsg());
+			}
+			
+			while (!$result->EOF) {
+				$rowData = $result->GetRowAssoc(false);
+				$parentName = $rowData[$this->lookupParentColumn];
+				$result->MoveNext();
+			}
+			
+			if ($this->lookupParentColumn != '') {
+				$where = $this->lookupChildColumn . ' = ' . $_CAMILA['db']->qstr($parentName);
+			}
+			
+		}
 
-		if ($this->filter != '')
-			$where = '(' . $this->filter . ') AND ';
+		if ($this->filter != '') {
+			if ($where != '')
+				$where .= ' AND (' . $this->filter . ') AND ';
+			else
+				$where .= '(' . $this->filter . ') AND ';
+		}
 
 		if ($_CAMILA['user_visibility_type'] == 'personal') {
 			require(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $this->worktableId . '.visibility.inc.php');
