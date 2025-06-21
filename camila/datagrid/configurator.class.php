@@ -1244,7 +1244,7 @@ class configurator
 			}
             
             $rcount++;
-            $t->setVariable('form_element', $this->get_form_element($result->fields, CAMILA_TABLE_WORKP . $id, $forceReadonly));
+            $t->setVariable('form_element', $this->get_form_element($result->fields, CAMILA_TABLE_WORKP . $id, $forceReadonly,$t));
 
 			if (stripos($result->fields['field_options'], $this->camila_get_translation('camila.worktable.field.groupvisibilityfield')) !== false) {
 				$groupvisibilityfield = $result->fields['col_name'];
@@ -1633,7 +1633,7 @@ class configurator
     }
     
     
-    function get_form_element($rs,$table,$forceReadonly=false)
+    function get_form_element($rs,$table,$forceReadonly=false, $t)
     {
         //new form_static_listbox($form2, 'sheet', camila_get_translation('camila.worktable.xls.sheetnum'), $sheet_list);
         $required   = $rs['required'] == 'y' ? 'true' : 'false';
@@ -1647,6 +1647,7 @@ class configurator
         $unique     = $rs['must_be_unique'];
 		$help		= $rs['help'];
 		$visible	= $rs['visible'];
+		$fOptions	= $rs['field_options'];
 
         if ($forcecase == 'upper')
             $validation = 'uppercase';
@@ -1716,17 +1717,7 @@ class configurator
 				if (stripos($options, 'select ') === 0) {				
 					$script.= "\$camilaWT  = new CamilaWorkTable();
 					\$camilaWT->db = \$_CAMILA['db'];
-					if (isset(\$_REQUEST['camila_addparams'])) {
-						\$params_array = [];
-						\$camila_addparams_decoded = html_entity_decode(\$_REQUEST['camila_addparams']);
-						parse_str(\$camila_addparams_decoded, \$params_array);
-
-						if (isset(\$params_array['pid'])) {
-							\$options = str_replace('\${".camila_get_translation('camila.worktable.field.default.parentid')."}', \$params_array['pid'], \$options);
-						}
-					} else {
-						\$options = str_replace('\${".camila_get_translation('camila.worktable.field.default.parentid')."}', \$_REQUEST['pid'], \$options);
-					}
+					\$options = str_replace('\${codice riga padre}', worktable_get_parentid(\$wt_id,\$lookupParentColumn, \$lookupParentTable, \$lookupChildColumn), \$options);					
 					\$result = \$camilaWT->startExecuteQuery(\$options);
 					\$vals = [];
 					while (!\$result->EOF) {
@@ -1768,6 +1759,33 @@ class configurator
             case 'query';
                 $script = "new form_textbox(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";
                 break;
+			
+			case 'lookup';
+                $script = "new form_textbox(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";
+
+				$wtName = trim(strpos($s = $fOptions, '(') !== false ? substr($s, 0, strpos($s, '(')) : $s);
+				$wcName = trim(substr($fOptions, strpos($fOptions, '(') + 1, strpos($fOptions, ')') - strpos($fOptions, '(') - 1));				
+				
+				$pTable = $this->db->Execute('select id,tablename from ' . CAMILA_TABLE_WORKT . ' where LOWER(short_title)=' . $this->db->qstr(strtolower($wtName)));
+				if ($pTable === false)
+					camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
+				else {
+					$t->setVariable('lookup_parent_table', $pTable->fields['tablename']);
+
+					$pColumn = $this->db->Execute('select col_name from ' . CAMILA_TABLE_WORKC . ' where (LOWER(name)=' . $this->db->qstr(strtolower($wcName)) . ' and wt_id=' . $this->db->qstr($pTable->fields['id']) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
+					if ($pColumn === false)
+						camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
+					else {
+						$t->setVariable('lookup_parent_column', $pColumn->fields['col_name']);
+					}
+					
+					$t->setVariable('lookup_child_column', $field);
+				}
+				
+				/**/
+
+				break;
+				
             
             default:
                 $script = "new form_textbox(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";

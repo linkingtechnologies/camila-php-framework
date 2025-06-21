@@ -31,21 +31,30 @@ if (isset($_REQUEST['admin'])) {
 	$camilaUI->insertLineBreak();
 	$camilaUI->insertLineBreak();
 	$camilaUI->openBox();
+	
+	$count = 0;
 
 	if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
 		$camilaUI->openMenuSection($_CAMILA['page_short_title']);
 		while (!$result->EOF) {
 			$camilaUI->addItemToMenuSection($result->fields['url'], $result->fields['short_title']);
+			$count++;
 			$result->MoveNext();
 		}
 		$camilaUI->closeMenuSection();
 	} else {
 		while (!$result->EOF) {
 			$camilaUI->insertButton($result->fields['url'], $result->fields['short_title'],'');
+			$count++;
 			$result->MoveNext();
 		}
 	}
 	$camilaUI->closeBox();
+	
+	if ($count == 0) {
+		header("Location: index.php");
+		exit;
+	}
 }
   
 ?>

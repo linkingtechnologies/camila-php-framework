@@ -44,6 +44,45 @@ function worktable_parse_default_expression($expression, $form) {
     return camila_parse_default_expression($expression, $form->fields['id']->defaultvalue);
 }
 
+function worktable_get_parentid($wtId, $lookupParentColumn, $lookupParentTable, $lookupChildColumn) {
+	$pid = '';
+	global $_CAMILA;
+	if (isset($_REQUEST['camila_addparams']) && $_REQUEST['camila_addparams'] !='') {
+		$params_array = [];
+		$camila_addparams_decoded = html_entity_decode($_REQUEST['camila_addparams']);
+		parse_str($camila_addparams_decoded, $params_array);
+		if (isset($params_array['pid'])) {
+			$pid = $params_array['pid'];
+		}
+	} else {
+		if (isset($_REQUEST['pid'])) {
+			$pid = $_REQUEST['pid'];
+		} else {
+			$rid = CAMILA_TABLE_WORKP . $wtId. '_id';
+			if (isset($_REQUEST['camila_update']) || isset ($_REQUEST[$rid])) {
+				$u = unserialize(stripslashes($_REQUEST['camila_update']));
+				$id = $u['camilakey_id'];
+				if ($id == '') {
+					$id = $_REQUEST[$rid];
+				}
+				$table = CAMILA_TABLE_WORKP . $wtId;
+				//$check = camila_token($_REQUEST['camila_update']);
+				$rr = $_CAMILA['db']->Execute("select $lookupChildColumn from $table WHERE id =".$_CAMILA['db']->qstr($id));
+				if ($rr === false) {
+					camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg()); 
+				} else {
+					$rrr = $_CAMILA['db']->Execute("SELECT id FROM $lookupParentTable WHERE $lookupParentColumn =". $_CAMILA['db']->qstr($rr->fields[$lookupChildColumn]));
+					if ($rrr === false) {
+						camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg()); 
+					} else {
+						$pid = $rrr->fields['id'];
+					}
+				}
+			}							
+		}
+	}
+	return $pid;
+}
 
 if (camila_form_in_update_mode('${table}')) {
 
@@ -52,6 +91,9 @@ if (camila_form_in_update_mode('${table}')) {
     <!-- $EndBlock require -->
 
     $form = new dbform('${table}', 'id');
+	$lookupParentColumn = '${lookup_parent_column}';
+	$lookupParentTable = '${lookup_parent_table}';
+	$lookupChildColumn = '${lookup_child_column}';
 
     if ($_CAMILA['adm_user_group'] != CAMILA_ADM_USER_GROUP)
     {
