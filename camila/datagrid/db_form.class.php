@@ -525,10 +525,14 @@ $(document).ready(function(){
           if (isset($_REQUEST['camila_print']))
              return;
 
-          if (isset($_REQUEST['camila_delete']) && $this->mode != 'insert')
-              parent::draw_delete(camila_get_translation('camila.deletebutton'));
-          else
-              parent::draw_submit(camila_get_translation('camila.' . $this->mode . 'button'));
+          if (isset($_REQUEST['camila_delete']) && $this->mode != 'insert') {
+              if ($this->candelete)
+				parent::draw_delete(camila_get_translation('camila.deletebutton'));
+		  }
+          else {
+			  if ($this->caninsert || $this->canupdate)
+				parent::draw_submit(camila_get_translation('camila.' . $this->mode . 'button'));
+		  }
       }
 
       function draw_header()

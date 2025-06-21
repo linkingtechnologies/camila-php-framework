@@ -123,14 +123,15 @@ if (camila_form_in_update_mode('${table}')) {
         $form->fields['id']->forcedraw = true;
     }
 
-	new form_textbox($form, 'uuid', camila_get_translation('camila.worktable.field.uuid'));
+	new form_hidden($form, 'uuid', camila_get_translation('camila.worktable.field.uuid'));
+
 	if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
         if ($_REQUEST['camila_update'] == 'new' && !isset($_REQUEST['camila_phpform_sent'])) {
             $form->fields['uuid']->defaultvalue = camila_generate_uuid();
         }
 		if (is_object($form->fields['uuid'])) {
 			$form->fields['uuid']->updatable = false;
-			$form->fields['uuid']->forcedraw = true;
+			$form->fields['uuid']->forcedraw = true;			
 		}		
 	}
 
@@ -234,13 +235,22 @@ if (camila_form_in_update_mode('${table}')) {
           $mapping = '${mapping_abbrev}';
 
 	  $stmt = 'select ' . $report_fields . ' from ${table}';
+	  
+	    $caninsert = ${caninsert};
+        $candelete = ${candelete};
+        $canupdate = ${canupdate};
 
-      $report = new report($stmt.$filter, '', '${order_field}', '${order_dir}', $mapping, null, 'id', $default_fields, '', (isset($_REQUEST['camila_rest'])) ? false : ${canupdate}, (isset($_REQUEST['camila_rest'])) ? false : ${candelete});
+	if ($_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) {
+        $caninsert = true;
+        $candelete = true;
+        $canupdate = true;
+    }
+
+      $report = new report($stmt.$filter, '', '${order_field}', '${order_dir}', $mapping, null, 'id', $default_fields, '', (isset($_REQUEST['camila_rest'])) ? false : $canupdate, (isset($_REQUEST['camila_rest'])) ? false : $candelete);
 	  
 	  ${report_functions_script}
 
 	  ${report_readonly_record_script}
-	  $caninsert = ${caninsert};
 
       if (($caninsert || $_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) && !isset($_REQUEST['camila_rest'])) {
 		  if (!${has_parent}) {

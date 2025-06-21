@@ -1785,11 +1785,11 @@ class configurator
 				/**/
 
 				break;
-				
             
             default:
-                $script = "new form_textbox(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";
-                               
+				$script = $visibleCheckStart;
+                $script .= "new form_textbox(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";
+                $script .= $visibleCheckEnd;      
         }
         
         
