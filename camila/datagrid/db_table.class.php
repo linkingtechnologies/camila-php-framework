@@ -27,6 +27,9 @@ class dbtable
 	public $lookupParentColumn;
 	public $lookupChildColumn;
 	public $lookupParentTable;
+	
+	public $mapping;
+	public $mappingSeparator = '#';
 
     public function __construct($sql, $filter = '', $orderby = '', $direction = 'asc', $mapping = '', $title = '', $worktableId = '')
     {
@@ -143,7 +146,10 @@ class dbtable
 		}
         for ($i = 0; $i < $fields; $i++) {
             $field = $this->result->FetchField($i);
-            $headerRow->add_column(new Chaw_Text($field->name));
+			$fName = $field->name;
+			if ($fName == 'id')
+				$fName = '';
+            $headerRow->add_column(new Chaw_Text($this->map($fName)));
         }
         $table->add_row($headerRow);
 
@@ -156,12 +162,15 @@ class dbtable
 				if ($key == 'id' && $this->worktableId != '') {
 					$arr=[];
 					$arr['camilakey_id'] = $value;
-					$reqs = 'camila_delete=' . urlencode(serialize($arr)) . '&camila_token=' . camila_token(serialize($arr));
-					$cell = new CHAW_link('X', 'cf_worktable'.$this->worktableId.'.php?'.$reqs);
-					$row->add_column($cell);
 					
 					$reqs = 'camila_update=' . urlencode(serialize($arr)) . '&camila_token=' . camila_token(serialize($arr));
-					$cell = new CHAW_link($value, 'cf_worktable'.$this->worktableId.'.php?'.$reqs);
+					$cell = new CHAW_link(camila_get_translation('camila.report.detailform'), 'cf_worktable'.$this->worktableId.'.php?'.$reqs);
+					$cell->set_css_class('button is-info is-small');
+					$row->add_column($cell);
+
+					$reqs = 'camila_delete=' . urlencode(serialize($arr)) . '&camila_token=' . camila_token(serialize($arr));
+					$cell = new CHAW_link(camila_get_translation('camila.worktable.delete'), 'cf_worktable'.$this->worktableId.'.php?'.$reqs);
+					$cell->set_css_class('button is-danger is-small');
 					$row->add_column($cell);
 				} else {
 					$cell = new CHAW_text($value);
@@ -180,4 +189,20 @@ class dbtable
 			$_CAMILA['page']->add_text($text);
 		}
     }
+
+	function map($field)
+	{
+		$mappings = explode($this->mappingSeparator, trim($this->mapping, $this->mappingSeparator));
+		$map = [];
+
+		foreach ($mappings as $pair) {
+			if (strpos($pair, '=') !== false) {
+				list($key, $value) = explode('=', $pair, 2);
+				$map[$key] = $value;
+			}
+		}
+
+		return isset($map[$field]) ? $map[$field] : $field;
+	}
+	
 }

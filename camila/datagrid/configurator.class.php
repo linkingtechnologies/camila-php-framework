@@ -1309,21 +1309,23 @@ class configurator
 				$html = "<div class='pt-5'></div>";
 				$parentButtons .= "\$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, \"".$html."\"));";
 				
-				$resultF = $this->db->Execute('select col_name from ' . CAMILA_TABLE_WORKC . ' where (wt_id=' . $this->db->qstr($resultL2->fields['id']) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
+				$resultF = $this->db->Execute('select col_name,name_abbrev from ' . CAMILA_TABLE_WORKC . ' where (wt_id=' . $this->db->qstr($resultL2->fields['id']) . ' and is_deleted<>' . $this->db->qstr('y') . ')');
 				if ($resultF === false)
 					camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
 
 				$fieldNames = [];
+				$mapping = '';
 				while (!$resultF->EOF) {
 					if ($resultF->fields['col_name'] != $wtcCols[$resultL2->fields['id']]) {
 						$fieldNames[] = $resultF->fields['col_name'];
+						$mapping .= $resultF->fields['col_name']. '=' . $resultF->fields['name_abbrev'] . '#';
 					}
 					$resultF->MoveNext();
 				}
-				
 
 				$stmt = "select id,".implode(', ', $fieldNames)." from ".CAMILA_TABLE_WORKP.$resultL2->fields['id'];
 				$tables="\$dbtable = new dbtable('".$stmt."',\$filter,'','','','".$resultL2->fields['short_title']."','".$resultL2->fields['id']."');";
+				$tables.="\$dbtable->mapping='".addslashes($mapping)."';";
 				$tables.="\$dbtable->lookupChildColumn='".$wtcCols[$resultL2->fields['id']]."';";
 				$tables.="\$dbtable->lookupParentColumn='". $wtCols[$resultL2->fields['id']] ."';";
 				$tables.="\$dbtable->lookupParentId=\$form->fields['id']->value;";

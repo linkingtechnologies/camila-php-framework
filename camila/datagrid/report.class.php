@@ -1252,6 +1252,7 @@ class report
     
     function map($field)
     {
+		//??? Useless
         $field = str_replace('.', '.', $field);
         if ($this->mapping != '' && strpos($this->mapping . '=', $this->mappingseparator . $field . '=') !== false) {
             $str = trim(substr($this->mapping, strpos($this->mapping, $this->mappingseparator . $field . '=') + strlen($this->mappingseparator . $field . '=')));
