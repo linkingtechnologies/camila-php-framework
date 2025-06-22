@@ -1,0 +1,3 @@
+<?php
+${hierarchy_script}
+?>

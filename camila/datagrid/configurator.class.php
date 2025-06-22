@@ -1153,6 +1153,10 @@ class configurator
         $report_fields = 'id,';
 
 		$visibility_script = "\$camila_vg=[];\n\$camila_vp=[];\n";
+		$hierarchy_script = "if (!isset(\$camila_parent_id_query)) \$camila_parent_id_query=[];\nif (!isset(\$camila_child_worktable_name)) \$camila_child_worktable_name=[];\n";
+
+
+
 
         if (CAMILA_WORKTABLE_SPECIAL_ICON_ENABLED)
             $report_fields .= 'cf_bool_is_special,';
@@ -1244,7 +1248,7 @@ class configurator
 			}
             
             $rcount++;
-            $t->setVariable('form_element', $this->get_form_element($result->fields, CAMILA_TABLE_WORKP . $id, $forceReadonly,$t));
+            $t->setVariable('form_element', $this->get_form_element($result->fields, CAMILA_TABLE_WORKP . $id, $forceReadonly,$t,$hierarchy_script));
 
 			if (stripos($result->fields['field_options'], $this->camila_get_translation('camila.worktable.field.groupvisibilityfield')) !== false) {
 				$groupvisibilityfield = $result->fields['col_name'];
@@ -1314,22 +1318,28 @@ class configurator
 					camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
 
 				$fieldNames = [];
-				$mapping = '';
+				$cMapping = '';
 				while (!$resultF->EOF) {
 					if ($resultF->fields['col_name'] != $wtcCols[$resultL2->fields['id']]) {
 						$fieldNames[] = $resultF->fields['col_name'];
-						$mapping .= $resultF->fields['col_name']. '=' . $resultF->fields['name_abbrev'] . '#';
+						$cMapping .= $resultF->fields['col_name']. '=' . $resultF->fields['name_abbrev'] . '#';
 					}
 					$resultF->MoveNext();
 				}
 
 				$stmt = "select id,".implode(', ', $fieldNames)." from ".CAMILA_TABLE_WORKP.$resultL2->fields['id'];
 				$tables="\$dbtable = new dbtable('".$stmt."',\$filter,'','','','".$resultL2->fields['short_title']."','".$resultL2->fields['id']."');";
-				$tables.="\$dbtable->mapping='".addslashes($mapping)."';";
+				$tables.="\$dbtable->mapping='".addslashes($cMapping)."';";
 				$tables.="\$dbtable->lookupChildColumn='".$wtcCols[$resultL2->fields['id']]."';";
 				$tables.="\$dbtable->lookupParentColumn='". $wtCols[$resultL2->fields['id']] ."';";
 				$tables.="\$dbtable->lookupParentId=\$form->fields['id']->value;";
 				$tables.="\$dbtable->lookupParentTable='".CAMILA_TABLE_WORKP . $id ."';";
+				
+				$pSqlId = 'SELECT '. $wtCols[$resultL2->fields['id']] .' FROM ' .CAMILA_TABLE_WORKP . $id . ' WHERE ' . $wtCols[$resultL2->fields['id']] . ' = ';
+				$hierarchy_script .= "if (!isset(\$camila_parent_id_query['".$resultL2->fields['id']."']))\$camila_parent_id_query['".$resultL2->fields['id']."']='".$pSqlId."';\n";
+				//$hierarchy_script .= "\$camila_child_worktable_name['".$resultL2->fields['id']."']='".$resultL2->fields['short_title']."';\n";
+				
+				
 				
 				$tables.="\$dbtable->process();";
 				$tables.="\$dbtable->draw();";
@@ -1571,6 +1581,16 @@ class configurator
         $fh = fopen(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $id . '.visibility.inc.php', 'wb');
 		fwrite($fh, \ForceUTF8\Encoding::toUTF8($output2));
 		
+		
+		$t3 = new MiniTemplator;
+        $t3->readTemplateFromFile(CAMILA_DIR . 'templates/hierarchy.inc.php');
+		$t3->setVariable('hierarchy_script', $hierarchy_script);
+		$output3 = '';
+		$t3->generateOutputToString($output3);
+        $fh = fopen(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $id . '.hierarchy.inc.php', 'wb');
+		fwrite($fh, \ForceUTF8\Encoding::toUTF8($output3));
+		
+		
 		if (function_exists('opcache_reset'))
 			opcache_reset();
         
@@ -1635,7 +1655,7 @@ class configurator
     }
     
     
-    function get_form_element($rs,$table,$forceReadonly=false, $t)
+    function get_form_element($rs,$table,$forceReadonly=false, $t, &$hierarchy_script)
     {
         //new form_static_listbox($form2, 'sheet', camila_get_translation('camila.worktable.xls.sheetnum'), $sheet_list);
         $required   = $rs['required'] == 'y' ? 'true' : 'false';
@@ -1719,7 +1739,7 @@ class configurator
 				if (stripos($options, 'select ') === 0) {				
 					$script.= "\$camilaWT  = new CamilaWorkTable();
 					\$camilaWT->db = \$_CAMILA['db'];
-					\$options = str_replace('\${codice riga padre}', worktable_get_parentid(\$wt_id,\$lookupParentColumn, \$lookupParentTable, \$lookupChildColumn), \$options);					
+					\$options = str_replace('\${".camila_get_translation('camila.worktable.field.default.parentid')."}', worktable_get_parentid(\$wt_id,\$lookupParentColumn, \$lookupParentTable, \$lookupChildColumn), \$options);					
 					\$result = \$camilaWT->startExecuteQuery(\$options);
 					\$vals = [];
 					while (!\$result->EOF) {
@@ -1764,6 +1784,8 @@ class configurator
 			
 			case 'lookup';
                 $script = "new form_textbox(\$form, '$field', '$name', $required, $size, $maxlength, '$validation');";
+				
+				$pSqlId = '';
 
 				$wtName = trim(strpos($s = $fOptions, '(') !== false ? substr($s, 0, strpos($s, '(')) : $s);
 				$wcName = trim(substr($fOptions, strpos($fOptions, '(') + 1, strpos($fOptions, ')') - strpos($fOptions, '(') - 1));				
@@ -1783,6 +1805,10 @@ class configurator
 					
 					$t->setVariable('lookup_child_column', $field);
 				}
+
+				$pSqlId = 'SELECT '. $pColumn->fields['col_name'] . ' FROM ' . $pTable->fields['tablename'] . ' WHERE ' . $pColumn->fields['col_name'] . ' = ';
+				
+				$hierarchy_script .= "if (!isset(\$camila_parent_id_query['".$rs['wt_id']."'])) \$camila_parent_id_query['".$rs['wt_id']."']='".$pSqlId."';\n";
 				
 				/**/
 

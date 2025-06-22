@@ -147,11 +147,17 @@ class CamilaWorkTable
 		$sql2 = '';
 		$ttemp = new MiniTemplator();
 		$ttemp->setTemplateString($sql);
-
+	
 		$result = $this->getWorktableSheets();
+		$myArray = [];
 		while (!$result->EOF) {
 			$a = $result->fields;
 			$int = (int) filter_var(substr($a['tablename'],strpos($a['tablename'], '_')), FILTER_SANITIZE_NUMBER_INT);
+			
+			if (!isset($myArray[$int])) {
+				$myArray[$int] = $a['short_title'];
+			}
+			
 			$tablename = CAMILA_TABLE_WORKP.$int;
 			$ttemp->setVariable($a['short_title'], $tablename, true);
 			
@@ -164,9 +170,38 @@ class CamilaWorkTable
 			$result->MoveNext();
 		}
 		$this->db->SetFetchMode($old);
+		
+		/*foreach ($myArray as $k => $v) {
+			require(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $k . '.hierarchy.inc.php');			
+		}
+
+		if (isset($camila_parent_id_query) && is_array($camila_parent_id_query)) {
+			
+			foreach ($myArray as $k => $v) {
+				if (isset($camila_parent_id_query[$k]) && $camila_parent_id_query[$k] != '') {
+					$ttemp->setVariable($v .'.query id padre',$camila_parent_id_query[$k],true);
+				}
+			}
+
+		}*/
+			
+		if (isset($_REQUEST['camila_update']) || isset ($_REQUEST[$rid])) {
+			$u = unserialize(stripslashes($_REQUEST['camila_update']));
+			$id = $u['camilakey_id'];
+			if ($id == '') {
+				$id = $_REQUEST[$rid];
+			}
+			if ($id != '') {
+				$ttemp->setVariable(camila_get_translation('camila.worktable.field.default.parentid'), $id, true);
+			}
+		}
+			
+
+
 		$ttemp->generateOutputToString($sql2);
 		return $sql2;
 	}
+
 
 	function queryWorktableDatabase($sql, $prefix = true)
 	{
@@ -210,17 +245,18 @@ class CamilaWorkTable
 	function startExecuteQuery($sql,$prefix = true,$fetchMode=ADODB_FETCH_NUM)
 	{
 		$this->oldFetchMode = $this->db->SetFetchMode($fetchMode);
+
 		$query = $this->parseWorktableSqlStatement($sql, $prefix);
+		$table = $this->guessTableNameFromQuery($query);
 
 		global $_CAMILA;
 		
-		if ($_CAMILA['user_visibility_type'] == 'personal' || $_CAMILA['user_visibility_type'] == 'group') {
-			$table = $this->guessTableNameFromQuery($query);
-			if ($table != '') {
-				if (str_starts_with($table, CAMILA_TABLE_WORKP)) {
-					$worktableId = substr($table, strlen(CAMILA_TABLE_WORKP));
-					if (is_numeric($worktableId)) {
-	
+		if ($table != '') {
+			if (str_starts_with($table, CAMILA_TABLE_WORKP)) {
+				$worktableId = substr($table, strlen(CAMILA_TABLE_WORKP));
+				if (is_numeric($worktableId)) {
+					if ($_CAMILA['user_visibility_type'] == 'personal' || $_CAMILA['user_visibility_type'] == 'group') {
+
 						$addWhere = '';
 
 						if ($_CAMILA['user_visibility_type'] == 'personal') {
