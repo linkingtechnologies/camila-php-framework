@@ -195,8 +195,6 @@ class CamilaWorkTable
 				$ttemp->setVariable(camila_get_translation('camila.worktable.field.default.parentid'), $id, true);
 			}
 		}
-			
-
 
 		$ttemp->generateOutputToString($sql2);
 		return $sql2;

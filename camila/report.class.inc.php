@@ -141,6 +141,19 @@ class CamilaReport
     {
 		
 		$html = (string)$graph->html;
+		
+		if ($result != null) {
+			if ($result->RecordCount()>0) {
+				while (!$result->EOF) {
+					$c = 0;
+					foreach ($result->fields as $index => $value) {
+						$html = str_replace('${' . $c . '}', $value, $html);
+						$c++;
+					}
+					$result->MoveNext();
+				}
+			}
+		}
 
         return $html;
     }
@@ -289,7 +302,7 @@ class CamilaReport
 		$result = null;
 		$data = [];
 		
-		if (isset($report->id)) {
+		if (isset($report->query)) {
 
 			$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
 			$result = $this->camilaWT->startExecuteQuery($query);
@@ -336,9 +349,19 @@ class CamilaReport
 						$html .= '</td>';
 					$notEmptyCount++;
 				}
+				
+				if ($type === 'text') {
+					if ($gCount>1)
+						$html .= '<td width="50%" style="vertical-align: middle;">';
+					$html .= $this->generateText($result2, $graph, $noCustomCode).'</td>';
+					if ($gCount>1)
+						$html .= '</td>';
+					$notEmptyCount++;
+				}
+				
 			}
 			
-			if ($type === 'text') {
+			if ($type === 'text' && !isset($report->query)) {
 				if ($gCount>1)
 					$html .= '<td width="50%" style="vertical-align: middle;">';
 				$html .= $this->generateText($result2, $graph, $noCustomCode).'</td>';
