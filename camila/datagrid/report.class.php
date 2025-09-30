@@ -658,6 +658,7 @@ class report
             
         }
         
+		global $_CAMILA;
         
         if ($this->orderby != '' /*&& strpos($stmt,$this->orderby)!==false*/ ) {
             if (strpos($this->orderby, '__') !== false)
@@ -667,7 +668,8 @@ class report
 				$this->orderby = $this->isThereGroupByOrder;
 			}
 
-			$stmt = $stmt . ' order by ' . $this->orderby;
+
+			$stmt = $stmt . ' order by ' . $_CAMILA['db']->nameQuote . $this->orderby . $_CAMILA['db']->nameQuote;
             
             if (!isset($_REQUEST['d']))
                 $stmt .= ' ' . $this->direction;
@@ -681,7 +683,7 @@ class report
 			
         }
         
-        global $_CAMILA;
+        
         $_CAMILA['db']->SetFetchMode(ADODB_FETCH_ASSOC);
         $result = $_CAMILA['db']->Execute($stmt);
         //echo $stmt;
