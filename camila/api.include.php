@@ -2104,8 +2104,39 @@ namespace Tqdev\PhpCrudApi\Database {
                 $columnValue = $this->converter->convertColumnValue($column);
                 $values[] = $columnValue;
             }
+			if (str_contains($table->getRealName(),'_worktable')) {
+				$columns[] = '"' . 'id' . '"';
+				$values[] = '?';
+				if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+					$columns[] = '"' . 'uuid' . '"';
+					$values[] = '?';
+				}
+				$columns[] = '"' . 'created_by' . '"';
+				$values[] = '?';
+				$columns[] = '"' . 'created' . '"';
+				$values[] = '?';
+				$columns[] = '"' . 'created_src' . '"';
+				$values[] = '?';
+				$columns[] = '"' . 'created_by_surname' . '"';
+				$values[] = '?';
+				$columns[] = '"' . 'created_by_name' . '"';
+				$values[] = '?';
+				$columns[] = '"' . 'last_upd' . '"';
+				$values[] = '?';
+				$columns[] = '"' . 'last_upd_by' . '"';
+				$values[] = '?';
+				$columns[] = '"' . 'last_upd_src' . '"';
+				$values[] = '?';
+				$columns[] = '"' . 'last_upd_by_surname' . '"';
+				$values[] = '?';
+				$columns[] = '"' . 'last_upd_by_name' . '"';
+				$values[] = '?';
+				$columns[] = '"' . 'mod_num' . '"';
+				$values[] = '?';				
+			}
             $columnsSql = '(' . implode(',', $columns) . ')';
             $valuesSql = '(' . implode(',', $values) . ')';
+			return "$columnsSql VALUES $valuesSql";
             $outputColumn = $this->quoteColumnName($table->getPk());
             switch ($this->driver) {
                 case 'mysql':
@@ -2128,6 +2159,16 @@ namespace Tqdev\PhpCrudApi\Database {
                 $columnValue = $this->converter->convertColumnValue($column);
                 $results[] = $quotedColumnName . '=' . $columnValue;
             }
+			
+			if (str_contains($table->getRealName(),'_worktable')) {
+				$results[] = '"' . 'last_upd' . '" = ?';
+				$results[] = '"' . 'last_upd_by' . '" = ?';
+				$results[] = '"' . 'last_upd_src' . '" = ?';
+				$results[] = '"' . 'last_upd_by_surname' . '" = ?';
+				$results[] = '"' . 'last_upd_by_name' . '" = ?';
+				$results[] = '"' . 'mod_num' . '" = mod_num + 1';
+			}
+			
             return implode(',', $results);
         }
 
@@ -2685,11 +2726,33 @@ namespace Tqdev\PhpCrudApi\Database {
 
         public function createSingle(ReflectedTable $table, array $columnValues) /*: ?String*/
         {
+			global $_CAMILA;
             $this->converter->convertColumnValues($table, $columnValues);
             $insertColumns = $this->columns->getInsert($table, $columnValues);
             $tableRealName = $table->getRealName();
             $pkName = $table->getPk()->getName();
-            $parameters = array_values($columnValues);
+			if (str_contains($table->getRealName(),'_worktable')) {
+				$id  = $_CAMILA['db']->GenID(CAMILA_APPLICATION_PREFIX.'worktableseq', 100000);
+				$now = $_CAMILA['db']->BindTimeStamp(date("Y-m-d H:i:s", time()));
+				$columnValues['id'] = $id;
+				
+				if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
+					$columnValues['uuid'] = camila_generate_uuid();
+				}
+				$columnValues['created_by']='API';
+				$columnValues['created'] = $now;
+				$columnValues['created_src'] = 'API';
+				$columnValues['created_by_surname']  = $_CAMILA['user_surname'];
+				$columnValues['created_by_name']     = $_CAMILA['user_name'];
+				$columnValues['last_upd']            = $now;
+				$columnValues['last_upd_by']         = 'API';/*$_CAMILA['user'];*/
+				$columnValues['last_upd_src']        = 'API';
+				$columnValues['last_upd_by_surname'] = $_CAMILA['user_surname'];
+				$columnValues['last_upd_by_name']    = $_CAMILA['user_name'];
+				$columnValues['mod_num']             = 0;
+			}
+			$parameters = array_values($columnValues);
+				
             $sql = 'INSERT INTO "' . $tableRealName . '" ' . $insertColumns;
             $stmt = $this->query($sql, $parameters);
             // return primary key value if specified in the input
@@ -2804,6 +2867,7 @@ namespace Tqdev\PhpCrudApi\Database {
 
         public function updateSingle(ReflectedTable $table, array $columnValues, string $id)
         {
+			global $_CAMILA;
             if (count($columnValues) == 0) {
                 return 0;
             }
@@ -2813,6 +2877,17 @@ namespace Tqdev\PhpCrudApi\Database {
             $tableRealName = $table->getRealName();
             $condition = new ColumnCondition($table->getPk(), 'eq', $id);
             $condition = $this->addMiddlewareConditions($tableName, $condition);
+			
+			if (str_contains($table->getRealName(),'_worktable')) {
+				$now = $_CAMILA['db']->BindTimeStamp(date("Y-m-d H:i:s", time()));
+				$columnValues['last_upd']            = $now;
+				$columnValues['last_upd_by']         = 'API' . /*$_CAMILA['user'];*/
+				$columnValues['last_upd_src']        = 'API';
+				$columnValues['last_upd_by_surname'] = $_CAMILA['user_surname'];
+				$columnValues['last_upd_by_name']    = $_CAMILA['user_name'];
+				//$columnValues['mod_num']             = 0;
+			}
+
             $parameters = array_values($columnValues);
             $whereClause = $this->conditions->getWhereClause($condition, $parameters);
             $sql = 'UPDATE "' . $tableRealName . '" SET ' . $updateColumns . $whereClause;

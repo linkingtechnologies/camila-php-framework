@@ -195,49 +195,8 @@ class CamilaWorkTable
 				$ttemp->setVariable(camila_get_translation('camila.worktable.field.default.parentid'), $id, true);
 			}
 		}
-		
+
 		$ttemp->generateOutputToString($sql2);
-		
-		$table = $this->guessTableNameFromQuery($sql2);
-
-		global $_CAMILA;
-	
-		if ($table != '') {
-			if (str_starts_with($table, CAMILA_TABLE_WORKP)) {
-				$worktableId = substr($table, strlen(CAMILA_TABLE_WORKP));
-				if (is_numeric($worktableId)) {
-					if ($_CAMILA['user_visibility_type'] == 'personal' || $_CAMILA['user_visibility_type'] == 'group') {
-
-						$addWhere = '';
-
-						if ($_CAMILA['user_visibility_type'] == 'personal') {
-							require(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $worktableId . '.visibility.inc.php');
-							if (preg_match('/(\d+)$/', $worktableId, $matches)) {
-								$wd = $matches[1];
-								if (array_key_exists($wd, $camila_vp)) {
-									$addWhere .= $camila_vp[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user']);
-								}
-							}	
-						}
-
-						if ($_CAMILA['user_visibility_type'] == 'group') {
-							require(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $worktableId . '.visibility.inc.php');
-							if (preg_match('/(\d+)$/', $worktableId, $matches)) {
-								$wd = $matches[1];
-								if (array_key_exists($wd, $camila_vg)) {
-									$addWhere .= $camila_vg[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user_group']);
-								}
-							}
-						}
-						
-						if ($addWhere != '') {
-							$sql2 = $this->addWhereClauseSafely($sql2, $addWhere);
-						}
-					}
-				}
-			}
-		}
-		
 		return $sql2;
 	}
 
@@ -246,7 +205,7 @@ class CamilaWorkTable
 	{
 		$old = $this->db->SetFetchMode(ADODB_FETCH_NUM);
 		$query = $this->parseWorktableSqlStatement($sql, $prefix);
-		
+		//echo $query;
 		$result = $this->db->Execute($query);
 		$arr = array();
 		while (!$result->EOF) {
@@ -286,6 +245,45 @@ class CamilaWorkTable
 		$this->oldFetchMode = $this->db->SetFetchMode($fetchMode);
 
 		$query = $this->parseWorktableSqlStatement($sql, $prefix);
+		$table = $this->guessTableNameFromQuery($query);
+
+		global $_CAMILA;
+		
+		if ($table != '') {
+			if (str_starts_with($table, CAMILA_TABLE_WORKP)) {
+				$worktableId = substr($table, strlen(CAMILA_TABLE_WORKP));
+				if (is_numeric($worktableId)) {
+					if ($_CAMILA['user_visibility_type'] == 'personal' || $_CAMILA['user_visibility_type'] == 'group') {
+
+						$addWhere = '';
+
+						if ($_CAMILA['user_visibility_type'] == 'personal') {
+							require(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $worktableId . '.visibility.inc.php');
+							if (preg_match('/(\d+)$/', $worktableId, $matches)) {
+								$wd = $matches[1];
+								if (array_key_exists($wd, $camila_vp)) {
+									$addWhere .= $camila_vp[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user']);
+								}
+							}	
+						}
+
+						if ($_CAMILA['user_visibility_type'] == 'group') {
+							require(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $worktableId . '.visibility.inc.php');
+							if (preg_match('/(\d+)$/', $worktableId, $matches)) {
+								$wd = $matches[1];
+								if (array_key_exists($wd, $camila_vg)) {
+									$addWhere .= $camila_vg[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user_group']);
+								}
+							}
+						}
+						
+						if ($addWhere != '') {
+							$query = $this->addWhereClauseSafely($query, $addWhere);
+						}
+					}
+				}
+			}
+		}
 
 		//echo $query;
 

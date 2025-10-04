@@ -21,6 +21,7 @@ require_once('../../camila/autoloader.inc.php');
 require_once('../../camila/config.inc.php');
 require_once('../../camila/i18n.inc.php');
 require_once('../../camila/database.inc.php');
+require_once('../../camila/camila.php');
 require_once('../../camila/auth.class.inc.php');
 require_once('../../camila/worktable.class.inc.php');
 
