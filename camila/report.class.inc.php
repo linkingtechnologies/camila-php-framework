@@ -166,7 +166,7 @@ class CamilaReport
 			if (!$noCustomCode) {
 				$html .= '<div>';
 			}
-			$html .= '<table border="1" cellspacing="0" cellpadding="5">';
+			$html .= '<table border="1" cellspacing="0" cellpadding="5" '.(isset($graph->style)?' style="'.$graph->style.'"':'').'>';
 			$columns = array_keys($result->fields);
 			$html .= '<thead><tr>';
 			$skipFirst = false;
