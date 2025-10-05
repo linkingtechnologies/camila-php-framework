@@ -175,6 +175,8 @@ class report
 	var $customFunctions;
 	
 	var $recordReadOnlyIfNotNullFields;
+	
+	var $drawapplytemplate = true;
     
     
     function __construct($stmt, $title, $orderby = '', $direction = 'asc', $mapping = '', $ordermapping = null, $keys = '', $defaultfields = '', $filter = '', $canupdate = true, $candelete = false)
@@ -1211,7 +1213,7 @@ class report
             $myLink = new CHAW_link(strtoupper(camila_get_translation('camila.export.xml2pdf')), basename($_SERVER['PHP_SELF']) . $this->urlappend . '&camila_xml2pdf');
             $myLink->set_br(0);
 			$myLink->set_css_class('btn '.$this->bootstrapbuttonsize.' btn-info button is-info is-small');
-            if ($this->page > 0)
+            if ($this->page > 0 && $this->drawapplytemplate)
                 $_CAMILA['page']->add_link($myLink);
 
 
