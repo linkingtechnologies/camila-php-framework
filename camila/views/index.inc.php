@@ -150,6 +150,7 @@ if (isset($_REQUEST['camila_autosuggest_filterbox'])) {
     //    if ($_REQUEST['objectid'] != '')
     //        $where = 'id='.$_CAMILA['db']->qstr($_REQUEST['objectid']);
     
+	$currMode = $_CAMILA['db']->SetFetchMode(ADODB_FETCH_ASSOC);
     $result = $_CAMILA['db']->SelectLimit($query . ' from ' . $_REQUEST['table'] . ' where ' . $where, $_REQUEST['maxresults']);
     if ($result === false)
         camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
@@ -166,6 +167,7 @@ if (isset($_REQUEST['camila_autosuggest_filterbox'])) {
         $result->MoveNext();
     }
     
+	$_CAMILA['db']->SetFetchMode($currMode);
     
     if ($count > 0) {
         //$json = new Services_JSON();
