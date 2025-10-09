@@ -112,6 +112,8 @@ if (camila_form_in_update_mode('${table}')) {
 
     $form->drawrules = true;
     $form->drawheadersubmitbutton = false;
+	
+	${form_validation_script}
 
     new form_textbox($form, 'id', camila_get_translation('camila.worktable.field.id'));
     if (is_object($form->fields['id'])) {

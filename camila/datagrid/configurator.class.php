@@ -1382,6 +1382,7 @@ class configurator
 		}
 			
 			$reportFunctionsScript = '';
+			$formValidationScript = '';
 			$pDir = CAMILA_APP_PATH . '/plugins/';
 			$pdh  = opendir($pDir);
 			while (false !== ($dir = readdir($pdh))) {
@@ -1394,12 +1395,20 @@ class configurator
 							$scriptPath = $tDir . '/' . $filename;
 							$reportFunctionsScript .= file_get_contents($scriptPath) . "\n";
 						}
+						if  ($filename == 'dbform.validations.inc.php')
+						{
+							$scriptPath = $tDir . '/' . $filename;
+							$formValidationScript .= file_get_contents($scriptPath) . "\n";
+						}
 					}
 				}
 			}
 			
 			if ($reportFunctionsScript != '')
 				$t->setVariable('report_functions_script', $reportFunctionsScript);
+			
+			if ($formValidationScript != '')
+				$t->setVariable('form_validation_script', $formValidationScript);
 
 
         $report_fields .= ',created,created_by,created_by_surname,created_by_name,last_upd,last_upd_by,last_upd_by_surname,last_upd_by_name,mod_num';

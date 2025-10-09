@@ -96,6 +96,8 @@ require_once(CAMILA_DIR . 'datagrid/form.class.php');
       var $drawnavigationbox = true;
 
       var $recordcount;
+	  
+	  var $customValidation;
 
       // table - table name
       // keys - fields separeted by comma that select an unique row
@@ -763,6 +765,14 @@ $(document).ready(function(){
               } elseif ($this->mode == 'insert') {
                  // insert data
 				 //echo $this->oninsert;
+				 
+				 
+				 if (isset($this->customValidation)) {
+					 if (!call_user_func($this->customValidation, $this->mode, $this))
+						 return;
+				 }
+				 
+				 
                   if (isset($this->oninsert)) {
                       if (call_user_func($this->oninsert, $this)) {
                           $this->insert_data();
