@@ -88,4 +88,24 @@
 	}
   }
 
+  function camila_warning_text($msg)
+  {
+	  global $_CAMILA;
+	  if (php_sapi_name() == "cli" || $_CAMILA['cli']) {
+			echo $msg."\n";
+	  } else if (isset($_CAMILA['cli_args']) && $_CAMILA['cli_args'] != '') {
+			$_CAMILA['cli_output'] .= $msg."\n";
+	  }else {
+      
+	  $myHtmlCode = '<div class="notification is-warning" role="alert">';
+	  $myDiv = new HAW_raw(HAW_HTML, $myHtmlCode);
+	  $_CAMILA['page']->add_raw($myDiv);
+      $text = new CHAW_text($msg, HAW_TEXTFORMAT_BOLD);
+      $_CAMILA['page']->add_text($text);
+	  $myHtmlCode = '</div>';
+	  $myDiv = new HAW_raw(HAW_HTML, $myHtmlCode);
+	  $_CAMILA['page']->add_raw($myDiv);
+	}
+  }
+  
 ?>
