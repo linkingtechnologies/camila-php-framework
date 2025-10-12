@@ -191,6 +191,9 @@ camila.worktable.share.candelete = Cancellazione dati consentita se condivisa
 
 camila.worktable.visibility.filter = Filtro visibilità
 
+camila.worktable.additional.filter = Filtro addizionale
+camila.worktable.additional.child.filter = Filtro addizionale figli
+
 camila.worktable.query.count = conteggio
 
 camila.worktable.confirm = CONFERMA DATI INSERITI

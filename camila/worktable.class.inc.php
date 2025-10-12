@@ -140,14 +140,55 @@ class CamilaWorkTable
 		return $result3;
     }
 	
+	function replaceVars(string $template, array $vars): string {
+		// Replace non-breaking spaces (common in HTML/WYSIWYG) with normal spaces
+		$template = str_replace("\xC2\xA0", ' ', $template);
+
+		// Normalize variable keys: trim and compress multiple spaces into one
+		$normVars = [];
+		foreach ($vars as $k => $v) {
+			$normalizedKey = preg_replace('/\s+/u', ' ', trim((string)$k));
+			$normVars[$normalizedKey] = $v;
+		}
+
+		// Replace all ${...} placeholders with matching values from $vars
+		return preg_replace_callback('/\$\{([^}]+)\}/u', function ($m) use ($normVars) {
+			// Clean up the placeholder key (remove extra spaces)
+			$key = preg_replace('/\s+/u', ' ', trim($m[1]));
+
+			// Return the variable value if found, otherwise leave the placeholder unchanged
+			return array_key_exists($key, $normVars) ? (string)$normVars[$key] : $m[0];
+		}, $template);
+	}
+
+
 	function parseWorktableSqlStatement($sql, $prefix = true) {
 		require_once (CAMILA_LIB_DIR . 'minitemplator/MiniTemplator.class.php');
+		if (isset($_REQUEST['camila_worktable_add_filter']) || isset($_REQUEST['camila_worktable_add_child_filter_1'])) {
+		
+			$vars = Array();
+
+			if (isset($_REQUEST['camila_worktable_add_filter'])) {
+				$vars[camila_get_translation('camila.worktable.additional.filter')] = $_REQUEST['camila_worktable_add_filter'];
+			}
+			if (isset($_REQUEST['camila_worktable_add_child_filter_1'])) {
+				$vars[camila_get_translation('camila.worktable.additional.child.filter').' 1'] = $_REQUEST['camila_worktable_add_child_filter_1'];
+			}
+			if (isset($_REQUEST['camila_worktable_add_child_filter_2'])) {
+				$vars[camila_get_translation('camila.worktable.additional.child.filter').' 2'] = $_REQUEST['camila_worktable_add_child_filter_2'];
+			}
+			if (isset($_REQUEST['camila_worktable_add_child_filter_3'])) {
+				$vars[camila_get_translation('camila.worktable.additional.child.filter').' 3'] = $_REQUEST['camila_worktable_add_child_filter_3'];
+			}
+			$sql = $this->replaceVars($sql, $vars);
+		}		
+
 		$old = $this->db->SetFetchMode(ADODB_FETCH_ASSOC);
 
 		$sql2 = '';
 		$ttemp = new MiniTemplator();
 		$ttemp->setTemplateString($sql);
-	
+
 		$result = $this->getWorktableSheets();
 		$myArray = [];
 		while (!$result->EOF) {
@@ -196,6 +237,8 @@ class CamilaWorkTable
 			}
 		}
 		
+		
+
 		$ttemp->generateOutputToString($sql2);
 		
 		$table = $this->guessTableNameFromQuery($sql2);

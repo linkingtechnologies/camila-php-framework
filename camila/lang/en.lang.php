@@ -192,6 +192,9 @@ camila.worktable.share.canupdate = Can update data if shared
 camila.worktable.share.candelete = Can delete data if shared
 camila.worktable.visibility.filter = Visibility Filter
 
+camila.worktable.additional.filter = Additional filter
+camila.worktable.additional.child.filter = Additional child filter
+
 camila.worktable.query.count = count
 
 camila.worktable.confirm = CONFIRM INSERTED DATA
