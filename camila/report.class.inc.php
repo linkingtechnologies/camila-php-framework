@@ -303,7 +303,7 @@ class CamilaReport
 		$result = null;
 		$data = [];
 		
-		if (isset($report->query)) {
+		if (/*isset($report->query) || */isset($query)) {
 
 			$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
 			$result = $this->camilaWT->startExecuteQuery($query);
