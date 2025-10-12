@@ -194,7 +194,8 @@ class CamilaReport
 					} else {
 						$value = $result->fields[$column];
 						if (isset($graph->barcodeColumn) && $cCount == $graph->barcodeColumn) {
-							$html .= '<td><barcode code="'.$value.'" type="'.$graph->barcodeType.'" size="'.$graph->barcodeSize.'" height="'.$graph->barcodeHeight.'" /></td>';
+							$html .= '<td style="text-align:center;line-height: 2;"><barcode code="'.$value.'" type="'.$graph->barcodeType.'" size="'.$graph->barcodeSize.'" height="'.$graph->barcodeHeight.'" />
+							<br/>'.$value.'</td>';
 						} else {
 							$html .= '<td>' . htmlspecialchars($value) . '</td>';
 						}
@@ -605,6 +606,8 @@ class CamilaReport
 			$mpdf->SetFooter('{PAGENO} | |' . CAMILA_APPLICATION_NAME . "\n".'<br/>Report del '.date('m/d/Y') . ' ore ' . date('H:i'));
 		
 		$mpdf->use_kwt = true;
+		
+		$mpdf->setTitle('PDF');
 
         // Initialize the Table of Contents (ToC)
         $tocHtml = '<h1>Indice</h1><ol>';
