@@ -23,7 +23,7 @@ defined('CAMILA_APPLICATION_NAME') or die('No direct script access.');
 
 
 if (!CAMILA_ANON_LOGIN & !isset($_REQUEST['camila_autosuggest'])) {
-	if (is_file(CAMILA_VAR_ROOTDIR.'/plugins/index.txt')) {
+	if (is_file(CAMILA_VAR_ROOTDIR.'/plugins/index.txt') && file_exists('plugins/'.file_get_contents(CAMILA_VAR_ROOTDIR.'/plugins/index.txt').'/dashboards.inc.php')) {
 		require_once('plugins/'.file_get_contents(CAMILA_VAR_ROOTDIR.'/plugins/index.txt').'/dashboards.inc.php');
 	}
 	else
