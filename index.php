@@ -25,6 +25,7 @@
 
         while (!feof($file_handle)) {
             $line = fgets($file_handle);
+            $value = null;
 
             $pos = strpos($line, $constant);
 
@@ -34,8 +35,9 @@
 
                 if ($pos !== false) {
 
-                    $arr = explode(',', $line);
-                    $value = camila_extract_string($arr[1]);
+                    if (isset($arr[1])) {
+                       $value = camila_extract_string($arr[1]);
+                    }
                 }
             }
         }
