@@ -10,7 +10,11 @@
           $content = @file_get_contents(CAMILA_DIR.'lang/'.$_CAMILA['lang'].'.lang.php')."\r\n";
           $content .= @file_get_contents(CAMILA_LANG_DIR.$_CAMILA['lang'].'.lang.php');
           $tmpFile = CAMILA_TMP_DIR.'/'.$_CAMILA['lang'].'.lang.php';
-          $fh = fopen($tmpFile, 'w') or die("Can't open TEMP lang file!");
+          $fh = fopen($tmpFile, 'w');
+          if (!$fh) {
+              $err = error_get_last();
+              die("Can't open TEMP lang file ($tmpFile)! Error: " . print_r($err, true));
+          }
           fwrite($fh, $content);
           fclose($fh);
       }
