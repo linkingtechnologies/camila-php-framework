@@ -11,10 +11,17 @@ class CamilaAuth
     
     function __construct($domain = '')
     {
+		session_start();
         $this->domainName = $domain;
 		$this->userTable = CAMILA_TABLE_USERS;
 		$this->applicationName = CAMILA_APPLICATION_NAME;
 		$this->authUserTable = CAMILA_AUTH_TABLE_USERS;
+		$this->db = $this->getAuthDatabaseConnection(CAMILA_AUTH_DSN);
+    }
+    
+    function getSessionId()
+    {
+        return session_id();
     }
 
     function getUserInfoSqlFromSessionId($sessionId)

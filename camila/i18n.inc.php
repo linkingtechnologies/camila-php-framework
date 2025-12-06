@@ -1,4 +1,5 @@
 <?php
+
   require_once(CAMILA_LIB_DIR.'m2translator/M2Translator.class.php');
   
   use \ForceUTF8\Encoding;
