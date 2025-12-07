@@ -5220,6 +5220,7 @@ namespace Tqdev\PhpCrudApi\Middleware {
                 $registerUser = $this->getProperty('registerUser', '');
                 $loginAfterRegistration = $this->getProperty('loginAfterRegistration', '');
                 $condition = new ColumnCondition($usernameColumn, 'eq', $username);
+
                 $returnedColumns = $this->getProperty('returnedColumns', '');
                 if (!$returnedColumns) {
                     $columnNames = $table->getColumnNames();
@@ -5229,7 +5230,7 @@ namespace Tqdev\PhpCrudApi\Middleware {
                     $columnNames = array_values(array_unique($columnNames));
                 }
                 $columnOrdering = $this->ordering->getDefaultColumnOrdering($table);
-                if ($path == 'register') {
+                /*if ($path == 'register') {
                     if (!$registerUser) {
                         return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
                     }
@@ -5263,22 +5264,32 @@ namespace Tqdev\PhpCrudApi\Middleware {
                         }
                     }
                     return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
-                }
+                }*/
                 if ($path == 'login') {
                     $users = $this->db->selectAll($table, $columnNames, $condition, $columnOrdering, 0, 1);
+                    $success = false;
                     foreach ($users as $user) {
                         if (password_verify($password, $user[$passwordColumnName]) == 1) {
+							$success = true;
                             if (!headers_sent()) {
                                 session_regenerate_id(true);
                             }
                             unset($user[$passwordColumnName]);
                             $_SESSION['user'] = $user;
-                            return $this->responder->success($user);
                         }
+                        if ($success)  {
+							$data = Array();
+							$token = bin2hex(random_bytes(40));
+                            $data['token'] = $token;
+                            $this->db->updateSingle($table, $data, $user['id']);
+                            return $this->responder->success($data);
+						} else {
+							$this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
+						}
                     }
                     return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
                 }
-                if ($path == 'password') {
+                /*if ($path == 'password') {
                     if ($username != ($_SESSION['user'][$usernameColumnName] ?? '')) {
                         return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
                     }
@@ -5305,7 +5316,7 @@ namespace Tqdev\PhpCrudApi\Middleware {
                         }
                     }
                     return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
-                }
+                }*/
             }
             if ($method == 'POST' && $path == 'logout') {
                 if (isset($_SESSION['user'])) {

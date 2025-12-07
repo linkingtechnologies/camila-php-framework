@@ -67,7 +67,7 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 	}
 
 	$conf['debug'] = true;
-	$conf['middlewares'] = 'apiKeyAuth,authorization';
+	$conf['middlewares'] = 'dbAuth,apiKeyDbAuth,authorization';
 	$conf['authorization.tableHandler'] = function ($operation, $tableName) {
 		$ret = true;
 		if (str_ends_with($tableName,'_camila_users') || str_ends_with($tableName,'_camila_files'))
@@ -76,6 +76,12 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 			$ret = false;*/
 		return $ret;
 	};
+	//$conf['dbAuth.usersTable']=CAMILA_TABLE_USERS;
+	$conf['dbAuth.loginTable']=CAMILA_TABLE_USERS;
+	
+	$conf['apiKeyDbAuth.usersTable']=CAMILA_TABLE_USERS;
+	$conf['apiKeyDbAuth.apiKeyColumn']='token';
+
 	$conf['authorization.columnHandler'] = function ($operation, $tableName, $columnName) {
 		$ret = true;
 		$excluded = [
@@ -103,7 +109,7 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 	$conf['mapping'] = $mapping;
 	$conf['controllers'] = 'records,openapi,status,columns';
 	$conf['customControllers'] = 'Tqdev\PhpCrudApi\CamilaCliController,Tqdev\PhpCrudApi\CamilaWorktableController';
-	$conf['apiKeyAuth.keys'] = CAMILA_APIKEYAUTH_KEYS;
+	//$conf['apiKeyAuth.keys'] = CAMILA_APIKEYAUTH_KEYS;
 	$config = new Config($conf);
 
 	$request = RequestFactory::fromGlobals();
