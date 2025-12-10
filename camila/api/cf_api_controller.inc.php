@@ -63,7 +63,29 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 			'username' => $_CAMILA['db']->user,
 			'password' => parse_url(CAMILA_DB_DSN, PHP_URL_PASS),
 			'database' => $_CAMILA['db']->database
-		];	
+		];
+
+		if (defined('CAMILA_AUTH_DSN') && CAMILA_AUTH_DSN !== CAMILA_DB_DSN) {
+			$auth = parse_url(CAMILA_AUTH_DSN);
+			$database = isset($auth['path']) ? ltrim($auth['path'], '/') : null;
+			$conf = array_merge($conf, [
+				'dbAuth.driver'   => $auth['scheme'] ?? null,
+				'dbAuth.address'  => $auth['host']   ?? null,
+				'dbAuth.port'     => $auth['port']   ?? null,
+				'dbAuth.username' => $auth['user']   ?? null,
+				'dbAuth.password' => $auth['pass']   ?? null,
+				'dbAuth.database' => $database,
+			]);
+			$conf = array_merge($conf, [
+				'apiKeyDbAuth.driver'   => $auth['scheme'] ?? null,
+				'apiKeyDbAuth.address'  => $auth['host']   ?? null,
+				'apiKeyDbAuth.port'     => $auth['port']   ?? null,
+				'apiKeyDbAuth.username' => $auth['user']   ?? null,
+				'apiKeyDbAuth.password' => $auth['pass']   ?? null,
+				'apiKeyDbAuth.database' => $database,
+			]);
+        }
+
 	}
 
 	$conf['debug'] = true;
@@ -77,9 +99,15 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 		return $ret;
 	};
 	//$conf['dbAuth.usersTable']=CAMILA_TABLE_USERS;
-	$conf['dbAuth.loginTable']=CAMILA_TABLE_USERS;
 	
-	$conf['apiKeyDbAuth.usersTable']=CAMILA_TABLE_USERS;
+	if (defined('CAMILA_AUTH_TABLE_USERS')) {
+		$conf['dbAuth.loginTable']=CAMILA_AUTH_TABLE_USERS;
+		$conf['apiKeyDbAuth.usersTable']=CAMILA_AUTH_TABLE_USERS;
+	} else {
+		$conf['dbAuth.loginTable']=CAMILA_TABLE_USERS;
+		$conf['apiKeyDbAuth.usersTable']=CAMILA_TABLE_USERS;
+	}
+	
 	$conf['apiKeyDbAuth.apiKeyColumn']='token';
 
 	$conf['authorization.columnHandler'] = function ($operation, $tableName, $columnName) {

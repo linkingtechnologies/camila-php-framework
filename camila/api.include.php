@@ -759,8 +759,12 @@ namespace Tqdev\PhpCrudApi\Column\Reflection {
 
         public static function fromJson( /* object */$json): ReflectedTable
         {
+			
             $name = $json->alias??$json->name;
+            
             $realName = $json->name;
+            if ($realName == '')
+				$realName = $json->alias??$json->name;
             $type = isset($json->type) ? $json->type : 'table';
             $columns = [];
             if (isset($json->columns) && is_array($json->columns)) {
@@ -4612,6 +4616,7 @@ namespace Tqdev\PhpCrudApi\Middleware {
     use Tqdev\PhpCrudApi\Record\ErrorCode;
     use Tqdev\PhpCrudApi\Record\OrderingInfo;
     use Tqdev\PhpCrudApi\RequestUtils;
+    use Tqdev\PhpCrudApi\Cache\CacheFactory;
 
     class ApiKeyDbAuthMiddleware extends Middleware
     {
@@ -4632,15 +4637,46 @@ namespace Tqdev\PhpCrudApi\Middleware {
             $user = false;
             $headerName = $this->getProperty('header', 'X-API-Key');
             $apiKey = RequestUtils::getHeader($request, $headerName);
+            $apiKeyColumnName = $this->getProperty('apiKeyColumn', 'api_key');
+            $users = null;
             if ($apiKey) {
-                $tableName = $this->getProperty('usersTable', 'users');
-                $table = $this->reflection->getTable($tableName);
-                $apiKeyColumnName = $this->getProperty('apiKeyColumn', 'api_key');
-                $apiKeyColumn = $table->getColumn($apiKeyColumnName);
-                $condition = new ColumnCondition($apiKeyColumn, 'eq', $apiKey);
-                $columnNames = $table->getColumnNames();
-                $columnOrdering = $this->ordering->getDefaultColumnOrdering($table);
-                $users = $this->db->selectAll($table, $columnNames, $condition, $columnOrdering, 0, 1);
+				$tableName = $this->getProperty('usersTable', 'users');
+				if ($this->getProperty('driver', '') != '') {
+					$driver = $this->getProperty('driver', '');
+					if ($driver == 'mysqli')
+						$driver = 'mysql';
+					$db = new GenericDB(
+						$driver,
+						$this->getProperty('address', ''),
+						(int)$this->getProperty('port', 0),
+						$this->getProperty('database', ''),
+						'',
+						[],
+						[],
+						$this->getProperty('username', ''),
+						$this->getProperty('password', ''),
+						0
+					);
+
+					$prefix = sprintf('phpcrudapi2-%s-', substr(md5(__FILE__), 0, 8));
+					$cache = CacheFactory::create('TempFile', $prefix, '');
+					$reflection = new ReflectionService($db, $cache, 10);
+					$table = $reflection->getTable($tableName);
+					$apiKeyColumn = $table->getColumn($apiKeyColumnName);
+					$condition = new ColumnCondition($apiKeyColumn, 'eq', $apiKey);
+					$columnNames = $table->getColumnNames();
+					$columnOrdering = $this->ordering->getDefaultColumnOrdering($table);
+					$users = $db->selectAll($table, $columnNames, $condition, $columnOrdering, 0, 1);
+	
+				} else {
+					$table = $this->reflection->getTable($tableName);
+					$apiKeyColumn = $table->getColumn($apiKeyColumnName);
+					$condition = new ColumnCondition($apiKeyColumn, 'eq', $apiKey);
+					$columnNames = $table->getColumnNames();
+					$columnOrdering = $this->ordering->getDefaultColumnOrdering($table);
+					$users = $this->db->selectAll($table, $columnNames, $condition, $columnOrdering, 0, 1);
+				}
+                
                 if (count($users) < 1) {
                     return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $apiKey);
                 }
@@ -5159,6 +5195,7 @@ namespace Tqdev\PhpCrudApi\Middleware {
     use Tqdev\PhpCrudApi\Record\ErrorCode;
     use Tqdev\PhpCrudApi\Record\OrderingInfo;
     use Tqdev\PhpCrudApi\RequestUtils;
+    use Tqdev\PhpCrudApi\Cache\CacheFactory;
 
     class DbAuthMiddleware extends Middleware
     {
@@ -5211,25 +5248,26 @@ namespace Tqdev\PhpCrudApi\Middleware {
                 } else {
                     $tableName = $this->getProperty('usersTable', 'users');
                 }
-                $table = $this->reflection->getTable($tableName);
+                //$table = $this->reflection->getTable($tableName);
+                
                 $usernameColumnName = $this->getProperty('usernameColumn', 'username');
-                $usernameColumn = $table->getColumn($usernameColumnName);
+                //$usernameColumn = $table->getColumn($usernameColumnName);
                 $passwordColumnName = $this->getProperty('passwordColumn', 'password');
                 $passwordLength = $this->getProperty('passwordLength', '12');
-                $pkName = $table->getPk()->getName();
+                //$pkName = $table->getPk()->getName();
                 $registerUser = $this->getProperty('registerUser', '');
                 $loginAfterRegistration = $this->getProperty('loginAfterRegistration', '');
-                $condition = new ColumnCondition($usernameColumn, 'eq', $username);
+                //$condition = new ColumnCondition($usernameColumn, 'eq', $username);
 
                 $returnedColumns = $this->getProperty('returnedColumns', '');
-                if (!$returnedColumns) {
+                /*if (!$returnedColumns) {
                     $columnNames = $table->getColumnNames();
                 } else {
                     $columnNames = array_map('trim', explode(',', $returnedColumns));
                     $columnNames[] = $passwordColumnName;
                     $columnNames = array_values(array_unique($columnNames));
-                }
-                $columnOrdering = $this->ordering->getDefaultColumnOrdering($table);
+                }*/
+                //$columnOrdering = $this->ordering->getDefaultColumnOrdering($table);
                 /*if ($path == 'register') {
                     if (!$registerUser) {
                         return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
@@ -5266,14 +5304,65 @@ namespace Tqdev\PhpCrudApi\Middleware {
                     return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
                 }*/
                 if ($path == 'login') {
-                    $users = $this->db->selectAll($table, $columnNames, $condition, $columnOrdering, 0, 1);
+					
+                    $users = null;
+                    
+                    if ($this->getProperty('driver', '') != '') {
+						$driver = $this->getProperty('driver', '');
+						if ($driver == 'mysqli')
+							$driver = 'mysql';
+						$db = new GenericDB(
+							$driver,
+							$this->getProperty('address', ''),
+							(int)$this->getProperty('port', 0),
+							$this->getProperty('database', ''),
+							'',
+							[],
+							[],
+							$this->getProperty('username', ''),
+							$this->getProperty('password', ''),
+							0
+						);
+						$prefix = sprintf('phpcrudapi2-%s-', substr(md5(__FILE__), 0, 8));
+						$cache = CacheFactory::create('TempFile', $prefix, '');
+						$reflection = new ReflectionService($db, $cache, 10);
+						$table = $reflection->getTable($tableName);
+						$usernameColumn = $table->getColumn($usernameColumnName);
+						$pkName = $table->getPk()->getName();
+						$condition = new ColumnCondition($usernameColumn, 'eq', $username);
+						if (!$returnedColumns) {
+							$columnNames = $table->getColumnNames();
+						} else {
+							$columnNames = array_map('trim', explode(',', $returnedColumns));
+							$columnNames[] = $passwordColumnName;
+							$columnNames = array_values(array_unique($columnNames));
+						}
+						$columnOrdering = $this->ordering->getDefaultColumnOrdering($table);
+						$users = $db->selectAll($table, $columnNames, $condition, $columnOrdering, 0, 1);
+						
+					} else {
+						$usernameColumn = $table->getColumn($usernameColumnName);
+						$pkName = $table->getPk()->getName();
+						$table = $this->reflection->getTable($tableName);
+						$condition = new ColumnCondition($usernameColumn, 'eq', $username);
+						if (!$returnedColumns) {
+							$columnNames = $table->getColumnNames();
+						} else {
+							$columnNames = array_map('trim', explode(',', $returnedColumns));
+							$columnNames[] = $passwordColumnName;
+							$columnNames = array_values(array_unique($columnNames));
+						}
+						$columnOrdering = $this->ordering->getDefaultColumnOrdering($table);
+						$users = $this->db->selectAll($table, $columnNames, $condition, $columnOrdering, 0, 1);
+					}
+            
                     $success = false;
                     foreach ($users as $user) {
-                        if (password_verify($password, $user[$passwordColumnName]) == 1) {
+                        if ((CAMILA_AUTH_PASSWORD_HASHING && password_verify($password, $user[$passwordColumnName]) == 1) || (!CAMILA_AUTH_PASSWORD_HASHING && $password == $user[$passwordColumnName])) {
 							$success = true;
-                            if (!headers_sent()) {
-                                session_regenerate_id(true);
-                            }
+                            //if (!headers_sent()) {
+                            //    session_regenerate_id(true);
+                            //}
                             unset($user[$passwordColumnName]);
                             $_SESSION['user'] = $user;
                         }
@@ -5281,7 +5370,11 @@ namespace Tqdev\PhpCrudApi\Middleware {
 							$data = Array();
 							$token = bin2hex(random_bytes(40));
                             $data['token'] = $token;
-                            $this->db->updateSingle($table, $data, $user['id']);
+                            if ($this->getProperty('driver', '') != '') {
+								$db->updateSingle($table, $data, $user['id']);
+							} else {
+								$this->db->updateSingle($table, $data, $user['id']);
+							}
                             return $this->responder->success($data);
 						} else {
 							$this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
