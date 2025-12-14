@@ -102,10 +102,12 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 	
 	if (defined('CAMILA_AUTH_TABLE_USERS')) {
 		$conf['dbAuth.loginTable']=CAMILA_AUTH_TABLE_USERS;
-		$conf['apiKeyDbAuth.usersTable']=CAMILA_AUTH_TABLE_USERS;
+		$conf['dbAuth.usersTable']=CAMILA_TABLE_USERS;
+		$conf['apiKeyDbAuth.loginTable']=CAMILA_AUTH_TABLE_USERS;
+		$conf['apiKeyDbAuth.usersTable']=CAMILA_TABLE_USERS;
 	} else {
 		$conf['dbAuth.loginTable']=CAMILA_TABLE_USERS;
-		$conf['apiKeyDbAuth.usersTable']=CAMILA_TABLE_USERS;
+		$conf['apiKeyDbAuth.loginTable']=CAMILA_TABLE_USERS;
 	}
 	
 	$conf['apiKeyDbAuth.apiKeyColumn']='token';

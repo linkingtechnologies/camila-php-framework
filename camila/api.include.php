@@ -4640,7 +4640,7 @@ namespace Tqdev\PhpCrudApi\Middleware {
             $apiKeyColumnName = $this->getProperty('apiKeyColumn', 'api_key');
             $users = null;
             if ($apiKey) {
-				$tableName = $this->getProperty('usersTable', 'users');
+				$tableName = $this->getProperty('loginTable', 'users');
 				if ($this->getProperty('driver', '') != '') {
 					$driver = $this->getProperty('driver', '');
 					if ($driver == 'mysqli')
@@ -4680,6 +4680,19 @@ namespace Tqdev\PhpCrudApi\Middleware {
                 if (count($users) < 1) {
                     return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $apiKey);
                 }
+                
+				if ($this->getProperty('driver', '') != '') {
+					$username = $users[0]['username'];
+					$tableName = $this->getProperty('usersTable', 'users');
+					$table2 = $this->reflection->getTable($tableName);
+					$usernameColumnName = $this->getProperty('usernameColumn', 'username');
+					$usernameColumn = $table2->getColumn($usernameColumnName);
+					$condition = new ColumnCondition($usernameColumn, 'eq', $username);
+					if ($this->db->selectCount($table2, $condition) != 1) {
+						$this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
+					}
+				}
+                
                 $user = $users[0];
             } else {
                 $authenticationMode = $this->getProperty('mode', 'required');
@@ -5355,7 +5368,7 @@ namespace Tqdev\PhpCrudApi\Middleware {
 						$columnOrdering = $this->ordering->getDefaultColumnOrdering($table);
 						$users = $this->db->selectAll($table, $columnNames, $condition, $columnOrdering, 0, 1);
 					}
-            
+ 
                     $success = false;
                     foreach ($users as $user) {
                         if ((CAMILA_AUTH_PASSWORD_HASHING && password_verify($password, $user[$passwordColumnName]) == 1) || (!CAMILA_AUTH_PASSWORD_HASHING && $password == $user[$passwordColumnName])) {
@@ -5367,6 +5380,17 @@ namespace Tqdev\PhpCrudApi\Middleware {
                             $_SESSION['user'] = $user;
                         }
                         if ($success)  {
+							
+							if ($this->getProperty('driver', '') != '') {
+								$tableName = $this->getProperty('usersTable', 'users');
+								$table2 = $this->reflection->getTable($tableName);
+								$usernameColumn = $table2->getColumn($usernameColumnName);
+								$condition = new ColumnCondition($usernameColumn, 'eq', $username);
+								if ($this->db->selectCount($table2, $condition) != 1) {
+									$this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
+								}
+							}
+							
 							$data = Array();
 							$token = bin2hex(random_bytes(40));
                             $data['token'] = $token;
