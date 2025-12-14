@@ -5354,9 +5354,9 @@ namespace Tqdev\PhpCrudApi\Middleware {
 						$users = $db->selectAll($table, $columnNames, $condition, $columnOrdering, 0, 1);
 						
 					} else {
+						$table = $this->reflection->getTable($tableName);
 						$usernameColumn = $table->getColumn($usernameColumnName);
 						$pkName = $table->getPk()->getName();
-						$table = $this->reflection->getTable($tableName);
 						$condition = new ColumnCondition($usernameColumn, 'eq', $username);
 						if (!$returnedColumns) {
 							$columnNames = $table->getColumnNames();
