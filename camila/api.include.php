@@ -5452,12 +5452,12 @@ namespace Tqdev\PhpCrudApi\Middleware {
                 }
                 return $this->responder->error(ErrorCode::AUTHENTICATION_REQUIRED, '');
             }
-            if (!isset($_SESSION['user']) || !$_SESSION['user']) {
+            /*if (!isset($_SESSION['user']) || !$_SESSION['user']) {
                 $authenticationMode = $this->getProperty('mode', 'required');
                 if ($authenticationMode == 'required') {
                     return $this->responder->error(ErrorCode::AUTHENTICATION_REQUIRED, '');
                 }
-            }
+            }*/
             return $next->handle($request);
         }
     }
