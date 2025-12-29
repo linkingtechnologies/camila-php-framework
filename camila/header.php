@@ -239,9 +239,9 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
           if ($result === false)
               camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
 
-          $query = 'UPDATE ' . CAMILA_TABLE_USERS . ' SET session_id=?, session_end='.$send.', output=?, lang=? WHERE id=?';
+          $query = 'UPDATE ' . CAMILA_TABLE_USERS . ' SET session_id=?, token=?, session_end='.$send.', output=?, lang=? WHERE id=?';
 
-          $result = $_CAMILA['db']->Execute($query, Array(session_id(), $_CAMILA['output'], $_CAMILA['lang'], $table['id']) );
+          $result = $_CAMILA['db']->Execute($query, Array(session_id(), session_id(), $_CAMILA['output'], $_CAMILA['lang'], $table['id']) );
           if ($result === false)
               camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
 
