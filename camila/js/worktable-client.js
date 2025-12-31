@@ -1,16 +1,57 @@
 /* global fetch */
+/**
+ * WorkTableClient
+ * ===============
+ *
+ * Lightweight JavaScript (browser) client that wraps REST endpoints of the form:
+ *
+ *   /records/<table>            (GET list, POST create)
+ *   /records/<table>/<id>       (GET read, PUT update, DELETE remove)
+ *
+ * Features:
+ * - CRUD + List operations
+ * - AND / OR filters
+ * - Column include / exclude
+ * - Sorting, pagination, size limiting
+ * - Request timeout via AbortController
+ * - Optional API key header
+ *
+ * --------------------------------------------------
+ * QUICK START
+ * --------------------------------------------------
+ *
+ * ```js
+ * const api = WorkTableClient({
+ *   baseUrl: "https://example.com/cf_api.php",
+ *   recordsPath: "/records",
+ *   apiKeyHeaderName: "X-API-Key",
+ *   apiKeyHeaderValue: "my-secret"
+ * });
+ *
+ * const posts = await api.list("posts", {
+ *   order: [["created", "desc"]],
+ *   size: 10
+ * });
+ * ```
+ */
 (function (global) {
   "use strict";
 
+  /**
+   * @param {Object} [options]
+   * @param {string} [options.baseUrl=""] Base API URL
+   * @param {string} [options.recordsPath="/records"] Records endpoint path
+   * @param {string|null} [options.apiKeyHeaderName=null] API key header name
+   * @param {string|null} [options.apiKeyHeaderValue=null] API key header value
+   * @param {number} [options.timeoutMs=20000] Request timeout in ms
+   */
   function WorkTableClient(options) {
     options = options || {};
 
     var baseUrl = options.baseUrl || "";
     var recordsPath = options.recordsPath || "/records";
-
     var apiKeyHeaderName = options.apiKeyHeaderName || null;
     var apiKeyHeaderValue = options.apiKeyHeaderValue || null;
-
     var timeoutMs = options.timeoutMs || 20000;
 
     function joinUrl(a, b) {
@@ -31,13 +72,19 @@
     var base = joinUrl(baseUrl, recordsPath);
 
     /* ==========================
-       utils
+       Utilities
        ========================== */
 
     function encode(value) {
       return encodeURIComponent(String(value));
     }
 
+    /**
+     * Builds a query string from a ListQuery object.
+     *
+     * @param {Object} [params]
+     * @returns {string}
+     */
     function buildQuery(params) {
       if (!params) return "";
 
@@ -50,7 +97,7 @@
         });
       }
 
-      // OR filters: filter1, filter2...
+      // OR filters (filter1, filter2, ...)
       if (params.orFilters) {
         Object.keys(params.orFilters).forEach(function (key) {
           var group = params.orFilters[key];
@@ -64,14 +111,18 @@
       if (params.include) {
         sp.set(
           "include",
-          Array.isArray(params.include) ? params.include.join(",") : params.include
+          Array.isArray(params.include)
+            ? params.include.join(",")
+            : params.include
         );
       }
 
       if (params.exclude) {
         sp.set(
           "exclude",
-          Array.isArray(params.exclude) ? params.exclude.join(",") : params.exclude
+          Array.isArray(params.exclude)
+            ? params.exclude.join(",")
+            : params.exclude
         );
       }
 
@@ -95,7 +146,9 @@
       if (params.page !== undefined) {
         sp.set(
           "page",
-          Array.isArray(params.page) ? params.page.join(",") : params.page
+          Array.isArray(params.page)
+            ? params.page.join(",")
+            : params.page
         );
       }
 
@@ -103,6 +156,14 @@
       return qs ? "?" + qs : "";
     }
 
+    /**
+     * Executes a fetch request with timeout and JSON handling.
+     *
+     * @param {string} path
+     * @param {"GET"|"POST"|"PUT"|"DELETE"} method
+     * @param {Object} [body]
+     * @returns {Promise<any>}
+     */
     function request(path, method, body) {
       var controller = new AbortController();
       var timer = setTimeout(function () {
@@ -111,7 +172,6 @@
 
       var headers = {};
 
-      // API key header
       if (apiKeyHeaderName && apiKeyHeaderValue) {
         headers[apiKeyHeaderName] = apiKeyHeaderValue;
       }
@@ -149,7 +209,7 @@
     }
 
     /* ==========================
-       table-bound API
+       Table-bound API
        ========================== */
 
     function tableApi(tableName) {
@@ -179,13 +239,12 @@
     }
 
     /* ==========================
-       public API
+       Public API
        ========================== */
 
     return {
       table: tableApi,
 
-      // direct access (optional)
       create: function (table, data) {
         return request("/" + encode(table), "POST", data);
       },
@@ -210,19 +269,26 @@
         return request("/" + encode(table) + buildQuery(query), "GET");
       },
 
-      // helpers
+      /**
+       * Builds a filter tuple.
+       * Example: filter("id","gt",1) -> ["id","gt",1]
+       */
       filter: function (column, operator) {
         var values = Array.prototype.slice.call(arguments, 2);
         return [column, operator].concat(values);
       },
 
+      /**
+       * Negates an operator by prefixing "n".
+       * Example: negate("eq") -> "neq"
+       */
       negate: function (operator) {
         return "n" + operator;
       }
     };
   }
 
-  // expose globally
+  // Expose globally
   global.WorkTableClient = WorkTableClient;
 
 })(window);
