@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2025 Umberto Bresciani
+    Copyright (C) 2006-2026 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -324,6 +324,60 @@ function addTimelineSection(array $events, string $commonIcon = 'ri-calendar-lin
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
 	}
 	
+	function mountMiniApp($pluginName, $bootScript, $cssFilePath = '') {
+		global $_CAMILA;
+		
+		$scheme = $this->isHttps() ? 'https' : 'http';
+		$host = $_SERVER['HTTP_HOST'];
+
+		$config = [
+			'baseUrl' => $scheme.'://'.$host.'/app/'.CAMILA_APP_DIR.'/cf_api.php'
+		];
+
+		$refrCode = "<script src='../../camila/js/worktable-client.js'></script>";
+		$refrCode .= "<script>window.APP_CONFIG = ".json_encode($config, JSON_UNESCAPED_SLASHES)."</script>";
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $refrCode));
+
+		$html = <<<HTML
+		<section class="section">
+		  <div class="container">
+			<div id="app">
+			</div>
+		  </div>
+		</section>
+
+		<!-- Guard-rail: browser NON compatibili -->
+		<script nomodule>
+		  document.body.innerHTML = `
+			<section class="section">
+			  <div class="container">
+				<article class="message is-danger">
+				  <div class="message-header">
+					<p>Browser non supportato</p>
+				  </div>
+				  <div class="message-body">
+					Questa applicazione richiede un browser moderno.<br>
+					Usa <strong>Chrome</strong> o <strong>Edge</strong> aggiornati
+					(anche su mobile).
+				  </div>
+				</article>
+			  </div>
+			</section>
+		  `;
+		</script>
+
+		<!-- App -->
+		HTML;
+		
+		if ($cssFilePath != '') {
+			$_CAMILA['page']->camila_add_js("<link href=\"plugins/$pluginName$cssFilePath\" rel=\"stylesheet\">\n");
+		}
+		
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
+		$html = '<script type="module" src="./plugins/'.$pluginName.$bootScript.'"></script>';
+		$_CAMILA['page']->camila_add_js($html);
+	}
+	
 	function printHomeMenu($confFile, $defaultId = '') {
 		$current = Array();
 		global $_CAMILA;
@@ -349,6 +403,29 @@ function addTimelineSection(array $events, string $commonIcon = 'ri-calendar-lin
 
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</ul></div></div>'));
 		return $current;
+	}
+	
+	function isHttps(): bool
+	{
+		if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+			return true;
+		}
+
+		if (
+			!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+			$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https'
+		) {
+			return true;
+		}
+
+		if (
+			!empty($_SERVER['HTTP_X_FORWARDED_SSL']) &&
+			$_SERVER['HTTP_X_FORWARDED_SSL'] === 'on'
+		) {
+			return true;
+		}
+
+		return false;
 	}
 	
 	function decodeIcon($icon) {
