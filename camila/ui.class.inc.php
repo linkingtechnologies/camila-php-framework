@@ -339,12 +339,8 @@ function addTimelineSection(array $events, string $commonIcon = 'ri-calendar-lin
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $refrCode));
 
 		$html = <<<HTML
-		<section class="section">
-		  <div class="container">
-			<div id="app">
-			</div>
-		  </div>
-		</section>
+		<div id="app">
+		</div>
 
 		<!-- Guard-rail: browser NON compatibili -->
 		<script nomodule>
