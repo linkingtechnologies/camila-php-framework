@@ -4639,7 +4639,11 @@ namespace Tqdev\PhpCrudApi\Middleware {
             $apiKey = RequestUtils::getHeader($request, $headerName);
             $apiKeyColumnName = $this->getProperty('apiKeyColumn', 'api_key');
             $users = null;
-            if ($apiKey) {
+
+            if ($apiKey || (session_status() === PHP_SESSION_ACTIVE)) {
+				if (session_status() === PHP_SESSION_ACTIVE) {
+					$apiKeyColumnName = "session_id";
+				}
 				$tableName = $this->getProperty('loginTable', 'users');
 				if ($this->getProperty('driver', '') != '') {
 					$driver = $this->getProperty('driver', '');

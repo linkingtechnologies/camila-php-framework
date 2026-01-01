@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2025 Umberto Bresciani
+   Copyright (C) 2006-2026 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -171,15 +171,11 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
           $query = 'SELECT id, '.$attribs.'visibility_type, level, ' . CAMILA_TABLE_USERS . '.grp, surname, name, password, preferences, session_id FROM ' . CAMILA_TABLE_USERS . " WHERE UPPER(name)=UPPER('" . $name . "') AND UPPER(surname)=UPPER('" . $surname . "')";
       else {
           if (CAMILA_USERNAME_LOGIN) {
-              //$query = 'SELECT id, '.$attribs.' visibility_type, level, ' . CAMILA_TABLE_USERS . '.grp, username, password, preferences, session_id FROM ' . CAMILA_TABLE_USERS . " WHERE UPPER(username)=UPPER('" . $_REQUEST['username'] . "')";
 			  $query = $camilaAuth->getAuthUserInfoSqlFromUsername($_REQUEST['username']);
           }
 		  else
               $query = 'SELECT id, '.$attribs.' visibility_type, level, ' . CAMILA_TABLE_USERS . '.grp, username, name, surname, password, preferences, session_id FROM ' . CAMILA_TABLE_USERS . " WHERE UPPER(name)=UPPER('" . $_REQUEST['name'] . "') AND UPPER(surname)=UPPER('" . $_REQUEST['surname'] . "')";
       }
-
-	  
-      //$result = $_CAMILA['db']->Execute($query);
 
 	  $dbAuth = $camilaAuth->getAuthDatabaseConnection(CAMILA_AUTH_DSN);
 	  $dbAuth->SetFetchMode(ADODB_FETCH_ASSOC);
@@ -239,9 +235,9 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
           if ($result === false)
               camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
 
-          $query = 'UPDATE ' . CAMILA_TABLE_USERS . ' SET session_id=?, token=?, session_end='.$send.', output=?, lang=? WHERE id=?';
+          $query = 'UPDATE ' . CAMILA_TABLE_USERS . ' SET session_id=?, session_end='.$send.', output=?, lang=? WHERE id=?';
 
-          $result = $_CAMILA['db']->Execute($query, Array(session_id(), session_id(), $_CAMILA['output'], $_CAMILA['lang'], $table['id']) );
+          $result = $_CAMILA['db']->Execute($query, Array(session_id(), $_CAMILA['output'], $_CAMILA['lang'], $table['id']) );
           if ($result === false)
               camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
 
@@ -253,13 +249,6 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
           if (CAMILA_ANON_LOGIN)
               setcookie(camila_session_cookie_name() . '_username', $_REQUEST['username'], time() + CAMILA_SESSION_DURATION, "/", false);
 
-		  //230515
-		  
-		  
-		  //$sessionLogin = CAMILA_APPLICATION_NAME . '_logged_user';
-		  //$_SESSION[$sessionLogin]=$_REQUEST['username'];
-
-		  //echo $_REQUEST['lang'];
 		  $camilaAuth->putUsernameIntoSession($_REQUEST['username'], $_REQUEST['lang']);
 
           if (isset($_REQUEST['camila_redirect'])) {
@@ -289,39 +278,26 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
 
   if (CAMILA_ANON_LOGIN)
         $query = 'SELECT * FROM ' . CAMILA_TABLE_USERS . ' WHERE username= ' . $_CAMILA['db']->qstr($_COOKIE[CAMILA_APPLICATION_NAME . '_username']);
-//      $query = 'SELECT * FROM ' . CAMILA_TABLE_USERS . ' WHERE session_id= ' . $_CAMILA['db']->qstr(session_id());
   else
   {
-      //$query = 'SELECT * FROM ' . CAMILA_TABLE_USERS . ' WHERE session_id=' . $_CAMILA['db']->qstr(!isset($_REQUEST['camila_session_id'])?session_id():$_REQUEST['camila_session_id']) . ' AND session_end>' . $_CAMILA['db']->DBTimeStamp(time());
-	  //$query = $camilaAuth->getUserInfoSqlFromSessionId(!isset($_REQUEST['camila_session_id'])?session_id():$_REQUEST['camila_session_id']);
-	  
-	  //Dummy query
-	  $query = 'SELECT * FROM ' . CAMILA_TABLE_USERS . ' WHERE username IS NULL' ;
+	$query = 'SELECT * FROM ' . CAMILA_TABLE_USERS . ' WHERE username IS NULL' ;
 
-	  //if ()
-		  //$sessionLogin = CAMILA_APPLICATION_NAME . '_logged_user';
-		  //$loggedUser = $_SESSION[$sessionLogin];
+	$loggedUser = $camilaAuth->getUsernameFromSession();
+	$sLang = $camilaAuth->getLangFromSession();
 
-		  $loggedUser = $camilaAuth->getUsernameFromSession();
-		  $sLang = $camilaAuth->getLangFromSession();
-		  //echo $sLang;
-		  
-		  if (CAMILA_LOGIN_MLANG && $sLang != '') {
-			  $_CAMILA['lang'] = $sLang;
-		  }
-		  
-		  if ($loggedUser != '') {
-			  //$query = 'SELECT * FROM ' . CAMILA_TABLE_USERS . ' WHERE username = ' . $_CAMILA['db']->qstr($loggedUser);
-			  $query = $camilaAuth->getUserInfoSqlFromUsername($loggedUser);
-		  }
+	if (CAMILA_LOGIN_MLANG && $sLang != '') {
+		$_CAMILA['lang'] = $sLang;
+	}
 
+	if ($loggedUser != '') {
+		$query = $camilaAuth->getUserInfoSqlFromUsername($loggedUser);
+	}
   }
   
   //echo $query;
   $camilaAuth->getUserLevelFromUsername($camilaAuth->getUsernameFromSession());
   
   //echo $query;
-
   $result = $_CAMILA['db']->Execute($query);
   if ($result === false) {
 	  
@@ -396,13 +372,6 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
   ksort($f);
   reset($f);
   $count = 0;
-  /*while (list($k, $v) = each($f)) {
-      $fmt.=$v;
-      if ($count<2) {
-          $fmt.=camila_get_translation('camila.dateformat.separator');
-      }
-  $count++;
-  }*/
 
   foreach ($f as $k => $v) {
 	  $fmt.=$v;
@@ -420,11 +389,7 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
       $skey = '___camila___';
 
 
-  //$_CAMILA['user_level'] = 0;
-  //$_CAMILA['lang'] = 'it';
-  /*if (CAMILA_ANON_LOGIN)
-      $query = 'SELECT url,active,visible,short_title,full_title,label_order,title_attributes,title_color,title_boxcolor,level,filter,parent,login,dos_threshold,help FROM ' . CAMILA_DB_ . "pages, " . CAMILA_DB_ ."pages_lang WHERE active='yes' AND (". CAMILA_DB_ ."pages.url = ".CAMILA_DB_."pages_lang.page_url) AND lang=".$_CAMILA['db']->qstr($_CAMILA['lang'])." ORDER BY label_order";
-  else */if ($_CAMILA['user_group'] != '')
+  if ($_CAMILA['user_group'] != '')
       $query = 'SELECT share_key,url,active,visible,short_title,full_title,lang,label_order,title_attributes,title_color,title_boxcolor,level,filter,parent,login,dos_threshold,help FROM ' . CAMILA_TABLE_PAGES . ', ' . CAMILA_TABLE_PLANG .' WHERE (level>=' . $_CAMILA['user_level'] . " OR url='" . basename($_SERVER['PHP_SELF']) . "' ) AND (filter NOT LIKE '%-" . $_CAMILA['user_group'] . "%') AND ((filter='' OR filter LIKE '%-%' OR filter LIKE '%" . $_CAMILA['user_group'] . "%') or (share_key = '".$skey."') ) AND active='yes' AND (". CAMILA_TABLE_PAGES .".url = ".CAMILA_TABLE_PLANG.".page_url) AND lang=".$_CAMILA['db']->qstr($_CAMILA['lang'])." ORDER BY label_order";
   else
       $query = 'SELECT share_key,url,active,visible,short_title,full_title,label_order,title_attributes,title_color,title_boxcolor,level,filter,parent,login,dos_threshold,help FROM ' . CAMILA_TABLE_PAGES . ', ' . CAMILA_TABLE_PLANG .' WHERE (level>=' . $_CAMILA['user_level'] . " OR url='" . basename($_SERVER['PHP_SELF']) . "' ) AND ((filter='' OR filter LIKE '%-%' OR filter LIKE '%" . $_CAMILA['user_group'] . "%') OR (share_key = '".$skey."')) AND active='yes' AND (". CAMILA_TABLE_PAGES .".url = ".CAMILA_TABLE_PLANG.".page_url) AND lang=".$_CAMILA['db']->qstr($_CAMILA['lang'])." ORDER BY label_order";
@@ -494,18 +459,6 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
   if (isset($_REQUEST['camila_txt'])) {
       ob_start();
   }
-
-//  if (isset($_REQUEST['camila_save']) && $_REQUEST['camila_export_filename']!='') {
-//      require_once(CAMILA_DIR . 'fm/elements.php');
-
-//      global $_CAMILA;
-//      $rel = $_REQUEST['camila_export_filename'] . '.htm' .camila_hash(CAMILA_FM_PREFIX);
-//      $_CAMILA['ob_filename'] = $rel;
-//      $abs = get_abs_item($_CAMILA['adm_user_group'], $rel);
-
-//      $_CAMILA['ob_file'] = fopen($abs,'w');
-//      ob_start('camila_ob_file_callback');
-//  }
 
   if (isset($_REQUEST['camila_preferences'])) {
       include(CAMILA_DIR . 'preferences.inc.php');
@@ -739,43 +692,21 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
 	  
 
       if ($_CAMILA['user_loggedin'] == 1) {
-          //$camila_menu_id = $_CAMILA['skin'];
-		  
-		  //$code = "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."dommenu/domLib.js\"></script>\n";
-          //$code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."dommenu/domMenu.js\"></script>\n";
 
-		  //$code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/menu.js\"></script>\n";
-		  //$code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/menu" . $camila_menu_id . ".js\"></script>\n";
+		$_CAMILA['mainmenu'] = $jarr;
 
-		    $_CAMILA['mainmenu'] = $jarr;
+		$code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/jquery/jquery.min.js?v=2025\"></script>\n";
 
-			//$code .="<link href=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.css\" rel=\"stylesheet\">\n";
+		if (!defined('CAMILA_APPLICATION_UI_KIT') || (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bootstrap3')) {
+			$code .="<script src=\"".CAMILA_LIB_DIR."bootstrap/js/bootstrap.min.js\"></script>\n";
+		}
+		$code .="<script src=\"".CAMILA_DIR."js/jquery/jquery.poshytip.js\"></script>\n";
+		$code .="<script src=\"".CAMILA_DIR."js/x-editable/jquery-editable-poshytip.min.js\"></script>\n";
+		$code .="<link href=\"".CAMILA_DIR."css/x-editable/jquery-editable.css\" rel=\"stylesheet\">\n";
 
-		    $code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/jquery/jquery.min.js?v=2025\"></script>\n";
-
-			if (!defined('CAMILA_APPLICATION_UI_KIT') || (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bootstrap3')) {
-				$code .="<script src=\"".CAMILA_LIB_DIR."bootstrap/js/bootstrap.min.js\"></script>\n";
-			}
-		    //$code .= "<script language=\"javascript\" src=\"".CAMILA_LIB_DIR."smartmenus/jquery.smartmenus.js?v?2025\"></script>\n";
-			//$code .="<script src=\"".CAMILA_LIB_DIR."smartmenus/addons/bootstrap/jquery.smartmenus.bootstrap.js?v=2025\"></script>\n";
-
-
-			$code .="<script src=\"".CAMILA_DIR."js/jquery/jquery.poshytip.js\"></script>\n";
-			$code .="<script src=\"".CAMILA_DIR."js/x-editable/jquery-editable-poshytip.min.js\"></script>\n";
-			$code .="<link href=\"".CAMILA_DIR."css/x-editable/jquery-editable.css\" rel=\"stylesheet\">\n";
-
-		  /*else
-		  {
-		    $json = new Services_JSON();
-            $jarr2 = $json->encode($jarr);
-            $code .= "<script>camila_addDOMLoadEvent ( function() {";          
-            $code .= "var a = '" . str_replace(array("'","\\u0000"), array("\'",""), $jarr2) . "'; camilamenu_init(a);} )</script>";
-		  }*/
-          $_CAMILA['page']->camila_add_js($code);
+        $_CAMILA['page']->camila_add_js($code);
       }
-	  
-	  
-	  
+
       $camila_linkset_sep = new CHAW_text(' ' . CAMILA_LINKSET_SEPARATOR . ' ');
       $camila_linkset_sep->set_br(0);
 
@@ -862,27 +793,16 @@ if (!$_CAMILA['page']->camila_exporting())
 
   if ($bookmark_count == 0)
   {
-     //$text = new CHAW_text('');
-     //$text->set_br(1);
-     //$_CAMILA['page']->add_text($text);
-
   }
   else
   {
 	  $myDivOpen = new HAW_raw(HAW_HTML, '</div>');
 	  $_CAMILA['page']->add_raw($myDivOpen);
-     //$text = new CHAW_text('');
-     //$text->set_br(1);
-     //$_CAMILA['page']->add_text($text);
-
   }
 }
   $code = '<script>document.title="' . CAMILA_APPLICATION_NAME . ' - ' . str_replace("'", "\'", $_CAMILA['page_full_title']) . '"</script>';
   $js = new CHAW_js($code);
   $_CAMILA['page']->add_userdefined($js);
-
-  //$_CAMILA['page']->smartMenusTheme = $smartMenusTheme;
-
 
 require('../../camila/views/cf_worktable_rebuild.inc.php');
 
