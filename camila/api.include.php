@@ -447,6 +447,7 @@ namespace Tqdev\PhpCrudApi\Column\Reflection {
 
         public static function fromJson( /* object */$json): ReflectedColumn
         {
+			
             $name = $json->alias ?? $json->name;
             $realName = $json->name;
             $type = $json->type;
@@ -635,7 +636,7 @@ namespace Tqdev\PhpCrudApi\Column\Reflection {
 
         public function getRealName(string $tableName): string
         {
-            return isset($this->tableRealNames[$tableName]) ? $this->tableRealNames[$tableName] : '';
+            return isset($this->tableRealNames[$tableName]) ? $this->tableRealNames[$tableName] : $tableName;
         }
 
         public function getTableNames(): array
@@ -2862,7 +2863,7 @@ namespace Tqdev\PhpCrudApi\Database {
             $orderBy = $this->columns->getOrderBy($table, $columnOrdering);
             $offsetLimit = $this->columns->getOffsetLimit($offset, $limit);
             $sql = 'SELECT ' . $selectColumns . ' FROM "' . $tableRealName . '"' . $whereClause . $orderBy . $offsetLimit;
-            $stmt = $this->query($sql, $parameters);
+			$stmt = $this->query($sql, $parameters);
             $records = $stmt->fetchAll();
             $records = $this->mapRecords($tableRealName, $records);
             $this->converter->convertRecords($table, $columnNames, $records);
