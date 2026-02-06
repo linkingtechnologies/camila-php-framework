@@ -331,7 +331,9 @@ function addTimelineSection(array $events, string $commonIcon = 'ri-calendar-lin
 		$host = $_SERVER['HTTP_HOST'];
 
 		$config = [
-			'baseUrl' => $scheme.'://'.$host.'/app/'.CAMILA_APP_DIR.'/cf_api.php'
+			'baseUrl' => $scheme.'://'.$host.'/app/'.CAMILA_APP_DIR.'/cf_api.php',
+			'apiKeyHeaderName' => 'Authorization',
+			'apiKeyHeaderValue' => 'PHPSESSID'
 		];
 
 		$refrCode = "<script src='../../camila/js/worktable-client.js'></script>";

@@ -2862,6 +2862,15 @@ namespace Tqdev\PhpCrudApi\Database {
             $whereClause = $this->conditions->getWhereClause($condition, $parameters);
             $orderBy = $this->columns->getOrderBy($table, $columnOrdering);
             $offsetLimit = $this->columns->getOffsetLimit($offset, $limit);
+			global $_CAMILA;
+			if (isset($_CAMILA['visibility_filter'])) {
+				if (trim($whereClause)=='') {
+					$whereClause = ' WHERE ' . $_CAMILA['visibility_filter'] . ' ';
+				} else {
+					$whereClause = ' WHERE (' . substr($whereClause, strlen(' WHERE ')) . ') AND ' . $_CAMILA['visibility_filter'] . ' ';
+				}
+			}
+			
             $sql = 'SELECT ' . $selectColumns . ' FROM "' . $tableRealName . '"' . $whereClause . $orderBy . $offsetLimit;
 			$stmt = $this->query($sql, $parameters);
             $records = $stmt->fetchAll();
@@ -4638,15 +4647,31 @@ namespace Tqdev\PhpCrudApi\Middleware {
             $user = false;
             $headerName = $this->getProperty('header', 'X-API-Key');
             $apiKey = RequestUtils::getHeader($request, $headerName);
+			
+			$headerName2 = $this->getProperty('header', 'Authorization');
+            $apiKey2 = RequestUtils::getHeader($request, $headerName2);
+
             $apiKeyColumnName = $this->getProperty('apiKeyColumn', 'api_key');
             $users = null;
+			$browserSession = false;
 
-            if ($apiKey || (session_status() === PHP_SESSION_ACTIVE)) {
-				if (session_status() === PHP_SESSION_ACTIVE) {
-					$apiKeyColumnName = "session_id";
-				}
+			if ($apiKey2 != '') {
+				session_start();
+				$apiKeyColumnName = "session_id";
+				$apiKey = session_id();
+				$browserSession = true;
+			}
+
+            if ($apiKey /*|| (session_status() === PHP_SESSION_ACTIVE)*/) {
+				/*if (session_status() === PHP_SESSION_ACTIVE) {
+					if (!isset($_SESSION['apiUser'])) {
+						
+					}
+				}*/
+				
 				$tableName = $this->getProperty('loginTable', 'users');
-				if ($this->getProperty('driver', '') != '') {
+				// External Auth
+				if (!$browserSession && $this->getProperty('driver', '') != '') {
 					$driver = $this->getProperty('driver', '');
 					if ($driver == 'mysqli')
 						$driver = 'mysql';
@@ -4668,12 +4693,14 @@ namespace Tqdev\PhpCrudApi\Middleware {
 					$reflection = new ReflectionService($db, $cache, 10);
 					$table = $reflection->getTable($tableName);
 					$apiKeyColumn = $table->getColumn($apiKeyColumnName);
+					
 					$condition = new ColumnCondition($apiKeyColumn, 'eq', $apiKey);
 					$columnNames = $table->getColumnNames();
 					$columnOrdering = $this->ordering->getDefaultColumnOrdering($table);
 					$users = $db->selectAll($table, $columnNames, $condition, $columnOrdering, 0, 1);
 	
 				} else {
+					$tableName = $this->getProperty('usersTable', 'users');
 					$table = $this->reflection->getTable($tableName);
 					$apiKeyColumn = $table->getColumn($apiKeyColumnName);
 					$condition = new ColumnCondition($apiKeyColumn, 'eq', $apiKey);
@@ -4683,7 +4710,7 @@ namespace Tqdev\PhpCrudApi\Middleware {
 				}
                 
                 if (count($users) < 1) {
-                    return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $apiKey);
+                    return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $apiKey . '(1)');
                 }
                 
 				if ($this->getProperty('driver', '') != '') {
@@ -4693,9 +4720,40 @@ namespace Tqdev\PhpCrudApi\Middleware {
 					$usernameColumnName = $this->getProperty('usernameColumn', 'username');
 					$usernameColumn = $table2->getColumn($usernameColumnName);
 					$condition = new ColumnCondition($usernameColumn, 'eq', $username);
-					if ($this->db->selectCount($table2, $condition) != 1) {
-						$this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $username);
+					
+					$u2 = $this->db->selectAll($table2, $table2->getColumnNames(), $condition, $this->ordering->getDefaultColumnOrdering($table2), 0, 1);
+					if (count($u2) != 1) {
+						return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $apiKey);
 					}
+					global $_CAMILA;
+					$_CAMILA['user'] = $u2[0]['username'];
+					$_CAMILA['user_id'] = $u2[0]['id'];
+					$_CAMILA['user_level'] = $u2[0]['level'];
+					$_CAMILA['user_group'] = $u2[0]['grp'];
+					$_CAMILA['user_visibility_type'] = $u2[0]['visibility_type'];
+					$_CAMILA['adm_user_group'] = ($_CAMILA['user_group'] == '' ? CAMILA_ADM_USER_GROUP : $_CAMILA['user_group']);
+					$_CAMILA['user_surname'] = $u2[0]['surname'];
+					$_CAMILA['user_name'] = $u2[0]['name'];
+					$_CAMILA['user_preferences'] = unserialize($u2[0]['preferences']);
+					$_CAMILA['user_loggedin'] = 1;
+					$_CAMILA['skin'] = CAMILA_DEFAULT_JS_SKIN;
+					if ($_CAMILA['user_preferences']['c_sk'] != '')
+						$_CAMILA['skin'] = $_CAMILA['user_preferences']['c_sk'];
+					$_CAMILA['user_attrib_01'] = $u2[0]['attrib_01'];
+					$_CAMILA['user_attrib_02'] = $u2[0]['attrib_02'];
+					$_CAMILA['user_attrib_03'] = $u2[0]['attrib_03'];
+					$_CAMILA['user_attrib_04'] = $u2[0]['attrib_04'];
+					$_CAMILA['user_attrib_05'] = $u2[0]['attrib_05'];
+					$_CAMILA['user_attrib_06'] = $u2[0]['attrib_06'];
+					$_CAMILA['user_attrib_07'] = $u2[0]['attrib_07'];
+					$_CAMILA['user_attrib_08'] = $u2[0]['attrib_08'];
+					$_CAMILA['user_attrib_09'] = $u2[0]['attrib_09'];
+					$_CAMILA['user_attrib_10'] = $u2[0]['attrib_10'];
+					$_CAMILA['user_attrib_11'] = $u2[0]['attrib_11'];
+					$_CAMILA['user_attrib_12'] = $u2[0]['attrib_12'];
+					$_CAMILA['user_attrib_13'] = $u2[0]['attrib_13'];
+					$_CAMILA['user_attrib_14'] = $u2[0]['attrib_14'];
+					$_CAMILA['user_attrib_15'] = $u2[0]['attrib_15'];
 				}
                 
                 $user = $users[0];
@@ -8634,6 +8692,32 @@ namespace Tqdev\PhpCrudApi\Record {
         public function _list(string $tableName, array $params): ListDocument
         {
             $table = $this->reflection->getTable($tableName);
+			
+			if (str_starts_with($table->getRealName(), CAMILA_TABLE_WORKP)) {
+				$wtId = substr($table->getRealName(), strlen(CAMILA_TABLE_WORKP));
+				global $_CAMILA;
+
+				if ($_CAMILA['user_visibility_type'] == 'personal') {
+					require_once(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $wtId . '.visibility.inc.php');
+					if (preg_match('/(\d+)$/', CAMILA_TABLE_WORKP . $wtId, $matches)) {
+						$wd = $matches[1];
+						if (array_key_exists($wd, $camila_vp)) {
+							$_CAMILA['visibility_filter'] = $camila_vp[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user']);
+						}
+					}	
+				}
+
+				if ($_CAMILA['user_visibility_type'] == 'group') {
+					require_once(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $wtId . '.visibility.inc.php');
+					if (preg_match('/(\d+)$/', CAMILA_TABLE_WORKP . $wtId, $matches)) {
+						$wd = $matches[1];
+						if (array_key_exists($wd, $camila_vg)) {
+							$_CAMILA['visibility_filter'] = $camila_vg[$wd] . '=' . $_CAMILA['db']->qstr($_CAMILA['user_group']);
+						}
+					}
+				}
+			}
+
             $this->joiner->addMandatoryColumns($table, $params);
             $columnNames = $this->columns->getNames($table, true, $params);
             $condition = $this->filters->getCombinedConditions($table, $params);
