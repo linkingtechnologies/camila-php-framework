@@ -2879,6 +2879,7 @@ namespace Tqdev\PhpCrudApi\Database {
             return $records;
         }
 
+		//888
         public function updateSingle(ReflectedTable $table, array $columnValues, string $id)
         {
 			global $_CAMILA;
@@ -3522,9 +3523,11 @@ namespace Tqdev\PhpCrudApi\Database {
             $sql = $this->getTablesSQL();
             $results = $this->query($sql, [$this->database]);
             $tables = $this->tables;
+			
             $results = array_filter($results, function ($v) use ($tables) {
-                return $tables == ['all'] || in_array($v['TABLE_NAME'], $tables);
+                return ($tables == ['all'] || in_array($v['TABLE_NAME'], $tables)) && (str_starts_with($v['TABLE_NAME'],CAMILA_TABLE_WORKP));
             });
+			
             foreach ($results as &$result) {
                 $result['TABLE_REAL_NAME'] = $result['TABLE_NAME'];
                 $result['TABLE_NAME'] = $this->mapper->getTableName($result['TABLE_REAL_NAME']);
