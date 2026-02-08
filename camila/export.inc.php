@@ -1,7 +1,7 @@
 <?php
 
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2025 Umberto Bresciani
+   Copyright (C) 2006-2026 Umberto Bresciani
 
    Camila PHP Framework is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -37,7 +37,11 @@
   $url = './'.$new_url;
   
   $camilaUI->openButtonBar();
-  $camilaUI->insertSecondaryButton($url, camila_get_translation('camila.back'), 'chevron-left');
+  if (isset($_REQUEST['returl'])) {
+	  $camilaUI->insertSecondaryButton($_REQUEST['returl'], camila_get_translation('camila.back'), 'chevron-left');
+  } else {
+	  $camilaUI->insertSecondaryButton($url, camila_get_translation('camila.back'), 'chevron-left');
+  }
   $camilaUI->closeButtonBar();
   
   //$camilaUI->insertLineBreak();
