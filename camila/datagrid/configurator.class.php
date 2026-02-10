@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2025 Umberto Bresciani
+    Copyright (C) 2006-2026 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1067,11 +1067,7 @@ class configurator
         }
         //}
         
-        
-        
         $success3 = $this->create_script_from_template($id);
-        
-        
         
         $resultTemp = $this->db->Execute('select id from ' . CAMILA_TABLE_WORKT . ' where id<>' . $this->db->qstr($id));
         if ($resultTemp === false)
@@ -1082,8 +1078,7 @@ class configurator
             $successTemp = $this->create_script_from_template($resultTemp->fields['id']);
             $resultTemp->MoveNext();
         }
-        
-        
+
         $record                = Array();
         $record['short_title'] = $resultTable->fields['short_title'];
         $record['full_title']  = $resultTable->fields['full_title'];
@@ -1137,6 +1132,7 @@ class configurator
         $this->queries          = 'Array(';
 
         $resultTable = $this->db->Execute('select * from ' . CAMILA_TABLE_WORKT . ' where id=' . $this->db->qstr($id));
+		
         if ($resultTable === false)
             camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $this->db->ErrorMsg());
         
@@ -1153,10 +1149,8 @@ class configurator
         $report_fields = 'id,';
 
 		$visibility_script = "\$camila_vg=[];\n\$camila_vp=[];\n";
+		$access_script = "\$camila_access_c=[];\$camila_access_r=[];\$camila_access_u=[];\$camila_access_d=[];";
 		$hierarchy_script = "if (!isset(\$camila_parent_id_query)) \$camila_parent_id_query=[];\nif (!isset(\$camila_child_worktable_name)) \$camila_child_worktable_name=[];\n";
-
-
-
 
         if (CAMILA_WORKTABLE_SPECIAL_ICON_ENABLED)
             $report_fields .= 'cf_bool_is_special,';
@@ -1180,6 +1174,11 @@ class configurator
 		$groupvisibilityfield = '';
 		$personalvisibilityfield = 'created_by';
 		$recordReadOnlyIfNotNullFields = [];
+
+		$access_script .= "\n\$camila_access_c[$id]=(\$_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) ? true : ".($caninsert ? 'true' : 'false').";";
+		$access_script .= "\n\$camila_access_r[$id]=true;";
+		$access_script .= "\n\$camila_access_u[$id]=(\$_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) ? true : ".($canupdate ? 'true' : 'false').";";
+		$access_script .= "\n\$camila_access_d[$id]=(\$_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) ? true : ".($candelete ? 'true' : 'false').";";
 
         while (!$result->EOF) {
             if ($vcount > 0)
@@ -1589,8 +1588,7 @@ class configurator
 		$t2->generateOutputToString($output2);
         $fh = fopen(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $id . '.visibility.inc.php', 'wb');
 		fwrite($fh, \ForceUTF8\Encoding::toUTF8($output2));
-		
-		
+
 		$t3 = new MiniTemplator;
         $t3->readTemplateFromFile(CAMILA_DIR . 'templates/hierarchy.inc.php');
 		$t3->setVariable('hierarchy_script', $hierarchy_script);
@@ -1599,7 +1597,14 @@ class configurator
         $fh = fopen(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $id . '.hierarchy.inc.php', 'wb');
 		fwrite($fh, \ForceUTF8\Encoding::toUTF8($output3));
 		
-		
+		$t4 = new MiniTemplator;
+        $t4->readTemplateFromFile(CAMILA_DIR . 'templates/access.inc.php');
+		$t4->setVariable('access_script', $access_script);
+		$output4 = '';
+		$t4->generateOutputToString($output4);
+        $fh = fopen(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $id . '.access.inc.php', 'wb');
+		fwrite($fh, \ForceUTF8\Encoding::toUTF8($output4));
+
 		if (function_exists('opcache_reset'))
 			opcache_reset();
         
