@@ -1714,6 +1714,7 @@ namespace Tqdev\PhpCrudApi\Controller {
     use Tqdev\PhpCrudApi\Record\ErrorCode;
     use Tqdev\PhpCrudApi\Record\RecordService;
     use Tqdev\PhpCrudApi\RequestUtils;
+	use Tqdev\PhpCrudApi\ResponseFactory;
 
     class RecordController
     {
@@ -1722,7 +1723,8 @@ namespace Tqdev\PhpCrudApi\Controller {
 
         public function __construct(Router $router, Responder $responder, RecordService $service)
         {
-            $router->register('GET', '/records/*', array($this, '_list'));
+            $router->register('GET', '/permissions/*', array($this, '_permissions'));
+			$router->register('GET', '/records/*', array($this, '_list'));
             $router->register('POST', '/records/*', array($this, 'create'));
             $router->register('GET', '/records/*/*', array($this, 'read'));
             $router->register('PUT', '/records/*/*', array($this, 'update'));
@@ -1732,7 +1734,20 @@ namespace Tqdev\PhpCrudApi\Controller {
             $this->responder = $responder;
         }
 
-        public function _list(ServerRequestInterface $request): ResponseInterface
+		public function _permissions(ServerRequestInterface $request): ResponseInterface
+        {			
+			$table = RequestUtils::getPathSegment($request, 2);
+			
+			if (!$this->service->hasTable($table)) {
+                return $this->responder->error(ErrorCode::TABLE_NOT_FOUND, $table);
+            }
+						
+			$result = $this->service->_permissions($table);			
+			$responder = new JsonResponder(JSON_UNESCAPED_UNICODE, false);
+			return $responder->success($result);
+        }
+		
+		public function _list(ServerRequestInterface $request): ResponseInterface
         {
             $table = RequestUtils::getPathSegment($request, 2);
             $params = RequestUtils::getParams($request);
@@ -8744,7 +8759,32 @@ namespace Tqdev\PhpCrudApi\Record {
         {
             return $this->db->ping();
         }
-    }
+		
+		public function _permissions(string $tableName): object
+        {
+            $table = $this->reflection->getTable($tableName);
+			
+			if (str_starts_with($table->getRealName(), CAMILA_TABLE_WORKP)) {
+				$wtId = substr($table->getRealName(), strlen(CAMILA_TABLE_WORKP));
+				global $_CAMILA;
+
+				require_once(CAMILA_WORKTABLES_DIR . '/' . CAMILA_TABLE_WORKP . $wtId . '.access.inc.php');
+				$data = [
+				"table" => $tableName,
+				"id" => $wtId,
+				"can" => [
+					"create" => $camila_access_c[$wtId],
+					"read"   => $camila_access_r[$wtId],
+					"update" => $camila_access_u[$wtId],
+					"delete" => $camila_access_d[$wtId]
+					]
+				];
+				
+				return (object)$data;
+
+			}
+		}
+	}
 }
 
 // file: src/Tqdev/PhpCrudApi/Record/RelationJoiner.php
