@@ -2846,6 +2846,14 @@ namespace Tqdev\PhpCrudApi\Database {
             $condition = $this->addMiddlewareConditions($tableName, $condition);
             $parameters = array();
             $whereClause = $this->conditions->getWhereClause($condition, $parameters);
+			global $_CAMILA;
+			if (isset($_CAMILA['visibility_filter'])) {
+				if (trim($whereClause)=='') {
+					$whereClause = ' WHERE ' . $_CAMILA['visibility_filter'] . ' ';
+				} else {
+					$whereClause = ' WHERE (' . substr($whereClause, strlen(' WHERE ')) . ') AND ' . $_CAMILA['visibility_filter'] . ' ';
+				}
+			}
             $sql = 'SELECT COUNT(*) FROM "' . $tableRealName . '"' . $whereClause;
             $stmt = $this->query($sql, $parameters);
             return $stmt->fetchColumn(0);
