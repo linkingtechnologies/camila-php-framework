@@ -1175,10 +1175,10 @@ class configurator
 		$personalvisibilityfield = 'created_by';
 		$recordReadOnlyIfNotNullFields = [];
 
-		$access_script .= "\n\$camila_access_c[$id]=(\$_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) ? true : ".($caninsert ? 'true' : 'false').";";
+		$access_script .= "\n\$camila_access_c[$id]=(\$_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) ? true : ".($caninsert == 'true' ? 'true' : 'false').";";
 		$access_script .= "\n\$camila_access_r[$id]=true;";
-		$access_script .= "\n\$camila_access_u[$id]=(\$_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) ? true : ".($canupdate ? 'true' : 'false').";";
-		$access_script .= "\n\$camila_access_d[$id]=(\$_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) ? true : ".($candelete ? 'true' : 'false').";";
+		$access_script .= "\n\$camila_access_u[$id]=(\$_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) ? true : ".($canupdate == 'true' ? 'true' : 'false').";";
+		$access_script .= "\n\$camila_access_d[$id]=(\$_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP) ? true : ".($candelete == 'true' ? 'true' : 'false').";";
 
         while (!$result->EOF) {
             if ($vcount > 0)

@@ -8,6 +8,7 @@
  *   /records/<table>            (GET list, POST create)
  *   /records/<table>/<id>       (GET read, PUT update, DELETE remove)
  *   /columns/<table>            (GET describe table columns)   [optional extension]
+ *   /permissions/<table>        (GET table permissions)       [optional extension]
  *
  * Features:
  * - CRUD + List operations
@@ -17,35 +18,7 @@
  * - Request timeout via AbortController
  * - Optional API key header
  * - Optional table schema describe (/columns)
- *
- * --------------------------------------------------
- * QUICK START
- * --------------------------------------------------
- *
- * ```js
- * const api = WorkTableClient({
- *   baseUrl: "https://example.com/cf_api.php",
- *   recordsPath: "/records",
- *   apiKeyHeaderName: "X-API-Key",
- *   apiKeyHeaderValue: "my-secret"
- * });
- *
- * const posts = await api.list("posts", {
- *   order: [["created", "desc"]],
- *   size: 10
- * });
- * ```
- *
- * --------------------------------------------------
- * DESCRIBE (COLUMNS)
- * --------------------------------------------------
- * If your backend exposes:
- *   /columns/<table>
- *
- * ```js
- * const cols = await api.describe("posts");
- * const cols2 = await api.table("posts").describe();
- * ```
+ * - Optional table permissions (/permissions)
  */
 (function (global) {
   "use strict";
@@ -55,6 +28,7 @@
    * @param {string} [options.baseUrl=""] Base API URL
    * @param {string} [options.recordsPath="/records"] Records endpoint path
    * @param {string} [options.columnsPath="/columns"] Columns endpoint path (optional)
+   * @param {string} [options.permissionsPath="/permissions"] Permissions endpoint path (optional) // NEW
    * @param {string|null} [options.apiKeyHeaderName=null] API key header name
    * @param {string|null} [options.apiKeyHeaderValue=null] API key header value
    * @param {number} [options.timeoutMs=20000] Request timeout in ms
@@ -64,7 +38,8 @@
 
     var baseUrl = options.baseUrl || "";
     var recordsPath = options.recordsPath || "/records";
-    var columnsPath = options.columnsPath || "/columns"; // NEW (retrocompat: optional)
+    var columnsPath = options.columnsPath || "/columns";
+    var permissionsPath = options.permissionsPath || "/permissions";
     var apiKeyHeaderName = options.apiKeyHeaderName || null;
     var apiKeyHeaderValue = options.apiKeyHeaderValue || null;
     var timeoutMs = options.timeoutMs || 20000;
@@ -83,11 +58,13 @@
       return a + b;
     }
 
-    // KEEP EXACT BEHAVIOR for records base
     var base = joinUrl(baseUrl, recordsPath);
 
-    // NEW base for columns describe
+    // base for columns describe
     var baseCols = joinUrl(baseUrl, columnsPath);
+
+    // NEW base for permissions
+    var basePerms = joinUrl(baseUrl, permissionsPath);
 
     /* ==========================
        Utilities
@@ -275,6 +252,54 @@
         });
     }
 
+    /**
+     * Same as request(), but targets /permissions base.
+     * New, does not affect existing users.
+     */
+    function requestPermissions(path, method, body) {
+      var controller = new AbortController();
+      var timer = setTimeout(function () {
+        controller.abort();
+      }, timeoutMs);
+
+      var headers = {};
+
+      if (apiKeyHeaderName && apiKeyHeaderValue) {
+        headers[apiKeyHeaderName] = apiKeyHeaderValue;
+      }
+
+      var reqOptions = {
+        method: method,
+        headers: headers,
+        signal: controller.signal
+      };
+
+      if (body !== undefined && body !== null) {
+        headers["Content-Type"] = "application/json";
+        reqOptions.body = JSON.stringify(body);
+      }
+
+      return fetch(basePerms + path, reqOptions)
+        .then(function (res) {
+          var ct = res.headers.get("content-type") || "";
+          var reader =
+            ct.indexOf("application/json") !== -1 ? res.json() : res.text();
+
+          return reader.then(function (payload) {
+            if (!res.ok) {
+              var err = new Error("HTTP " + res.status);
+              err.status = res.status;
+              err.payload = payload;
+              throw err;
+            }
+            return payload;
+          });
+        })
+        .finally(function () {
+          clearTimeout(timer);
+        });
+    }
+
     /* ==========================
        Table-bound API
        ========================== */
@@ -306,6 +331,11 @@
         // NEW (retrocompat extension)
         describe: function (query) {
           return requestColumns("/" + t + buildQuery(query), "GET");
+        },
+
+        // NEW (retrocompat extension)
+        permissions: function (query) {
+          return requestPermissions("/" + t + buildQuery(query), "GET");
         }
       };
     }
@@ -344,6 +374,11 @@
       // NEW (retrocompat extension)
       describe: function (table, query) {
         return requestColumns("/" + encode(table) + buildQuery(query), "GET");
+      },
+
+      // NEW (retrocompat extension)
+      permissions: function (table, query) {
+        return requestPermissions("/" + encode(table) + buildQuery(query), "GET");
       },
 
       /**
