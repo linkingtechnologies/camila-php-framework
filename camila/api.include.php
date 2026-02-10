@@ -1724,6 +1724,7 @@ namespace Tqdev\PhpCrudApi\Controller {
         public function __construct(Router $router, Responder $responder, RecordService $service)
         {
             $router->register('GET', '/permissions/*', array($this, '_permissions'));
+			$router->register('GET', '/records/*/distinct/*', array($this, '_distinct'));
 			$router->register('GET', '/records/*', array($this, '_list'));
             $router->register('POST', '/records/*', array($this, 'create'));
             $router->register('GET', '/records/*/*', array($this, 'read'));
@@ -1746,7 +1747,19 @@ namespace Tqdev\PhpCrudApi\Controller {
 			$responder = new JsonResponder(JSON_UNESCAPED_UNICODE, false);
 			return $responder->success($result);
         }
-		
+
+		public function _distinct(ServerRequestInterface $request): ResponseInterface
+        {
+            $table = RequestUtils::getPathSegment($request, 2);
+			$column = RequestUtils::getPathSegment($request, 4);
+			
+            $params = RequestUtils::getParams($request);
+            if (!$this->service->hasTable($table)) {
+                return $this->responder->error(ErrorCode::TABLE_NOT_FOUND, $table);
+            }
+			return $this->responder->success($this->service->_list($table, $params, true, $column));
+        }
+
 		public function _list(ServerRequestInterface $request): ResponseInterface
         {
             $table = RequestUtils::getPathSegment($request, 2);
@@ -2872,7 +2885,7 @@ namespace Tqdev\PhpCrudApi\Database {
             return $mappedRecords;
         }
 
-        public function selectAll(ReflectedTable $table, array $columnNames, Condition $condition, array $columnOrdering, int $offset, int $limit): array
+        public function selectAll(ReflectedTable $table, array $columnNames, Condition $condition, array $columnOrdering, int $offset, int $limit, $distinct=false, $distinctColumn = ''): array
         {
             if ($limit == 0) {
                 return array();
@@ -2893,7 +2906,10 @@ namespace Tqdev\PhpCrudApi\Database {
 					$whereClause = ' WHERE (' . substr($whereClause, strlen(' WHERE ')) . ') AND ' . $_CAMILA['visibility_filter'] . ' ';
 				}
 			}
-			
+			if ($distinct) {
+				$orderBy = ' ORDER BY ' . $selectColumns;
+				$selectColumns = "DISTINCT ".$selectColumns;
+			}
             $sql = 'SELECT ' . $selectColumns . ' FROM "' . $tableRealName . '"' . $whereClause . $orderBy . $offsetLimit;
 			$stmt = $this->query($sql, $parameters);
             $records = $stmt->fetchAll();
@@ -8715,7 +8731,7 @@ namespace Tqdev\PhpCrudApi\Record {
             return $this->db->incrementSingle($table, $columnValues, $id);
         }
 
-        public function _list(string $tableName, array $params): ListDocument
+        public function _list(string $tableName, array $params, $distinct = false, $distinctColumn = ''): ListDocument
         {
             $table = $this->reflection->getTable($tableName);
 			
@@ -8745,7 +8761,19 @@ namespace Tqdev\PhpCrudApi\Record {
 			}
 
             $this->joiner->addMandatoryColumns($table, $params);
+			//print_r($params);
             $columnNames = $this->columns->getNames($table, true, $params);
+			if ($distinct) {
+				$valore = $distinctColumn;
+
+				$params['include'] = $params['include'] ?? [];
+
+				if (!in_array($valore, $params['include'])) {
+					$params['include'][] = $valore;
+				}
+				$columnNames = $this->columns->getNames($table, true, $params);
+
+			}
             $condition = $this->filters->getCombinedConditions($table, $params);
             $columnOrdering = $this->ordering->getColumnOrdering($table, $params);
             if (!$this->pagination->hasPage($params)) {
@@ -8757,8 +8785,8 @@ namespace Tqdev\PhpCrudApi\Record {
                 $limit = $this->pagination->getPageLimit($params);
                 $count = $this->db->selectCount($table, $condition);
             }
-			
-            $records = $this->db->selectAll($table, $columnNames, $condition, $columnOrdering, $offset, $limit);
+
+            $records = $this->db->selectAll($table, $columnNames, $condition, $columnOrdering, $offset, $limit, $distinct, $distinctColumn);
             $this->joiner->addJoins($table, $records, $params, $this->db);
             return new ListDocument($records, $count);
         }
