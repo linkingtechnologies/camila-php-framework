@@ -8761,18 +8761,18 @@ namespace Tqdev\PhpCrudApi\Record {
 			}
 
             $this->joiner->addMandatoryColumns($table, $params);
-			//print_r($params);
             $columnNames = $this->columns->getNames($table, true, $params);
 			if ($distinct) {
-				$valore = $distinctColumn;
-
-				$params['include'] = $params['include'] ?? [];
-
-				if (!in_array($valore, $params['include'])) {
-					$params['include'][] = $valore;
+				if (!is_array($params)) {
+					$params = [];
+				}
+				if (!isset($params['include']) || !is_array($params['include'])) {
+					$params['include'] = [];
+				}
+				if (!in_array($distinctColumn, $params['include'])) {
+					$params['include'][] = $distinctColumn;
 				}
 				$columnNames = $this->columns->getNames($table, true, $params);
-
 			}
             $condition = $this->filters->getCombinedConditions($table, $params);
             $columnOrdering = $this->ordering->getColumnOrdering($table, $params);
