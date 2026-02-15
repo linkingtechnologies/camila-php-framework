@@ -5,10 +5,11 @@
  *
  * Lightweight JavaScript (browser) client that wraps REST endpoints of the form:
  *
- *   /records/<table>            (GET list, POST create)
- *   /records/<table>/<id>       (GET read, PUT update, DELETE remove)
- *   /columns/<table>            (GET describe table columns)   [optional extension]
- *   /permissions/<table>        (GET table permissions)       [optional extension]
+ *   /records/<table>                      (GET list, POST create)
+ *   /records/<table>/<id>                 (GET read, PUT update, DELETE remove)
+ *   /records/<table>/distinct/<column>    (GET distinct values)
+ *   /columns/<table>                      (GET describe table columns)     [optional extension]
+ *   /permissions/<table>                  (GET table permissions)          [optional extension]
  *
  * Features:
  * - CRUD + List operations
@@ -19,6 +20,7 @@
  * - Optional API key header
  * - Optional table schema describe (/columns)
  * - Optional table permissions (/permissions)
+ * - Optional distinct values (/records/<table>/distinct/<column>)
  */
 (function (global) {
   "use strict";
@@ -28,7 +30,7 @@
    * @param {string} [options.baseUrl=""] Base API URL
    * @param {string} [options.recordsPath="/records"] Records endpoint path
    * @param {string} [options.columnsPath="/columns"] Columns endpoint path (optional)
-   * @param {string} [options.permissionsPath="/permissions"] Permissions endpoint path (optional) // NEW
+   * @param {string} [options.permissionsPath="/permissions"] Permissions endpoint path (optional)
    * @param {string|null} [options.apiKeyHeaderName=null] API key header name
    * @param {string|null} [options.apiKeyHeaderValue=null] API key header value
    * @param {number} [options.timeoutMs=20000] Request timeout in ms
@@ -58,12 +60,13 @@
       return a + b;
     }
 
+    // KEEP EXACT BEHAVIOR for records base
     var base = joinUrl(baseUrl, recordsPath);
 
     // base for columns describe
     var baseCols = joinUrl(baseUrl, columnsPath);
 
-    // NEW base for permissions
+    // base for permissions
     var basePerms = joinUrl(baseUrl, permissionsPath);
 
     /* ==========================
@@ -206,7 +209,6 @@
 
     /**
      * Same as request(), but targets /columns base.
-     * New, does not affect existing users.
      */
     function requestColumns(path, method, body) {
       var controller = new AbortController();
@@ -254,7 +256,6 @@
 
     /**
      * Same as request(), but targets /permissions base.
-     * New, does not affect existing users.
      */
     function requestPermissions(path, method, body) {
       var controller = new AbortController();
@@ -328,14 +329,19 @@
           return request("/" + t + "/" + encode(id), "DELETE");
         },
 
-        // NEW (retrocompat extension)
         describe: function (query) {
           return requestColumns("/" + t + buildQuery(query), "GET");
         },
 
-        // NEW (retrocompat extension)
         permissions: function (query) {
           return requestPermissions("/" + t + buildQuery(query), "GET");
+        },
+
+        distinct: function (column, query) {
+          return request(
+            "/" + t + "/distinct/" + encode(column) + buildQuery(query),
+            "GET"
+          );
         }
       };
     }
@@ -371,14 +377,19 @@
         return request("/" + encode(table) + buildQuery(query), "GET");
       },
 
-      // NEW (retrocompat extension)
       describe: function (table, query) {
         return requestColumns("/" + encode(table) + buildQuery(query), "GET");
       },
 
-      // NEW (retrocompat extension)
       permissions: function (table, query) {
         return requestPermissions("/" + encode(table) + buildQuery(query), "GET");
+      },
+
+      distinct: function (table, column, query) {
+        return request(
+          "/" + encode(table) + "/distinct/" + encode(column) + buildQuery(query),
+          "GET"
+        );
       },
 
       /**
