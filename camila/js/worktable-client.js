@@ -10,6 +10,7 @@
  *   /records/<table>/distinct/<column>    (GET distinct values)
  *   /columns/<table>                      (GET describe table columns)     [optional extension]
  *   /permissions/<table>                  (GET table permissions)          [optional extension]
+ *   /sequence/<table>                     (GET table sequence)             [optional extension]
  *
  * Features:
  * - CRUD + List operations
@@ -20,6 +21,7 @@
  * - Optional API key header
  * - Optional table schema describe (/columns)
  * - Optional table permissions (/permissions)
+ * - Optional table sequence (/sequence)
  * - Optional distinct values (/records/<table>/distinct/<column>)
  */
 (function (global) {
@@ -31,6 +33,7 @@
    * @param {string} [options.recordsPath="/records"] Records endpoint path
    * @param {string} [options.columnsPath="/columns"] Columns endpoint path (optional)
    * @param {string} [options.permissionsPath="/permissions"] Permissions endpoint path (optional)
+   * @param {string} [options.sequencePath="/sequence"] Sequence endpoint path (optional)
    * @param {string|null} [options.apiKeyHeaderName=null] API key header name
    * @param {string|null} [options.apiKeyHeaderValue=null] API key header value
    * @param {number} [options.timeoutMs=20000] Request timeout in ms
@@ -42,6 +45,7 @@
     var recordsPath = options.recordsPath || "/records";
     var columnsPath = options.columnsPath || "/columns";
     var permissionsPath = options.permissionsPath || "/permissions";
+    var sequencePath = options.sequencePath || "/sequence";
     var apiKeyHeaderName = options.apiKeyHeaderName || null;
     var apiKeyHeaderValue = options.apiKeyHeaderValue || null;
     var timeoutMs = options.timeoutMs || 20000;
@@ -68,6 +72,9 @@
 
     // base for permissions
     var basePerms = joinUrl(baseUrl, permissionsPath);
+
+    // base for sequence
+    var baseSeq = joinUrl(baseUrl, sequencePath);
 
     /* ==========================
        Utilities
@@ -301,6 +308,53 @@
         });
     }
 
+    /**
+     * Same as request(), but targets /sequence base.
+     */
+    function requestSequence(path, method, body) {
+      var controller = new AbortController();
+      var timer = setTimeout(function () {
+        controller.abort();
+      }, timeoutMs);
+
+      var headers = {};
+
+      if (apiKeyHeaderName && apiKeyHeaderValue) {
+        headers[apiKeyHeaderName] = apiKeyHeaderValue;
+      }
+
+      var reqOptions = {
+        method: method,
+        headers: headers,
+        signal: controller.signal
+      };
+
+      if (body !== undefined && body !== null) {
+        headers["Content-Type"] = "application/json";
+        reqOptions.body = JSON.stringify(body);
+      }
+
+      return fetch(baseSeq + path, reqOptions)
+        .then(function (res) {
+          var ct = res.headers.get("content-type") || "";
+          var reader =
+            ct.indexOf("application/json") !== -1 ? res.json() : res.text();
+
+          return reader.then(function (payload) {
+            if (!res.ok) {
+              var err = new Error("HTTP " + res.status);
+              err.status = res.status;
+              err.payload = payload;
+              throw err;
+            }
+            return payload;
+          });
+        })
+        .finally(function () {
+          clearTimeout(timer);
+        });
+    }
+
     /* ==========================
        Table-bound API
        ========================== */
@@ -335,6 +389,10 @@
 
         permissions: function (query) {
           return requestPermissions("/" + t + buildQuery(query), "GET");
+        },
+
+        sequence: function (query) {
+          return requestSequence("/" + t + buildQuery(query), "GET");
         },
 
         distinct: function (column, query) {
@@ -383,6 +441,10 @@
 
       permissions: function (table, query) {
         return requestPermissions("/" + encode(table) + buildQuery(query), "GET");
+      },
+
+      sequence: function (table, query) {
+        return requestSequence("/" + encode(table) + buildQuery(query), "GET");
       },
 
       distinct: function (table, column, query) {
