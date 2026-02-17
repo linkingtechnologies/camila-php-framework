@@ -1399,12 +1399,12 @@ namespace Tqdev\PhpCrudApi\Controller {
             $router->register('GET', '/columns', array($this, 'getDatabase'));
             $router->register('GET', '/columns/*', array($this, 'getTable'));
             $router->register('GET', '/columns/*/*', array($this, 'getColumn'));
-            $router->register('PUT', '/columns/*', array($this, 'updateTable'));
-            $router->register('PUT', '/columns/*/*', array($this, 'updateColumn'));
-            $router->register('POST', '/columns', array($this, 'addTable'));
-            $router->register('POST', '/columns/*', array($this, 'addColumn'));
-            $router->register('DELETE', '/columns/*', array($this, 'removeTable'));
-            $router->register('DELETE', '/columns/*/*', array($this, 'removeColumn'));
+            //$router->register('PUT', '/columns/*', array($this, 'updateTable'));
+            //$router->register('PUT', '/columns/*/*', array($this, 'updateColumn'));
+            //$router->register('POST', '/columns', array($this, 'addTable'));
+            //$router->register('POST', '/columns/*', array($this, 'addColumn'));
+            //$router->register('DELETE', '/columns/*', array($this, 'removeTable'));
+            //$router->register('DELETE', '/columns/*/*', array($this, 'removeColumn'));
             $this->responder = $responder;
             $this->reflection = $reflection;
             $this->definition = $definition;
@@ -1724,6 +1724,7 @@ namespace Tqdev\PhpCrudApi\Controller {
         public function __construct(Router $router, Responder $responder, RecordService $service)
         {
             $router->register('GET', '/permissions/*', array($this, '_permissions'));
+			$router->register('GET', '/sequence/*', array($this, '_sequence'));
 			$router->register('GET', '/records/*/distinct/*', array($this, '_distinct'));
 			$router->register('GET', '/records/*', array($this, '_list'));
             $router->register('POST', '/records/*', array($this, 'create'));
@@ -1731,6 +1732,7 @@ namespace Tqdev\PhpCrudApi\Controller {
             $router->register('PUT', '/records/*/*', array($this, 'update'));
             $router->register('DELETE', '/records/*/*', array($this, 'delete'));
             $router->register('PATCH', '/records/*/*', array($this, 'increment'));
+
             $this->service = $service;
             $this->responder = $responder;
         }
@@ -1748,6 +1750,25 @@ namespace Tqdev\PhpCrudApi\Controller {
 			return $responder->success($result);
         }
 
+		public function _sequence(ServerRequestInterface $request): ResponseInterface
+        {			
+			$table = RequestUtils::getPathSegment($request, 2);
+			
+			if (!$this->service->hasTable($table)) {
+                return $this->responder->error(ErrorCode::TABLE_NOT_FOUND, $table);
+            }
+			
+			global $_CAMILA;
+			$id  = $_CAMILA['db']->GenID(CAMILA_APPLICATION_PREFIX.'worktableseq', 100000);
+			$data = [
+				"table" => $tableName,
+				"id" => $id,
+				];
+
+			$responder = new JsonResponder(JSON_UNESCAPED_UNICODE, false);
+			return $responder->success($data);
+        }
+		
 		public function _distinct(ServerRequestInterface $request): ResponseInterface
         {
             $table = RequestUtils::getPathSegment($request, 2);
