@@ -1761,7 +1761,7 @@ namespace Tqdev\PhpCrudApi\Controller {
 			global $_CAMILA;
 			$id  = $_CAMILA['db']->GenID(CAMILA_APPLICATION_PREFIX.'worktableseq', 100000);
 			$data = [
-				"table" => $tableName,
+				"table" => $table,
 				"id" => $id,
 				];
 
