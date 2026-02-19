@@ -43,6 +43,11 @@ class CamilaUserInterface
 		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
 	}
 
+function insertHtml(string $html) {
+	global $_CAMILA;
+	$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $html));
+}
+
 function addTimelineSection(array $events, string $commonIcon = 'ri-calendar-line')
 {
 	global $_CAMILA;
