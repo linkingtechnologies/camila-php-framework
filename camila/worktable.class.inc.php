@@ -118,9 +118,11 @@ class CamilaWorkTable
 		return $mapping;
     }
 	
-	function removeSpaces($str) {
-		return preg_replace('/[\s\.]+/', '-', $str);
-	}
+function removeSpaces($str) {
+    $str = preg_replace('/[\s\.\'"]+/', '-', $str);
+    $str = preg_replace('/-+/', '-', $str);
+    return trim($str, '-');
+}
 
 
 	function countWorktableRecords($id)
