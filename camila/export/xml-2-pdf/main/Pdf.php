@@ -5,7 +5,7 @@
  * @author guillaume l. <guillaume@geelweb.org>
  * @link http://www.geelweb.org
  * @license http://opensource.org/licenses/bsd-license.php BSD License 
- * @copyright copyright © 2006, guillaume luchet
+ * @copyright copyright ï¿½ 2006, guillaume luchet
  * @package Xml2Pdf
  * @version CVS: $Id: Pdf.php,v 1.7 2007/01/11 17:20:21 geelweb Exp $
  */
@@ -16,6 +16,24 @@
  * Include the Fpdf parent class.
  */
 require_once('fpdf.php');
+
+/**
+ * Include FPDI for importing existing PDF pages as templates.
+ * Falls back to plain FPDF via alias if FPDI is not available.
+ */
+$fpdiAutoload = defined('CAMILA_VENDOR_DIR')
+    ? CAMILA_VENDOR_DIR . 'setasign/fpdi/src/autoload.php'
+    : __DIR__ . '/../../../../vendor/setasign/fpdi/src/autoload.php';
+if (file_exists($fpdiAutoload)) {
+    require_once($fpdiAutoload);
+    if (!class_exists('PdfBase')) {
+        class_alias('\setasign\Fpdi\Fpdi', 'PdfBase');
+    }
+} else {
+    if (!class_exists('PdfBase')) {
+        class_alias('FPDF', 'PdfBase');
+    }
+}
 
 // }}}
 // doc {{{
@@ -32,11 +50,11 @@ require_once('fpdf.php');
  * @author guillaume l. <guillaume@geelweb.org>
  * @link http://www.geelweb.org
  * @license http://opensource.org/licenses/bsd-license.php BSD License 
- * @copyright copyright © 2006, guillaume luchet
+ * @copyright copyright ï¿½ 2006, guillaume luchet
  * @package Xml2Pdf
  * @version CVS: $Id: Pdf.php,v 1.7 2007/01/11 17:20:21 geelweb Exp $
  */ // }}}
-Class Pdf extends FPDF {
+Class Pdf extends PdfBase {
     // class properties {{{
     
 	public $k;
@@ -686,6 +704,33 @@ Class Pdf extends FPDF {
 			    $this->_out('endobj');
 		    }
 	    }
+
+        // FPDI: write imported page objects and referenced objects
+        if (property_exists($this, 'importedPages') && !empty($this->importedPages)) {
+            $this->currentReaderId = null;
+            foreach ($this->importedPages as $key => $pageData) {
+                $this->_newobj();
+                $this->importedPages[$key]['objectNumber'] = $this->n;
+                $this->currentReaderId = $pageData['readerId'];
+                $this->writePdfType($pageData['stream']);
+                $this->_put('endobj');
+            }
+            if (property_exists($this, 'readers')) {
+                foreach (array_keys($this->readers) as $readerId) {
+                    $parser = $this->getPdfReader($readerId)->getParser();
+                    $this->currentReaderId = $readerId;
+                    while (($objectNumber = array_pop($this->objectsToCopy[$readerId])) !== null) {
+                        try {
+                            $object = $parser->getIndirectObject($objectNumber);
+                        } catch (\Exception $e) {
+                            continue;
+                        }
+                        $this->writePdfType($object);
+                    }
+                }
+            }
+            $this->currentReaderId = null;
+        }
     }
 
     // }}}
