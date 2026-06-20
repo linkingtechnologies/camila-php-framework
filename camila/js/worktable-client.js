@@ -46,6 +46,7 @@
     var columnsPath = options.columnsPath || "/columns";
     var permissionsPath = options.permissionsPath || "/permissions";
     var sequencePath = options.sequencePath || "/sequence";
+    var tablesPath = options.tablesPath || "/tables";
     var apiKeyHeaderName = options.apiKeyHeaderName || null;
     var apiKeyHeaderValue = options.apiKeyHeaderValue || null;
     var timeoutMs = options.timeoutMs || 20000;
@@ -75,6 +76,9 @@
 
     // base for sequence
     var baseSeq = joinUrl(baseUrl, sequencePath);
+
+    // base for tables list
+    var baseTables = joinUrl(baseUrl, tablesPath);
 
     /* ==========================
        Utilities
@@ -452,6 +456,30 @@
           "/" + encode(table) + "/distinct/" + encode(column) + buildQuery(query),
           "GET"
         );
+      },
+
+      tables: function () {
+        var controller = new AbortController();
+        var timer = setTimeout(function () { controller.abort(); }, timeoutMs);
+        var headers = {};
+        if (apiKeyHeaderName && apiKeyHeaderValue) {
+          headers[apiKeyHeaderName] = apiKeyHeaderValue;
+        }
+        return fetch(baseTables, { method: "GET", headers: headers, signal: controller.signal })
+          .then(function (res) {
+            var ct = res.headers.get("content-type") || "";
+            var reader = ct.indexOf("application/json") !== -1 ? res.json() : res.text();
+            return reader.then(function (payload) {
+              if (!res.ok) {
+                var err = new Error("HTTP " + res.status);
+                err.status = res.status;
+                err.payload = payload;
+                throw err;
+              }
+              return payload;
+            });
+          })
+          .finally(function () { clearTimeout(timer); });
       },
 
       /**
