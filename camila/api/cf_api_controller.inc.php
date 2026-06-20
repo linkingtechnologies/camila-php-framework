@@ -94,12 +94,12 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
         __DIR__ . '/cf_handlers.inc.php'
     ];
 	foreach (CamilaPlugins::getList($_CAMILA['db']) as $plugin) {
-		if (($plugin['status'] ?? '') === 'active') {
+		//if (($plugin['status'] ?? '') === 'active') {
 			$routesFile = CAMILA_APP_PATH . '/plugins/' . $plugin['id'] . '/api/handlers.inc.php';
 			if (is_file($routesFile)) {
 				$conf['pluginFiles'][] = ['file' => $routesFile, 'prefix' => '/' . $plugin['id']];
 			}
-		}
+		//}
 	}
 	$conf['authorization.tableHandler'] = function ($operation, $tableName) {
 		$ret = true;
