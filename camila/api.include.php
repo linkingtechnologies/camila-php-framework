@@ -9747,7 +9747,12 @@ namespace Tqdev\PhpCrudApi {
 						$body     = $parsed !== null ? (array) $parsed : null;
 						$segments = array_values(array_filter(explode('/', $request->getUri()->getPath())));
 						$result   = $handler($params, $body, $segments);
-						return ResponseFactory::fromObject(200, $result, JSON_UNESCAPED_UNICODE);
+						$status   = 200;
+						if (isset($result['__status'])) {
+							$status = (int) $result['__status'];
+							unset($result['__status']);
+						}
+						return ResponseFactory::fromObject($status, $result, JSON_UNESCAPED_UNICODE);
 					};
 					if ($isPublic && $registerPublicRoute !== null) {
 						$registerPublicRoute(strtoupper($method), $fullPath, $wrapper);
