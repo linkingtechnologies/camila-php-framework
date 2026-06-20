@@ -632,6 +632,8 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
       }
   }
 
+  $_isTotemUser = strncasecmp($_CAMILA['user'] ?? '', 'totem', 5) === 0;
+
   if (!$_CAMILA['page']->camila_exporting() && !isset($_REQUEST['camila_popup'])) {
 
       //if ($_CAMILA['page_url'] != CAMILA_HOME)
@@ -693,7 +695,7 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
 
       if ($_CAMILA['user_loggedin'] == 1) {
 
-		$_CAMILA['mainmenu'] = $jarr;
+		if (!$_isTotemUser) $_CAMILA['mainmenu'] = $jarr;
 
 		$code .= "<script language=\"javascript\" src=\"".CAMILA_DIR."js/jquery/jquery.min.js?v=2025\"></script>\n";
 
@@ -756,7 +758,7 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
   //$text->set_color($_CAMILA['page_title_color'], $_CAMILA['page_title_boxcolor']);
   //$_CAMILA['page']->add_text($text);
 
-if (!$_CAMILA['page']->camila_exporting())
+if (!$_isTotemUser && !$_CAMILA['page']->camila_exporting())
 {
   $query = 'select * from ' . CAMILA_APPLICATION_PREFIX.'camila_bookmarks where base_url='.$_CAMILA['db']->qstr(basename($_SERVER['PHP_SELF'])) . ' and lang=' . $_CAMILA['db']->qstr($_CAMILA['lang']) . ' order by sequence';
   $result = $_CAMILA['db']->Execute($query);
