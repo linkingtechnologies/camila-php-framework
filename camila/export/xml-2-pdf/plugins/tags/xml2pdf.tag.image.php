@@ -6,7 +6,7 @@
  * @author guillaume l. <guillaume@geelweb.org> 
  * @link http://www.geelweb.org geelweb-dot-org 
  * @license http://opensource.org/licenses/bsd-license.php BSD License 
- * @copyright Copyright © 2006, guillaume luchet
+ * @copyright Copyright ï¿½ 2006, guillaume luchet
  * @version CVS: $Id: xml2pdf.tag.image.php,v 1.8 2007/01/05 23:07:31 geelweb Exp $
  * @package Xml2Pdf
  * @subpackage Tag
@@ -28,7 +28,7 @@
  * @author guillaume l. <guillaume@geelweb.org>
  * @link http://www.geelweb.org
  * @license http://opensource.org/licenses/bsd-license.php BSD License 
- * @copyright copyright © 2006, guillaume luchet
+ * @copyright copyright ï¿½ 2006, guillaume luchet
  * @version CVS: $Id: xml2pdf.tag.image.php,v 1.8 2007/01/05 23:07:31 geelweb Exp $
  * @package Xml2Pdf
  * @subpackage Tag
@@ -80,6 +80,12 @@ Class xml2pdf_tag_image {
     public $type = '';
     
     /**
+     * temp file created for attachment, cleaned up after render.
+     * @var string|null
+     */
+    private $_attachmentTmp = null;
+
+    /**
      * parent tag
      * @var object
      */
@@ -102,15 +108,16 @@ Class xml2pdf_tag_image {
         if(isset($tagProperties['FILE'])) {
             $this->file = $tagProperties['FILE'];
 
-            if (!file_exists($this->file)) {
+            if (strncmp($this->file, 'attachment://', 13) === 0) {
+                $this->file = $this->_resolveAttachment(substr($this->file, 13));
+            } elseif (!file_exists($this->file)) {
                 global $_CAMILA;
                 $file = CAMILA_TMPL_DIR . '/images/' . $_CAMILA['lang'] . '/' . $this->file;
                 if (file_exists($file) && filesize($file)>0)
                     $this->file = $file;
-				else
-					$this->file = '';
+                else
+                    $this->file = '';
             }
-
         }
         if(isset($tagProperties['WIDTH'])) {
             $this->width = $tagProperties['WIDTH'];
@@ -187,11 +194,84 @@ Class xml2pdf_tag_image {
                 @unlink($this->file);
             }
 
+            if ($this->_attachmentTmp !== null) {
+                @unlink($this->_attachmentTmp);
+                $this->_attachmentTmp = null;
+            }
+
         }
  
     }
 
     // }}}
+
+    /**
+     * Resolve an attachment:// URI to a temp file with the correct extension.
+     *
+     * URI format: attachment://<table>/<uuid>
+     * Type is read from <uuid>.meta; falls back to magic-byte detection.
+     * Returns path to a temp file (caller must unlink it via $_attachmentTmp).
+     *
+     * @param string $uri  everything after "attachment://"
+     * @return string  path to temp file, or '' if attachment not found/unsupported
+     */
+    private function _resolveAttachment($uri) {
+        $parts = explode('/', $uri, 2);
+
+        if (count($parts) !== 2 || $parts[0] === '' || $parts[1] === '') {
+            return '';
+        }
+        list($table, $id) = $parts;
+
+        $base = defined('CAMILA_FM_ROOTDIR') ? CAMILA_FM_ROOTDIR : '';
+        if ($base === '') {
+            return '';
+        }
+
+        $bin  = $base . '/attachments/' . $table . '/' . $id . '.bin';
+        $meta = $base . '/attachments/' . $table . '/' . $id . '.meta';
+
+        if (!file_exists($bin) || filesize($bin) === 0) {
+            return '';
+        }
+
+        // resolve extension from .meta
+        $ext = '';
+        if (file_exists($meta)) {
+            $mime = trim(file_get_contents($meta));
+            $map  = ['image/jpeg' => 'jpg', 'image/jpg' => 'jpg',
+                     'image/png'  => 'png', 'image/gif' => 'gif'];
+            if (isset($map[$mime])) {
+                $ext = $map[$mime];
+            }
+        }
+
+        // fallback: detect from magic bytes
+        if ($ext === '') {
+            $header = file_get_contents($bin, false, null, 0, 8);
+            if (substr($header, 0, 3) === "\xff\xd8\xff") {
+                $ext = 'jpg';
+            } elseif (substr($header, 0, 4) === "\x89PNG") {
+                $ext = 'png';
+            } elseif (substr($header, 0, 3) === 'GIF') {
+                $ext = 'gif';
+            } else {
+                return '';
+            }
+        }
+
+        // copy to temp file with proper extension so FPDF recognises it
+        $tmpBase = tempnam(defined('CAMILA_TMP_DIR') ? CAMILA_TMP_DIR : sys_get_temp_dir(), 'img');
+        $tmp = $tmpBase . '.' . $ext;
+        if (!copy($bin, $tmp)) {
+            return '';
+        }
+
+
+        $this->_attachmentTmp = $tmp;
+        $this->type = $ext;
+        return $tmp;
+    }
 
     function mathEval($equation) { 
         $equation = preg_replace("/[^0-9+\-.*\/()%]/","",$equation); 
