@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2025 Umberto Bresciani
+    Copyright (C) 2006-2026 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ require_once(CAMILA_VENDOR_DIR . '/autoload.php');
 
 require_once(CAMILA_DIR.'export/phpgraphlib/phpgraphlib.php');
 require_once(CAMILA_DIR.'export/phpgraphlib/phpgraphlib_pie.php');
+require_once(CAMILA_LIB_DIR.'qrcode/qrcode.class.php');
 
 use Mpdf\Mpdf;
 use PhpOffice\PhpWord\PhpWord;
@@ -30,22 +31,112 @@ use PhpOffice\PhpWord\SimpleType\Jc;
 use PhpOffice\PhpWord\Element\Cell;
 
 
+/**
+ * Renders statistical reports defined in XML config files.
+ *
+ * Each report file is an XML document with the following structure:
+ *
+ * ```xml
+ * <?xml version='1.0' standalone='yes' ?>
+ * <reports>
+ *   <report>
+ *     <id>unique_id</id>
+ *
+ *     <!-- Query selection: the engine picks the first matching variant in this order:
+ *          mysqlQuery (if driver=mysql) → sqliteQuery (if driver=sqlite) → query.
+ *          <query/> may be left empty when only driver-specific variants are provided. -->
+ *     <query>SELECT col1, col2 FROM ...</query>
+ *     <mysqlQuery>SELECT ...  (MySQL-specific syntax)</mysqlQuery>
+ *     <sqliteQuery>SELECT ... (SQLite-specific syntax)</sqliteQuery>
+ *
+ *     <graphs>
+ *       <graph>
+ *         <id>1</id>
+ *
+ *         <!-- Graph type: pie | bar | table | text -->
+ *         <type>pie</type>
+ *         <title>Chart title shown in the document</title>
+ *
+ *         <!-- pie / bar: pixel dimensions of the generated PNG image.
+ *              <filename> is ignored by the engine (path is computed internally). -->
+ *         <width>500</width>
+ *         <height>400</height>
+ *
+ *         <!-- table: core options -->
+ *         <sum>1</sum>                           <!-- 0|1 — append a numeric totals row -->
+ *         <hideFirstColumn>true</hideFirstColumn> <!-- omit column 0 from header and rows -->
+ *         <columnWidths>30,40,30</columnWidths>   <!-- comma-separated % widths used in Word/ODT output;
+ *                                                      must match the number of visible columns -->
+ *
+ *         <!-- text: raw HTML template; ${0}, ${1}, … are replaced with query column values -->
+ *         <html><![CDATA[<p>${0} — ${1}</p>]]></html>
+ *
+ *         <!-- ── Optional extensions ────────────────────────────────────────────── -->
+ *
+ *         <!-- Inline CSS applied to the HTML <table> element (HTML/PDF output only) -->
+ *         <style>width:100%</style>
+ *
+ *         <!-- Render a 1-D barcode in a table column (HTML/PDF output via mPDF <barcode> tag) -->
+ *         <barcodeColumn>2</barcodeColumn>       <!-- 0-based column index (all columns, incl. hidden) -->
+ *         <barcodeType>code39extend</barcodeType>
+ *         <barcodeSize>0.3</barcodeSize>
+ *         <barcodeHeight>8</barcodeHeight>
+ *
+ *         <!-- Render a QR code image in a table column (all output formats: HTML, PDF, Word, ODT) -->
+ *         <qrcodeColumn>2</qrcodeColumn>         <!-- 0-based column index (all columns, incl. hidden) -->
+ *         <qrcodeSize>80</qrcodeSize>            <!-- output PNG size in pixels (default 80) -->
+ *         <qrcodeLevel>M</qrcodeLevel>           <!-- ECC level: L | M | Q | H (default M) -->
+ *
+ *       </graph>
+ *     </graphs>
+ *   </report>
+ * </reports>
+ * ```
+ *
+ * Supported output formats: PDF (mPDF), HTML, Word (.docx), ODT.
+ */
 class CamilaReport
 {
+    /** @var \SimpleXMLElement Parsed XML config for the current report file. */
     private $xmlConfig;
-	private $camilaWT;
-	private $reportDir;
-	private $reportList;
-	private $currentReport;
-	private $lang;
 
-	public $shouldGenerateToc = false;
-	public $shouldGenerateHeader = false;
-	public $headerHtml;
+    /** @var object Camila worktable instance used for database queries. */
+    private $camilaWT;
 
-	public $shouldGenerateFooter = false;
-	public $outputFileName;
+    /** @var string Absolute path to the language-specific reports directory. */
+    private $reportDir;
 
+    /** @var array<string,string> Map of report filename (without .xml) → display subtitle. */
+    private $reportList;
+
+    /** @var string Filename key (without .xml) of the active report. */
+    private $currentReport;
+
+    /** @var string Active language code (e.g. "it"). */
+    private $lang;
+
+    /** @var bool When true, a table of contents is prepended to PDF/Word output. */
+    public $shouldGenerateToc = false;
+
+    /** @var bool When true, the HTML in $headerHtml is added as a repeating page header. */
+    public $shouldGenerateHeader = false;
+
+    /** @var string HTML markup rendered as the page header (used when $shouldGenerateHeader is true). */
+    public $headerHtml;
+
+    /** @var bool When true, a footer with page number, app name and date is added. */
+    public $shouldGenerateFooter = false;
+
+    /** @var string Optional custom filename for PDF inline output (default: "Report <date>.pdf"). */
+    public $outputFileName;
+
+    /**
+     * @param string $lang       Language code used to locate the reports sub-directory.
+     * @param object $camilaWT   Camila worktable instance (provides DB access).
+     * @param string $reportDir  Base path containing per-language report folders.
+     * @param string $reportName Filename (without .xml) of the report to load.
+     *                           Defaults to the first file found alphabetically.
+     */
     public function __construct($lang, $camilaWT, $reportDir, $reportName = '')
     {
 		$this->lang = $lang;
@@ -63,6 +154,12 @@ class CamilaReport
 		}
     }
 
+    /**
+     * Scans the reports directory and returns all available report files.
+     *
+     * @return array<string,string> Keys are filenames without extension; values are the
+     *                              substring after the first underscore (used as display subtitle).
+     */
 	function getReports() {
 		$extension = 'xml';
 		if (!is_dir($this->reportDir)) {
@@ -91,10 +188,12 @@ class CamilaReport
 		return $filenames;
 	}
 	
+    /** Returns the filename key (without .xml) of the currently loaded report. */
 	function getCurrentReportName() {
 		return $this->currentReport;
 	}
 	
+    /** Returns the display subtitle of the current report (the part after the first underscore in the filename), or null if no report is loaded. */
 	function getCurrentReportTitle() {
 		$title = null;
 		if (!empty($this->reportList)) {
@@ -103,6 +202,14 @@ class CamilaReport
 		return $title;
 	}
 	
+    /**
+     * Returns the most appropriate query for the active database driver.
+     *
+     * Checks for <mysqlQuery> or <sqliteQuery> siblings first; falls back to <query>.
+     *
+     * @param \SimpleXMLElement $node A <report> node from the XML config.
+     * @return \SimpleXMLElement The query element to execute.
+     */
 	function getQuery($node) {
 		$dbType = $this->camilaWT->db->dataProvider;
 		$query = $node->query;
@@ -137,6 +244,17 @@ class CamilaReport
 		return $html;
 	}
 
+    /**
+     * Renders a <graph type="text"> block.
+     *
+     * The graph must contain a <html> element with the HTML template.
+     * Placeholders ${0}, ${1}, … are replaced with the corresponding query column values
+     * from the first (and only expected) result row.
+     *
+     * @param \ADORecordSet|null $result Query result (ADODB_FETCH_ASSOC mode).
+     * @param \SimpleXMLElement  $graph  The <graph> node.
+     * @return string HTML fragment.
+     */
     private function generateText($result, $graph, $noCustomCode = false)
     {
 		
@@ -158,6 +276,24 @@ class CamilaReport
         return $html;
     }
 
+    /**
+     * Renders a <graph type="table"> block as an HTML table.
+     *
+     * Supported graph attributes:
+     * - <hideFirstColumn>true</hideFirstColumn>  Skips column 0 in header and rows.
+     * - <sum>1</sum>                             Appends a numeric totals row.
+     * - <style>…</style>                         Inline CSS applied to the <table> element.
+     * - <barcodeColumn>N</barcodeColumn>         Renders a mPDF <barcode> tag in column N.
+     *   <barcodeType>, <barcodeSize>, <barcodeHeight> — barcode parameters.
+     * - <qrcodeColumn>N</qrcodeColumn>           Renders a QR code image in column N.
+     *   <qrcodeSize> (px, default 80), <qrcodeLevel> (L|M|Q|H, default M),
+     *   <qrcodePadding> (cell padding in px, default 4).
+     *
+     * @param \ADORecordSet    $result       Query result (ADODB_FETCH_ASSOC mode).
+     * @param \SimpleXMLElement $graph       The <graph> node.
+     * @param bool             $noCustomCode When true, omits the wrapping <div> (used for embedding).
+     * @return string HTML fragment.
+     */
     private function generateTable($result, $graph, $noCustomCode = false)
     {
         // Generate the table headers
@@ -193,9 +329,16 @@ class CamilaReport
 					if ($cCount == 0 && $skipFirst) {
 					} else {
 						$value = $result->fields[$column];
-						if (isset($graph->barcodeColumn) && $cCount == $graph->barcodeColumn) {
-							$html .= '<td style="text-align:center;line-height: 2;"><barcode code="'.$value.'" type="'.$graph->barcodeType.'" size="'.$graph->barcodeSize.'" height="'.$graph->barcodeHeight.'" />
-							<br/>'.$value.'</td>';
+						if (isset($graph->barcodeColumn) && $cCount == (int)$graph->barcodeColumn) {
+							$html .= '<td style="text-align:center;line-height: 2;"><barcode code="'.$value.'" type="'.$graph->barcodeType.'" size="'.$graph->barcodeSize.'" height="'.$graph->barcodeHeight.'" /><br/>'.$value.'</td>';
+						} elseif (isset($graph->qrcodeColumn) && $cCount == (int)$graph->qrcodeColumn) {
+							$qrSize    = isset($graph->qrcodeSize)    ? (int)$graph->qrcodeSize    : 80;
+							$qrLevel   = isset($graph->qrcodeLevel)   ? (string)$graph->qrcodeLevel : 'M';
+							$qrPadding = isset($graph->qrcodePadding) ? (int)$graph->qrcodePadding : 4;
+							$imgPath   = $this->generateQrPng((string)$value, $qrSize, $qrLevel);
+							$html .= '<td style="text-align:center;padding:' . $qrPadding . 'px;">'
+								. ($imgPath ? '<img src="' . htmlspecialchars($imgPath) . '" width="' . $qrSize . '" height="' . $qrSize . '" /><br/>' : '')
+								. htmlspecialchars($value) . '</td>';
 						} else {
 							$html .= '<td>' . htmlspecialchars($value) . '</td>';
 						}
@@ -242,6 +385,14 @@ class CamilaReport
         return $html;
     }
 
+    /**
+     * Converts a two-column query result into a key→value array used by createGraph().
+     *
+     * The first column becomes the array key, the second becomes the numeric value.
+     *
+     * @param \ADORecordSet $result Query result (default fetch mode).
+     * @return array<string,mixed>
+     */
 	function queryWorktableDatabase($result)
 	{
 		$arr = array();
@@ -256,6 +407,39 @@ class CamilaReport
 		return $arr;
 	}
 	
+    /**
+     * Generates a QR code PNG and returns its file path.
+     *
+     * The PNG is cached in CAMILA_TMP_DIR using md5(value+level) as the filename,
+     * so the same value encoded at the same ECC level is only rendered once per request.
+     * Uses the bundled QRcode library (lib/qrcode/qrcode.class.php).
+     *
+     * @param string $value   Text to encode.
+     * @param int    $sizePx  Output image size in pixels (default 80).
+     * @param string $level   Error correction level: L | M | Q | H (default M).
+     * @return string Absolute path to the PNG, or '' if $value is empty.
+     */
+	private function generateQrPng($value, $sizePx = 80, $level = 'M') {
+		if (trim($value) === '') return '';
+		$filename = CAMILA_TMP_DIR . '/qr_' . md5($value . $level) . '.png';
+		if (!file_exists($filename)) {
+			$qr = new QRcode(utf8_encode($value), $level);
+			$qr->disableBorder();
+			$qr->displayPNG($sizePx, [255,255,255], [0,0,0], $filename, 0);
+		}
+		return $filename;
+	}
+
+    /**
+     * Generates a PHPGraphLib chart image and saves it to $filename.
+     *
+     * Required graph attributes: <type> (pie|bar), <width>, <height>, <title>.
+     *
+     * @param string            $name     Graph id (unused, kept for signature compatibility).
+     * @param \SimpleXMLElement $obj      The <graph> node.
+     * @param array             $data     Key→value pairs from queryWorktableDatabase().
+     * @param string|null       $filename Destination path for the PNG. If null, outputs directly to browser.
+     */
 	function createGraph($name, $obj, $data, $filename = null) {
 		if (count($data)>0)
 		{
@@ -286,9 +470,25 @@ class CamilaReport
 	}
 
 
+    /**
+     * Builds the HTML fragment for a single <report> node.
+     *
+     * Handles all graph types: pie, bar, table, text.
+     * Multiple graphs in the same report are laid out side-by-side in a <table>.
+     * When no data is found, outputs a localised "no data" message.
+     *
+     * @param \SimpleXMLElement $report       The <report> node.
+     * @param int               $index        0-based position within the file (used for anchor id).
+     * @param string            $title        Section heading text.
+     * @param bool              $noCustomCode When true, omits mPDF-specific wrapper tags (e.g. for embedding in Word).
+     * @return string HTML fragment ready for mPDF::WriteHTML().
+     */
     public function generateHtmlContent($report, $index, $title, $noCustomCode = false)
     {
         $html = '';
+		if (!$noCustomCode && isset($report->pageBreakBefore) && (string)$report->pageBreakBefore === 'true') {
+			$html .= '<pagebreak />';
+		}
 		if (!$noCustomCode)
 			$html.= '<mpdf><div keep-with-next="true"><nobreak>';
 		if (isset($report->id)) {
@@ -389,6 +589,20 @@ class CamilaReport
     }
 
 
+    /**
+     * Renders a query result as a PHPWord table inside the given container.
+     *
+     * Supports the same graph attributes as generateTable():
+     * <hideFirstColumn>, <sum>, <columnWidths>, <qrcodeColumn>/<qrcodeSize>/<qrcodeLevel>.
+     * Column widths are specified as comma-separated percentages in <columnWidths>;
+     * if omitted, columns are divided equally across $totalWidth twips.
+     *
+     * @param object            $container  PHPWord Section, Cell, or Header/Footer.
+     * @param \ADORecordSet     $result     Query result (ADODB_FETCH_ASSOC mode).
+     * @param \SimpleXMLElement $graph      The <graph> node.
+     * @param int               $totalWidth Available width in twips (default 9065 ≈ A4 usable width).
+     * @param array             $fontStyle  PHPWord font style array applied to all cells.
+     */
 	private function generatePhpWordTable($container, $result, $graph, $totalWidth = 9065, $fontStyle)
 	{
 		if ($result->RecordCount() <= 0) {
@@ -451,7 +665,24 @@ class CamilaReport
 			$table->addRow();
 			foreach ($activeColumns as $i => $column) {
 				$value = $result->fields[$column];
-				$table->addCell($customWidths[$i], $cellStyle)->addText((string)$value, $fontStyle);
+				$origIdx = $skipFirst ? $i + 1 : $i;
+
+				if (isset($graph->qrcodeColumn) && $origIdx == (int)$graph->qrcodeColumn) {
+					$qrSize  = isset($graph->qrcodeSize)  ? (int)$graph->qrcodeSize  : 80;
+					$qrLevel = isset($graph->qrcodeLevel) ? (string)$graph->qrcodeLevel : 'M';
+					$imgPath = $this->generateQrPng((string)$value, $qrSize, $qrLevel);
+					$cell = $table->addCell($customWidths[$i], $cellStyle);
+					if ($imgPath) {
+						$cell->addImage($imgPath, [
+							'width'     => round($qrSize * 0.75),
+							'height'    => round($qrSize * 0.75),
+							'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER,
+						]);
+					}
+					$cell->addText((string)$value, $fontStyle, ['alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+				} else {
+					$table->addCell($customWidths[$i], $cellStyle)->addText((string)$value, $fontStyle);
+				}
 
 				if ($sumEnabled && is_numeric($value)) {
 					if (!isset($totalRow[$column])) {
@@ -473,8 +704,24 @@ class CamilaReport
 		}
 	}
 
+    /**
+     * Adds the content of one <report> node to a PHPWord Section.
+     *
+     * Multiple graphs are placed side-by-side in a borderless table;
+     * a single graph is rendered directly into the section.
+     * Supports pie, bar (rendered as PNG via PHPGraphLib) and table types.
+     *
+     * @param Section           $section PHPWord section to append content to.
+     * @param \SimpleXMLElement $report  The <report> node.
+     * @param int               $index   Report position (unused, kept for API consistency).
+     * @param string            $title   Section heading (already added by the caller).
+     */
 	public function generateWordContent(Section $section, $report, $index, $title)
 	{
+		if (isset($report->pageBreakBefore) && (string)$report->pageBreakBefore === 'true') {
+			$section->addPageBreak();
+		}
+
 		$query = $this->getQuery($report);
 		$title = (string) $report->graphs->graph[0]->title;
 		$rId = (string) $report->id;
@@ -559,6 +806,16 @@ class CamilaReport
 		}
 	}
 
+    /**
+     * Adds an image to a PHPWord container, scaling it down to fit within $maxWidthTwip.
+     *
+     * If the image's natural width (at 96 dpi) exceeds the available width, it is scaled
+     * proportionally. The final dimensions are converted from pixels to points (×0.75).
+     *
+     * @param object $cellOrSection PHPWord Section or Cell.
+     * @param string $imagePath     Absolute path to the image file.
+     * @param int    $maxWidthTwip  Maximum width in twips (1 twip = 1/1440 inch).
+     */
 	private function addAutoScaledImageToCell($cellOrSection, $imagePath, $maxWidthTwip = 4000)
 	{
 		if (!file_exists($imagePath)) {
@@ -588,6 +845,12 @@ class CamilaReport
 		]);
 	}
 
+    /**
+     * Renders all reports to a PDF and sends it inline to the browser.
+     *
+     * Uses mPDF. Respects $shouldGenerateToc, $shouldGenerateHeader, $shouldGenerateFooter.
+     * The output filename defaults to "Report <date>.pdf"; override via $outputFileName.
+     */
     public function outputPdfToBrowser()
     {
         $mpdf = new \Mpdf\Mpdf([
@@ -642,6 +905,12 @@ class CamilaReport
 			$mpdf->Output('Report '.$date.'.pdf', \Mpdf\Output\Destination::INLINE);
     }
 
+    /**
+     * Renders all reports as HTML widgets and appends them to the current Camila page.
+     *
+     * Supports pie, bar (via dashboard image URLs) and table graph types.
+     * Errors in individual reports are caught and displayed inline.
+     */
 	function outputHtmlToBrowser() {
 		global $_CAMILA;
 		
@@ -707,6 +976,13 @@ class CamilaReport
 		
 	}
 	
+    /**
+     * Generates and outputs a chart image directly to the browser (used by dashboard AJAX requests).
+     *
+     * @param string $rId    Report id to match against <report><id>.
+     * @param string $gId    Graph id to match against <graph><id>.
+     * @param string $report Unused (kept for API compatibility).
+     */
 	function outputImageToBrowser($rId, $gId, $report) {
 		global $_CAMILA;
 		$reports = $this->xmlConfig->report;
@@ -727,6 +1003,15 @@ class CamilaReport
 		}
 	}
 
+    /**
+     * Builds and returns the PhpWord document object with all report content.
+     *
+     * Shared by outputDocxToBrowser() and outputOdtToBrowser().
+     * Applies header/footer when $shouldGenerateHeader/$shouldGenerateFooter are set.
+     * Adds a TOC when $shouldGenerateToc is true.
+     *
+     * @return PhpWord
+     */
     public function getPhpWordDocument()
 	{
 		$phpWord = new PhpWord();
@@ -772,6 +1057,7 @@ class CamilaReport
 		return $phpWord;
 	}
 
+    /** Sends all reports as a Word (.docx) file download to the browser. */
     public function outputDocxToBrowser()
 	{
 		$phpWord = $this->getPhpWordDocument();
@@ -789,6 +1075,7 @@ class CamilaReport
 		exit;
 	}
 
+    /** Sends all reports as an OpenDocument Text (.odt) file download to the browser. */
     public function outputOdtToBrowser()
     {
 		$phpWord = $this->getPhpWordDocument();
@@ -815,6 +1102,17 @@ class CamilaReport
 	 * @param string $html The HTML string to parse
 	 * @param string $basePath Base path for resolving image sources
 	 */
+    /**
+     * Converts HTML <table> elements found in $html into PHPWord table objects.
+     *
+     * Parses inline styles on <table> (border, cellpadding) and <td> (width, vertical-align,
+     * text-align) to replicate the visual layout in Word/ODT. Cell content is delegated to
+     * parseCellContent(). Used internally to convert the $headerHtml to a Word header.
+     *
+     * @param object $container PHPWord Section, Header, or Footer.
+     * @param string $html      HTML string containing one or more <table> elements.
+     * @param string $basePath  Base path for resolving relative image src paths.
+     */
 	function convertHtmlTableToPhpWord($container, $html, $basePath = '')
 	{
 		$dom = new DOMDocument();
@@ -913,6 +1211,17 @@ class CamilaReport
 	 * @param string $basePath Base path to resolve image paths
 	 * @param string|null $align Optional text alignment: left, center, right
 	 */
+    /**
+     * Populates a PHPWord Cell from the child nodes of an HTML <td> element.
+     *
+     * Handles: <img> (auto-scaled), <div> (spacing or text), <span>, <p>, <strong>,
+     * and bare text nodes. Extracts bold, color and alignment from inline styles.
+     *
+     * @param Cell          $cell     Target PHPWord cell.
+     * @param \DOMElement   $td       The source <td> DOM element.
+     * @param string        $basePath Base path for resolving relative image src paths.
+     * @param string|null   $align    Text alignment: "left" | "center" | "right" | null.
+     */
 	function parseCellContent($cell, $td, $basePath, $align = null)
 	{
 		$alignmentMap = [
