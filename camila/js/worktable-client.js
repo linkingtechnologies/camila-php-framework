@@ -35,6 +35,10 @@
  *   - Exists: HEAD check, no body transferred
  *   - List:   IDs with an attachment for a given table
  *   - Delete: removes binary + metadata from server storage
+ * - Custom plugin endpoints via call(method, path, body, query)
+ *   - Targets baseUrl directly (not /records)
+ *   - Authentication (API key header) applied automatically
+ *   - Supports any HTTP verb and optional JSON body / query string
  *
  * Public methods:
  *   table(name)                           returns a table-bound API object with:
@@ -57,6 +61,12 @@
  *   hasAttachment(table, id)             HEAD → Promise<false|{mime,ext}>
  *   listAttachments(table)               GET → Promise<{ids: Array<{id,mime,ext}>>}
  *   deleteAttachment(table, id)           DELETE → Promise<void>
+ *   call(method, path, body, query)       Generic call to any custom endpoint (auth included)
+ *                                         method: "GET"|"POST"|"PUT"|"DELETE"|"PATCH"
+ *                                         path:   e.g. "/templates/welcome"
+ *                                         body:   optional object (JSON)
+ *                                         query:  optional plain object → query string
+ *                                         → Promise<any>
  *   filter(column, operator, ...values)
  *   negate(operator)
  */
@@ -401,6 +411,55 @@
         });
     }
 
+    /**
+     * Generic fetch targeting baseUrl directly — for custom plugin endpoints.
+     * @param {string} path   e.g. "/templates/welcome"
+     * @param {string} method HTTP verb
+     * @param {Object} [body] JSON body
+     * @param {Object} [query] Plain object → query string
+     * @returns {Promise<any>}
+     */
+    function requestRaw(path, method, body, query) {
+      var controller = new AbortController();
+      var timer = setTimeout(function () { controller.abort(); }, timeoutMs);
+
+      var headers = {};
+      if (apiKeyHeaderName && apiKeyHeaderValue) {
+        headers[apiKeyHeaderName] = apiKeyHeaderValue;
+      }
+
+      var reqOptions = {
+        method: method || "GET",
+        headers: headers,
+        signal: controller.signal
+      };
+
+      if (body !== undefined && body !== null) {
+        headers["Content-Type"] = "application/json";
+        reqOptions.body = JSON.stringify(body);
+      }
+
+      var qs = (query && Object.keys(query).length)
+        ? "?" + new URLSearchParams(query).toString()
+        : "";
+
+      return fetch(baseUrl + path + qs, reqOptions)
+        .then(function (res) {
+          var ct = res.headers.get("content-type") || "";
+          var reader = ct.indexOf("application/json") !== -1 ? res.json() : res.text();
+          return reader.then(function (payload) {
+            if (!res.ok) {
+              var err = new Error("HTTP " + res.status);
+              err.status = res.status;
+              err.payload = payload;
+              throw err;
+            }
+            return payload;
+          });
+        })
+        .finally(function () { clearTimeout(timer); });
+    }
+
     /* ==========================
        Table-bound API
        ========================== */
@@ -635,6 +694,18 @@
             });
           })
           .finally(function () { clearTimeout(timer); });
+      },
+
+      /**
+       * Calls any custom plugin endpoint with authentication already applied.
+       * @param {string} method  "GET"|"POST"|"PUT"|"DELETE"|"PATCH"
+       * @param {string} path    Full path, e.g. "/templates/welcome"
+       * @param {Object} [body]  Optional JSON body
+       * @param {Object} [query] Optional query params, e.g. {lang:"it"}
+       * @returns {Promise<any>}
+       */
+      call: function (method, path, body, query) {
+        return requestRaw(path, method || "GET", body, query);
       },
 
       /**
