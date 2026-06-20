@@ -7,7 +7,7 @@
  * @author guillaume l. <guillaume@geelweb.org>
  * @link http://www.geelweb.org
  * @license http://opensource.org/licenses/bsd-license.php BSD License 
- * @copyright copyright © 2006, guillaume luchet
+ * @copyright copyright ï¿½ 2006, guillaume luchet
  * @package Xml2Pdf
  * @subpackage Tag
  * @version CVS:m $Id: xml2pdf.tag.paragraph.php,v 1.3 2006/12/26 08:38:00 geelweb Exp $
@@ -32,7 +32,7 @@ require_once('Xml2PdfTextTag.php');
  * @author guillaume l. <guillaume@geelweb.org>
  * @link http://www.geelweb.org
  * @license http://opensource.org/licenses/bsd-license.php BSD License 
- * @copyright copyright © 2006, guillaume luchet
+ * @copyright copyright ï¿½ 2006, guillaume luchet
  * @package Xml2Pdf
  * @subpackage Tag
  * @tutorial Xml2Pdf/Xml2Pdf.Tag.paragraph.pkg
@@ -96,6 +96,18 @@ Class xml2pdf_tag_paragraph extends Xml2PdfTextTag {
     public $align = PDF_DEFAULT_PARAGRAPH_ALIGN;
 
     /**
+     * vertical alignment inside the box (top|middle|bottom).
+     * @var string
+     */
+    public $valign = 'top';
+
+    /**
+     * box height in current unit â€” required for valign middle/bottom.
+     * @var float
+     */
+    public $height = 0;
+
+    /**
      * parent tag.
      * @var object
      */
@@ -139,6 +151,15 @@ Class xml2pdf_tag_paragraph extends Xml2PdfTextTag {
         }
         if(isset($tagProperties['LEFT'])) {
             $this->left = $this->mathEval($tagProperties['LEFT']);
+        }
+        if(isset($tagProperties['HEIGHT'])) {
+            $this->height = (float)$tagProperties['HEIGHT'];
+        }
+        if(isset($tagProperties['VALIGN'])) {
+            $v = strtolower($tagProperties['VALIGN']);
+            if(in_array($v, array('top','middle','bottom'))) {
+                $this->valign = $v;
+            }
         }
         if(isset($tagProperties['POSITION'])) {
             $this->position = (strtolower($tagProperties['POSITION'])=='absolute')?
@@ -217,6 +238,17 @@ Class xml2pdf_tag_paragraph extends Xml2PdfTextTag {
         if(!$y) {
             $y = $this->pdf->tMargin;
         }
+        if($this->height > 0 && $this->valign !== 'top') {
+            $style = str_replace('U', '', $this->fontStyle);
+            $this->pdf->setFont($this->font, $style, $this->fontSize);
+            $numLines = $this->_countLines($this->content, $this->width);
+            $textHeight = max($numLines, 1) * (float)$this->lineHeight;
+            $shift = ($this->valign === 'bottom')
+                ? $this->height - $textHeight
+                : ($this->height - $textHeight) / 2;
+            $y += max(0, $shift);
+        }
+
         $this->pdf->SetXY($x, $y);
 
         // set the paragraph font, fill, border and draw params
@@ -235,6 +267,26 @@ Class xml2pdf_tag_paragraph extends Xml2PdfTextTag {
         // write the content
         $this->pdf->multicell($this->width, $this->lineHeight, $this->content,
                               $this->border, $this->textAlign, $this->fill);
+    }
+
+    // }}}
+    // xml2pdf_tag_paragraph::_countLines() {{{
+
+    private function _countLines($text, $width) {
+        if($width <= 0 || trim($text) === '') return 1;
+        $lines   = 1;
+        $current = '';
+        foreach(preg_split('/( |\n)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE) as $token) {
+            if($token === "\n") { $lines++; $current = ''; continue; }
+            $test = ($current === '') ? $token : $current . $token;
+            if($this->pdf->GetStringWidth($test) > $width) {
+                $lines++;
+                $current = $token;
+            } else {
+                $current = $test;
+            }
+        }
+        return $lines;
     }
 
     // }}}
