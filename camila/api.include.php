@@ -9744,7 +9744,7 @@ namespace Tqdev\PhpCrudApi {
 					$wrapper = function(ServerRequestInterface $request) use ($handler): ResponseInterface {
 						$params   = RequestUtils::getParams($request);
 						$parsed   = $request->getParsedBody();
-						$body     = $parsed !== null ? (array) $parsed : null;
+						$body     = $parsed !== null ? json_decode(json_encode($parsed), true) : null;
 						$segments = array_values(array_filter(explode('/', $request->getUri()->getPath())));
 						$result   = $handler($params, $body, $segments);
 						$status   = 200;
