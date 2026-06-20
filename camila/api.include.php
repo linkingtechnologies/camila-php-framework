@@ -1145,6 +1145,7 @@ namespace Tqdev\PhpCrudApi\Config {
             'controllers' => 'records,geojson,openapi,status',
             'customControllers' => '',
             'customOpenApiBuilders' => '',
+            'pluginFiles' => [],
             'cacheType' => 'TempFile',
             'cachePath' => '',
             'cacheTime' => 10,
@@ -1301,6 +1302,12 @@ namespace Tqdev\PhpCrudApi\Config {
         public function getCustomControllers(): array
         {
             return array_filter(array_map('trim', explode(',', $this->values['customControllers'])));
+        }
+
+        public function getPluginFiles(): array
+        {
+            $v = $this->values['pluginFiles'];
+            return is_array($v) ? array_filter($v) : array_filter(array_map('trim', explode(',', $v)));
         }
 
         public function getCustomOpenApiBuilders(): array
@@ -4518,7 +4525,7 @@ namespace Tqdev\PhpCrudApi\Middleware\Router {
 
     interface Router extends RequestHandlerInterface
     {
-        public function register(string $method, string $path, array $handler);
+        public function register(string $method, string $path, callable $handler);
 
         public function load(Middleware $middleware);
 
@@ -4591,7 +4598,7 @@ namespace Tqdev\PhpCrudApi\Middleware\Router {
             return $tree;
         }
 
-        public function register(string $method, string $path, array $handler)
+        public function register(string $method, string $path, callable $handler)
         {
             $routeNumber = count($this->routeHandlers);
             $this->routeHandlers[$routeNumber] = $handler;
@@ -9676,6 +9683,80 @@ namespace Tqdev\PhpCrudApi {
 	}
 }
 
+namespace Tqdev\PhpCrudApi {
+	use Psr\Http\Message\ResponseInterface;
+	use Psr\Http\Message\ServerRequestInterface;
+	use Tqdev\PhpCrudApi\Cache\Cache;
+	use Tqdev\PhpCrudApi\Column\ReflectionService;
+	use Tqdev\PhpCrudApi\Config\Config;
+	use Tqdev\PhpCrudApi\Controller\Responder;
+	use Tqdev\PhpCrudApi\Database\GenericDB;
+	use Tqdev\PhpCrudApi\Middleware\Router\Router;
+
+	class CamilaPluginController {
+
+		private $responder;
+		private $status = [];
+
+		public function __construct(Router $router, Responder $responder, GenericDB $db, ReflectionService $reflection, Cache $cache, Config $config)
+		{
+			$this->responder = $responder;
+			$router->register('GET', '/status/plugins', array($this, 'pluginStatus'));
+
+			foreach ($config->getPluginFiles() as $fileEntry) {
+				$file   = is_array($fileEntry) ? ($fileEntry['file']   ?? '') : $fileEntry;
+				$prefix = is_array($fileEntry) ? ($fileEntry['prefix'] ?? '') : '';
+				$entry  = ['loaded' => false, 'routes' => [], 'error' => null];
+
+				if (!is_file($file)) {
+					$entry['error'] = 'file not found';
+					$this->status[] = $entry;
+					continue;
+				}
+
+				$routes = require $file;
+
+				if (!is_array($routes)) {
+					$entry['error'] = 'file did not return an array';
+					$this->status[] = $entry;
+					continue;
+				}
+
+				foreach ($routes as $route => $handler) {
+					if (!is_callable($handler)) {
+						$entry['routes'][] = ['route' => $route, 'registered' => false, 'error' => 'handler not callable'];
+						continue;
+					}
+					$parts = explode(' ', $route, 2);
+					if (count($parts) !== 2) {
+						$entry['routes'][] = ['route' => $route, 'registered' => false, 'error' => 'invalid route format'];
+						continue;
+					}
+					[$method, $path] = $parts;
+					$fullPath = $prefix . $path;
+					$router->register(strtoupper($method), $fullPath, function(ServerRequestInterface $request) use ($handler): ResponseInterface {
+						$params   = RequestUtils::getParams($request);
+						$parsed   = $request->getParsedBody();
+						$body     = $parsed !== null ? (array) $parsed : null;
+						$segments = array_values(array_filter(explode('/', $request->getUri()->getPath())));
+						$result   = $handler($params, $body, $segments);
+						return ResponseFactory::fromObject(200, $result, JSON_UNESCAPED_UNICODE);
+					});
+					$entry['routes'][] = ['route' => $fullPath, 'registered' => true];
+				}
+
+				$entry['loaded'] = true;
+				$this->status[] = $entry;
+			}
+		}
+
+		public function pluginStatus(ServerRequestInterface $request): ResponseInterface
+		{
+			return $this->responder->success(['plugins' => $this->status]);
+		}
+	}
+}
+
 // file: src/Tqdev/PhpCrudApi/Api.php
 namespace Tqdev\PhpCrudApi {
 
@@ -9723,6 +9804,7 @@ namespace Tqdev\PhpCrudApi {
     use Tqdev\PhpCrudApi\OpenApi\OpenApiService;
     use Tqdev\PhpCrudApi\Record\RecordService;
 	use Tqdev\PhpCrudApi\CamilaCliController;
+	use Tqdev\PhpCrudApi\CamilaPluginController;
 
     class Api implements RequestHandlerInterface
     {
@@ -9855,6 +9937,7 @@ namespace Tqdev\PhpCrudApi {
                     new $className($router, $responder, $db, $reflection, $cache);
                 }
             }
+            new CamilaPluginController($router, $responder, $db, $reflection, $cache, $config);
             $this->router = $router;
         }
 
