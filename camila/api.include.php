@@ -9698,7 +9698,7 @@ namespace Tqdev\PhpCrudApi {
 		private $responder;
 		private $status = [];
 
-		public function __construct(Router $router, Responder $responder, GenericDB $db, ReflectionService $reflection, Cache $cache, Config $config)
+		public function __construct(Router $router, Responder $responder, GenericDB $db, ReflectionService $reflection, Cache $cache, Config $config, callable $registerPublicRoute = null)
 		{
 			$this->responder = $responder;
 			$router->register('GET', '/status/plugins', array($this, 'pluginStatus'));
@@ -9722,7 +9722,14 @@ namespace Tqdev\PhpCrudApi {
 					continue;
 				}
 
-				foreach ($routes as $route => $handler) {
+				foreach ($routes as $route => $handlerDef) {
+					$isPublic = false;
+					if (is_array($handlerDef)) {
+						$isPublic    = (bool) ($handlerDef['public']  ?? false);
+						$handlerDef  = $handlerDef['handler'] ?? null;
+					}
+					$handler = $handlerDef;
+
 					if (!is_callable($handler)) {
 						$entry['routes'][] = ['route' => $route, 'registered' => false, 'error' => 'handler not callable'];
 						continue;
@@ -9734,15 +9741,20 @@ namespace Tqdev\PhpCrudApi {
 					}
 					[$method, $path] = $parts;
 					$fullPath = $prefix . $path;
-					$router->register(strtoupper($method), $fullPath, function(ServerRequestInterface $request) use ($handler): ResponseInterface {
+					$wrapper = function(ServerRequestInterface $request) use ($handler): ResponseInterface {
 						$params   = RequestUtils::getParams($request);
 						$parsed   = $request->getParsedBody();
 						$body     = $parsed !== null ? (array) $parsed : null;
 						$segments = array_values(array_filter(explode('/', $request->getUri()->getPath())));
 						$result   = $handler($params, $body, $segments);
 						return ResponseFactory::fromObject(200, $result, JSON_UNESCAPED_UNICODE);
-					});
-					$entry['routes'][] = ['route' => $fullPath, 'registered' => true];
+					};
+					if ($isPublic && $registerPublicRoute !== null) {
+						$registerPublicRoute(strtoupper($method), $fullPath, $wrapper);
+					} else {
+						$router->register(strtoupper($method), $fullPath, $wrapper);
+					}
+					$entry['routes'][] = ['route' => $fullPath, 'registered' => true, 'public' => $isPublic];
 				}
 
 				$entry['loaded'] = true;
@@ -9809,6 +9821,7 @@ namespace Tqdev\PhpCrudApi {
     class Api implements RequestHandlerInterface
     {
         private $router;
+        private $publicHandlers = [];
 
         public function __construct(Config $config)
         {
@@ -9937,7 +9950,12 @@ namespace Tqdev\PhpCrudApi {
                     new $className($router, $responder, $db, $reflection, $cache);
                 }
             }
-            new CamilaPluginController($router, $responder, $db, $reflection, $cache, $config);
+            $publicHandlers = &$this->publicHandlers;
+            new CamilaPluginController($router, $responder, $db, $reflection, $cache, $config,
+                function(string $method, string $path, callable $handler) use (&$publicHandlers) {
+                    $publicHandlers[$method . ' ' . $path] = $handler;
+                }
+            );
             $this->router = $router;
         }
 
@@ -10000,7 +10018,23 @@ namespace Tqdev\PhpCrudApi {
 
         public function handle(ServerRequestInterface $request): ResponseInterface
         {
-            return $this->router->route($this->addParsedBody($request));
+            $request = $this->addParsedBody($request);
+
+            if (!empty($this->publicHandlers)) {
+                $basePath = $this->router->getBasePath();
+                $rawPath  = $request->getUri()->getPath();
+                $path     = ($basePath !== '' && str_starts_with($rawPath, $basePath))
+                    ? substr($rawPath, strlen($basePath))
+                    : $rawPath;
+                if ($path === '' || $path === false) $path = '/';
+                $key = strtoupper($request->getMethod()) . ' ' . $path;
+                if (isset($this->publicHandlers[$key])) {
+                    $stripped = $request->withUri($request->getUri()->withPath($path));
+                    return ($this->publicHandlers[$key])($stripped);
+                }
+            }
+
+            return $this->router->route($request);
         }
     }
 }
