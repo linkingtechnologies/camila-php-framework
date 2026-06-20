@@ -138,7 +138,7 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 	};
 	$conf['mapping'] = $mapping;
 	$conf['controllers'] = 'records,openapi,status,columns';
-	$conf['customControllers'] = 'Tqdev\PhpCrudApi\CamilaCliController,Tqdev\PhpCrudApi\CamilaWorktableController';
+	$conf['customControllers'] = 'Tqdev\PhpCrudApi\CamilaCliController,Tqdev\PhpCrudApi\CamilaWorktableController,Tqdev\\PhpCrudApi\\CamilaAttachmentController';
 	//$conf['apiKeyAuth.keys'] = CAMILA_APIKEYAUTH_KEYS;
 	$config = new Config($conf);
 

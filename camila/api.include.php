@@ -2832,12 +2832,67 @@ namespace Tqdev\PhpCrudApi\Database {
             return $pkValue;
         }
 
+        private function isWorktableUuidMode(ReflectedTable $table): bool
+        {
+            return defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED
+                && str_contains($table->getRealName(), '_worktable');
+        }
+
+        private function injectUuidColumns(ReflectedTable $table, array $columnNames): array
+        {
+            if (!$this->isWorktableUuidMode($table)) {
+                return $columnNames;
+            }
+            $pkName = $table->getPk()->getName();
+            if (!in_array($pkName, $columnNames)) {
+                $columnNames[] = $pkName;
+            }
+            if (in_array('uuid', $table->getColumnNames()) && !in_array('uuid', $columnNames)) {
+                $columnNames[] = 'uuid';
+            }
+            return $columnNames;
+        }
+
+        private function remapWorktableIds(ReflectedTable $table, array $records): array
+        {
+            if (!$this->isWorktableUuidMode($table)) {
+                return $records;
+            }
+            $pkName = $table->getPk()->getName();
+            foreach ($records as &$record) {
+                $numericId = $record[$pkName] ?? null;
+                if (isset($record['uuid'])) {
+                    $record['id'] = $record['uuid'];
+                    unset($record['uuid']);
+                }
+                if ($numericId !== null) {
+                    $record['id2'] = $numericId;
+                    if ($pkName !== 'id') {
+                        unset($record[$pkName]);
+                    }
+                }
+            }
+            unset($record);
+            return $records;
+        }
+
+        private function getLookupColumn(ReflectedTable $table, string $id) /*: ReflectedColumn*/
+        {
+            if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED
+                && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id)
+                && in_array('uuid', $table->getColumnNames())) {
+                return $table->getColumn('uuid');
+            }
+            return $table->getPk();
+        }
+
         public function selectSingle(ReflectedTable $table, array $columnNames, string $id) /*: ?array*/
         {
+            $columnNames = $this->injectUuidColumns($table, $columnNames);
             $selectColumns = $this->columns->getSelect($table, $columnNames);
             $tableName = $table->getName();
             $tableRealName = $table->getRealName();
-            $condition = new ColumnCondition($table->getPk(), 'eq', $id);
+            $condition = new ColumnCondition($this->getLookupColumn($table, $id), 'eq', $id);
             $condition = $this->addMiddlewareConditions($tableName, $condition);
             $parameters = array();
             $whereClause = $this->conditions->getWhereClause($condition, $parameters);
@@ -2850,6 +2905,7 @@ namespace Tqdev\PhpCrudApi\Database {
             $records = array($record);
             $records = $this->mapRecords($tableRealName, $records);
             $this->converter->convertRecords($table, $columnNames, $records);
+            $records = $this->remapWorktableIds($table, $records);
             return $records[0];
         }
 
@@ -2858,10 +2914,12 @@ namespace Tqdev\PhpCrudApi\Database {
             if (count($ids) == 0) {
                 return [];
             }
+            $columnNames = $this->injectUuidColumns($table, $columnNames);
             $selectColumns = $this->columns->getSelect($table, $columnNames);
             $tableName = $table->getName();
             $tableRealName = $table->getRealName();
-            $condition = new ColumnCondition($table->getPk(), 'in', implode(',', $ids));
+            $lookupCol = (!empty($ids)) ? $this->getLookupColumn($table, $ids[0]) : $table->getPk();
+            $condition = new ColumnCondition($lookupCol, 'in', implode(',', $ids));
             $condition = $this->addMiddlewareConditions($tableName, $condition);
             $parameters = array();
             $whereClause = $this->conditions->getWhereClause($condition, $parameters);
@@ -2870,6 +2928,7 @@ namespace Tqdev\PhpCrudApi\Database {
             $records = $stmt->fetchAll();
             $records = $this->mapRecords($tableRealName, $records);
             $this->converter->convertRecords($table, $columnNames, $records);
+            $records = $this->remapWorktableIds($table, $records);
             return $records;
         }
 
@@ -2911,6 +2970,7 @@ namespace Tqdev\PhpCrudApi\Database {
             if ($limit == 0) {
                 return array();
             }
+            $columnNames = $this->injectUuidColumns($table, $columnNames);
             $selectColumns = $this->columns->getSelect($table, $columnNames);
             $tableName = $table->getName();
             $tableRealName = $table->getRealName();
@@ -2936,6 +2996,7 @@ namespace Tqdev\PhpCrudApi\Database {
             $records = $stmt->fetchAll();
             $records = $this->mapRecords($tableRealName, $records);
             $this->converter->convertRecords($table, $columnNames, $records);
+            $records = $this->remapWorktableIds($table, $records);
             return $records;
         }
 
@@ -2950,9 +3011,9 @@ namespace Tqdev\PhpCrudApi\Database {
             $updateColumns = $this->columns->getUpdate($table, $columnValues);
             $tableName = $table->getName();
             $tableRealName = $table->getRealName();
-            $condition = new ColumnCondition($table->getPk(), 'eq', $id);
+            $condition = new ColumnCondition($this->getLookupColumn($table, $id), 'eq', $id);
             $condition = $this->addMiddlewareConditions($tableName, $condition);
-			
+
 			if (str_contains($table->getRealName(),'_worktable')) {
 				$now = $_CAMILA['db']->BindTimeStamp(date("Y-m-d H:i:s", time()));
 				$columnValues['last_upd']            = $now;
@@ -2974,7 +3035,7 @@ namespace Tqdev\PhpCrudApi\Database {
         {
             $tableName = $table->getName();
             $tableRealName = $table->getRealName();
-            $condition = new ColumnCondition($table->getPk(), 'eq', $id);
+            $condition = new ColumnCondition($this->getLookupColumn($table, $id), 'eq', $id);
             $condition = $this->addMiddlewareConditions($tableName, $condition);
             $parameters = array();
             $whereClause = $this->conditions->getWhereClause($condition, $parameters);
@@ -2992,7 +3053,7 @@ namespace Tqdev\PhpCrudApi\Database {
             $updateColumns = $this->columns->getIncrement($table, $columnValues);
             $tableName = $table->getName();
             $tableRealName = $table->getRealName();
-            $condition = new ColumnCondition($table->getPk(), 'eq', $id);
+            $condition = new ColumnCondition($this->getLookupColumn($table, $id), 'eq', $id);
             $condition = $this->addMiddlewareConditions($tableName, $condition);
             $parameters = array_values($columnValues);
             $whereClause = $this->conditions->getWhereClause($condition, $parameters);
@@ -9412,6 +9473,205 @@ namespace Tqdev\PhpCrudApi {
 			$fArray = array_values($tables);
 			sort($fArray);
 			return $this->responder->success(['tables' => $fArray]);
+		}
+	}
+}
+
+namespace Tqdev\PhpCrudApi {
+	use Psr\Http\Message\ResponseInterface;
+	use Psr\Http\Message\ServerRequestInterface;
+	use Nyholm\Psr7\Factory\Psr17Factory;
+	use Tqdev\PhpCrudApi\Cache\Cache;
+	use Tqdev\PhpCrudApi\Column\ReflectionService;
+	use Tqdev\PhpCrudApi\Controller\Responder;
+	use Tqdev\PhpCrudApi\Database\GenericDB;
+	use Tqdev\PhpCrudApi\Middleware\Router\Router;
+
+	class CamilaAttachmentController {
+
+		private $responder;
+		private $storageDir;
+
+		public function __construct(Router $router, Responder $responder, GenericDB $db, ReflectionService $reflection, Cache $cache)
+		{
+			$router->register('POST', '/attachments/*/*', array($this, 'upload'));
+			$router->register('GET', '/attachments/*/*', array($this, 'serve'));
+			$router->register('HEAD', '/attachments/*/*', array($this, 'exists'));
+			$router->register('DELETE', '/attachments/*/*', array($this, 'remove'));
+			$router->register('GET', '/attachments/*', array($this, 'listIds'));
+			$this->responder = $responder;
+			$this->storageDir = rtrim(CAMILA_FM_ROOTDIR, '/\\') . DIRECTORY_SEPARATOR . 'attachments';
+		}
+
+		private function validateId(string $id): bool
+		{
+			if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED) {
+				return (bool) preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $id);
+			}
+			return (bool) preg_match('/^[a-zA-Z0-9_-]+$/', $id);
+		}
+
+		public function upload(ServerRequestInterface $request): ResponseInterface
+		{
+			$table = RequestUtils::getPathSegment($request, 2);
+			$id    = RequestUtils::getPathSegment($request, 3);
+			if (!$this->validateId($id)) {
+				return ResponseFactory::fromObject(400, ['message' => 'Invalid record id'], JSON_UNESCAPED_UNICODE);
+			}
+
+			$uploadedFiles = $request->getUploadedFiles();
+			if (empty($uploadedFiles['file'])) {
+				return ResponseFactory::fromObject(400, ['message' => 'No file uploaded'], JSON_UNESCAPED_UNICODE);
+			}
+			$uploaded = $uploadedFiles['file'];
+			if ($uploaded->getError() !== UPLOAD_ERR_OK) {
+				return ResponseFactory::fromObject(400, ['message' => 'Upload error: ' . $uploaded->getError()], JSON_UNESCAPED_UNICODE);
+			}
+
+			$stream = $uploaded->getStream();
+			$stream->rewind();
+			$content = $stream->getContents();
+
+			$finfo = new \finfo(FILEINFO_MIME_TYPE);
+			$mime  = $finfo->buffer($content);
+			if (!$mime || strpos($mime, 'image/') !== 0) {
+				return ResponseFactory::fromObject(400, ['message' => 'Only image/* files are allowed'], JSON_UNESCAPED_UNICODE);
+			}
+
+			$dir = $this->storageDir . DIRECTORY_SEPARATOR . $table;
+			if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+				return ResponseFactory::fromObject(500, ['message' => 'Cannot create storage directory'], JSON_UNESCAPED_UNICODE);
+			}
+
+			$binPath  = $dir . DIRECTORY_SEPARATOR . $id . '.bin';
+			$metaPath = $dir . DIRECTORY_SEPARATOR . $id . '.meta';
+
+			if (file_put_contents($binPath, $content) === false) {
+				return ResponseFactory::fromObject(500, ['message' => 'Cannot write file'], JSON_UNESCAPED_UNICODE);
+			}
+			if (file_put_contents($metaPath, $mime) === false) {
+				@unlink($binPath);
+				return ResponseFactory::fromObject(500, ['message' => 'Cannot write metadata'], JSON_UNESCAPED_UNICODE);
+			}
+
+			$url = '/attachments/' . rawurlencode($table) . '/' . rawurlencode($id);
+			return ResponseFactory::fromObject(201, ['url' => $url], JSON_UNESCAPED_UNICODE);
+		}
+
+		public function serve(ServerRequestInterface $request): ResponseInterface
+		{
+			$table = RequestUtils::getPathSegment($request, 2);
+			$id    = RequestUtils::getPathSegment($request, 3);
+			if (!$this->validateId($id)) {
+				return ResponseFactory::fromObject(400, ['message' => 'Invalid record id'], JSON_UNESCAPED_UNICODE);
+			}
+
+			$dir      = $this->storageDir . DIRECTORY_SEPARATOR . $table;
+			$binPath  = $dir . DIRECTORY_SEPARATOR . $id . '.bin';
+			$metaPath = $dir . DIRECTORY_SEPARATOR . $id . '.meta';
+
+			if (!file_exists($binPath) || !file_exists($metaPath)) {
+				return ResponseFactory::fromObject(404, ['message' => 'Attachment not found'], JSON_UNESCAPED_UNICODE);
+			}
+
+			$mime    = trim(file_get_contents($metaPath));
+			$ext     = $this->mimeToExt($mime);
+			$content = file_get_contents($binPath);
+
+			$psr17Factory = new Psr17Factory();
+			$stream = $psr17Factory->createStream($content);
+			$stream->rewind();
+			return $psr17Factory->createResponse(200)
+				->withBody($stream)
+				->withHeader('Content-Type', $mime)
+				->withHeader('Content-Disposition', 'attachment; filename="' . $id . '.' . $ext . '"')
+				->withHeader('X-Attachment-Ext', $ext)
+				->withHeader('Content-Length', (string) strlen($content))
+				->withHeader('Cache-Control', 'max-age=3600');
+		}
+
+		private function mimeToExt(string $mime): string
+		{
+			$map = [
+				'image/jpeg'    => 'jpg',
+				'image/png'     => 'png',
+				'image/gif'     => 'gif',
+				'image/webp'    => 'webp',
+				'image/svg+xml' => 'svg',
+				'image/bmp'     => 'bmp',
+				'image/tiff'    => 'tiff',
+				'image/avif'    => 'avif',
+				'image/heic'    => 'heic',
+				'image/heif'    => 'heif',
+			];
+			return $map[$mime] ?? 'bin';
+		}
+
+		public function exists(ServerRequestInterface $request): ResponseInterface
+		{
+			$table    = RequestUtils::getPathSegment($request, 2);
+			$id       = RequestUtils::getPathSegment($request, 3);
+			if (!$this->validateId($id)) {
+				return ResponseFactory::fromStatus(404);
+			}
+			$dir      = $this->storageDir . DIRECTORY_SEPARATOR . $table;
+			$binPath  = $dir . DIRECTORY_SEPARATOR . $id . '.bin';
+			$metaPath = $dir . DIRECTORY_SEPARATOR . $id . '.meta';
+			if (!file_exists($binPath)) {
+				return ResponseFactory::fromStatus(404);
+			}
+			$mime = file_exists($metaPath) ? trim(file_get_contents($metaPath)) : 'application/octet-stream';
+			$psr17Factory = new Psr17Factory();
+			return $psr17Factory->createResponse(200)
+				->withHeader('Content-Type', $mime)
+				->withHeader('X-Attachment-Ext', $this->mimeToExt($mime));
+		}
+
+		public function listIds(ServerRequestInterface $request): ResponseInterface
+		{
+			$table = RequestUtils::getPathSegment($request, 2);
+			$dir   = $this->storageDir . DIRECTORY_SEPARATOR . $table;
+
+			if (!is_dir($dir)) {
+				return ResponseFactory::fromObject(200, ['ids' => []], JSON_UNESCAPED_UNICODE);
+			}
+
+			$ids = [];
+			foreach (new \DirectoryIterator($dir) as $entry) {
+				if ($entry->isDot() || $entry->getExtension() !== 'bin') {
+					continue;
+				}
+				$id       = $entry->getBasename('.bin');
+				$metaPath = $dir . DIRECTORY_SEPARATOR . $id . '.meta';
+				$mime     = file_exists($metaPath) ? trim(file_get_contents($metaPath)) : 'application/octet-stream';
+				$ids[]    = ['id' => $id, 'mime' => $mime, 'ext' => $this->mimeToExt($mime)];
+			}
+			usort($ids, function ($a, $b) { return strcmp($a['id'], $b['id']); });
+			return ResponseFactory::fromObject(200, ['ids' => $ids], JSON_UNESCAPED_UNICODE);
+		}
+
+		public function remove(ServerRequestInterface $request): ResponseInterface
+		{
+			$table = RequestUtils::getPathSegment($request, 2);
+			$id    = RequestUtils::getPathSegment($request, 3);
+			if (!$this->validateId($id)) {
+				return ResponseFactory::fromObject(404, ['message' => 'Attachment not found'], JSON_UNESCAPED_UNICODE);
+			}
+
+			$dir      = $this->storageDir . DIRECTORY_SEPARATOR . $table;
+			$binPath  = $dir . DIRECTORY_SEPARATOR . $id . '.bin';
+			$metaPath = $dir . DIRECTORY_SEPARATOR . $id . '.meta';
+
+			if (!file_exists($binPath)) {
+				return ResponseFactory::fromObject(404, ['message' => 'Attachment not found'], JSON_UNESCAPED_UNICODE);
+			}
+
+			unlink($binPath);
+			if (file_exists($metaPath)) {
+				unlink($metaPath);
+			}
+
+			return ResponseFactory::fromStatus(204);
 		}
 	}
 }
