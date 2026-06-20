@@ -11,6 +11,7 @@
  *   /columns/<table>                      (GET describe table columns)     [optional extension]
  *   /permissions/<table>                  (GET table permissions)          [optional extension]
  *   /sequence/<table>                     (GET table sequence)             [optional extension]
+ *   /tables                               (GET list available tables)      [optional extension]
  *
  * Features:
  * - CRUD + List operations
@@ -23,6 +24,7 @@
  * - Optional table permissions (/permissions)
  * - Optional table sequence (/sequence)
  * - Optional distinct values (/records/<table>/distinct/<column>)
+ * - Optional tables list (/tables)
  */
 (function (global) {
   "use strict";
@@ -34,6 +36,7 @@
    * @param {string} [options.columnsPath="/columns"] Columns endpoint path (optional)
    * @param {string} [options.permissionsPath="/permissions"] Permissions endpoint path (optional)
    * @param {string} [options.sequencePath="/sequence"] Sequence endpoint path (optional)
+   * @param {string} [options.tablesPath="/tables"] Tables list endpoint path (optional)
    * @param {string|null} [options.apiKeyHeaderName=null] API key header name
    * @param {string|null} [options.apiKeyHeaderValue=null] API key header value
    * @param {number} [options.timeoutMs=20000] Request timeout in ms
