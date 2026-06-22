@@ -88,8 +88,15 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 
 	}
 
-	$conf['debug'] = true;
-	$conf['middlewares'] = 'dbAuth,apiKeyDbAuth,authorization';
+	$conf['debug'] = false;
+	$conf['middlewares'] = 'dbAuth,apiKeyDbAuth,authorization,sanitation';
+	$conf['sanitation.handler'] = function($operation, $tableName, $column, $value) {
+		$type = is_array($column) ? ($column['type'] ?? '') : $column->getType();
+		if ($value === '' && in_array($type, ['integer', 'float', 'decimal', 'date', 'time', 'datetime', 'timestamp', 'boolean'])) {
+			return null;
+		}
+		return $value;
+	};
 	$conf['pluginFiles'] = [
         __DIR__ . '/cf_handlers.inc.php'
     ];
@@ -155,7 +162,41 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 
 	$request = RequestFactory::fromGlobals();
 	$api = new Api($config);
-	$response = $api->handle($request);
+
+	set_exception_handler(function(Throwable $e) use ($request) {
+		$logDir  = defined('CAMILA_LOG_DIR') ? rtrim(CAMILA_LOG_DIR, '/\\') : sys_get_temp_dir();
+		$logFile = $logDir . '/cf-api-errors.log';
+		$ts      = date('Y-m-d H:i:s');
+		$method  = $_SERVER['REQUEST_METHOD'] ?? '-';
+		$uri     = $_SERVER['REQUEST_URI']    ?? '-';
+		$body    = file_get_contents('php://input');
+		$body    = $body !== false && strlen($body) > 0 ? $body : '-';
+		$line    = "$ts $method $uri\n  body: $body\n  " . get_class($e) . ': ' . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+		@file_put_contents($logFile, $line, FILE_APPEND | LOCK_EX);
+		http_response_code(500);
+		header('Content-Type: application/json');
+		echo json_encode(['code' => 9999, 'message' => 'Internal server error']);
+		exit;
+	});
+
+	try {
+		$response = $api->handle($request);
+	} catch (Throwable $e) {
+		$logDir  = defined('CAMILA_LOG_DIR') ? rtrim(CAMILA_LOG_DIR, '/\\') : sys_get_temp_dir();
+		$logFile = $logDir . '/cf-api-errors.log';
+		$ts      = date('Y-m-d H:i:s');
+		$method  = $_SERVER['REQUEST_METHOD'] ?? '-';
+		$uri     = $_SERVER['REQUEST_URI']    ?? '-';
+		$body    = file_get_contents('php://input');
+		$body    = $body !== false && strlen($body) > 0 ? $body : '-';
+		$line    = "$ts $method $uri\n  body: $body\n  " . get_class($e) . ': ' . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
+		@file_put_contents($logFile, $line, FILE_APPEND | LOCK_EX);
+		http_response_code(500);
+		header('Content-Type: application/json');
+		echo json_encode(['code' => 9999, 'message' => 'Internal server error']);
+		exit;
+	}
+
 	ResponseUtils::output($response);
 } else {
 
