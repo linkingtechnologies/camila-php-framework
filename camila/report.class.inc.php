@@ -525,7 +525,7 @@ class CamilaReport
 				    $logLine . PHP_EOL,
 				    FILE_APPEND
 				);
-				camila_error_page('', 'Si è verificato un errore nel report (ref: ' . $errorId . ')');
+				camila_error_page('', 'An error occurred while generating the report (ref: ' . $errorId . ')');
 				return '';
 			}
 
