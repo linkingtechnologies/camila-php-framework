@@ -4671,6 +4671,12 @@ namespace Tqdev\PhpCrudApi\Middleware\Router {
             try {
                 $response = call_user_func($this->routeHandlers[$routeNumbers[0]], $request);
             } catch (\Throwable $exception) {
+                $ts    = date('Y-m-d H:i:s');
+                $method = $_SERVER['REQUEST_METHOD'] ?? '-';
+                $uri    = $_SERVER['REQUEST_URI']    ?? '-';
+                $body   = (string) $request->getBody();
+                $entry  = "$ts $method $uri\n  body: " . ($body !== '' ? $body : '-') . "\n  " . get_class($exception) . ': ' . $exception->getMessage() . "\n" . $exception->getTraceAsString() . "\n";
+                file_put_contents(CAMILA_LOG_DIR . '/cf-api-errors.log', $entry, FILE_APPEND | LOCK_EX);
                 $response = $this->responder->exception($exception);
             }
             return $response;
