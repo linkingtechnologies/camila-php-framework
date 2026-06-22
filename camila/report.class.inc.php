@@ -396,8 +396,9 @@ class CamilaReport
 	function queryWorktableDatabase($result)
 	{
 		$arr = array();
+		if ($result === false) return $arr;
 		if($result->RecordCount()>0)
-		{			
+		{
 			while (!$result->EOF) {
 				$a = $result->fields;
 				$arr[$a[0]]=$a[1];
@@ -507,11 +508,28 @@ class CamilaReport
 
 			$result2 = $this->camilaWT->startExecuteQuery($query,true,ADODB_FETCH_ASSOC);
 			$result = $this->camilaWT->startExecuteQuery($query);
-			$data = $this->queryWorktableDatabase($result);
 
-			if (!$result) {
-				throw new Exception('Error executing query: ' . $this->db->ErrorMsg());
+			if ($result === false) {
+				$errorId     = strtoupper(substr(md5(uniqid('', true)), 0, 8));
+				$resolvedSql = $this->camilaWT->parseWorktableSqlStatement($query, true);
+				$trace       = array_map(
+				    fn($f) => ($f['file'] ?? '') . ':' . ($f['line'] ?? '') . ' ' . ($f['function'] ?? ''),
+				    debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
+				);
+				$logLine     = '[' . date('Y-m-d H:i:s') . '] [' . $errorId . '] '
+				             . $this->camilaWT->db->ErrorMsg()
+				             . ' | SQL: ' . $resolvedSql
+				             . PHP_EOL . implode(PHP_EOL, array_map(fn($l) => '  ' . $l, $trace));
+				file_put_contents(
+				    rtrim(CAMILA_LOG_DIR, '/\\') . '/report-query-error.log',
+				    $logLine . PHP_EOL,
+				    FILE_APPEND
+				);
+				camila_error_page('', 'Si è verificato un errore nel report (ref: ' . $errorId . ')');
+				return '';
 			}
+
+			$data = $this->queryWorktableDatabase($result);
 		}
 		
 		$gCount = 0;
