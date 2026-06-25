@@ -134,7 +134,7 @@ class CamilaAuth
 	{
 		$check = false;
 		if (defined('CAMILA_AUTH_PASSWORD_HASHING') && (CAMILA_AUTH_PASSWORD_HASHING)) {
-			$check = password_verify($pass, $dbPass);
+			$check = password_verify($pass, $dbPass);						
 		}
 		else
 		{
@@ -151,6 +151,7 @@ class CamilaAuth
    
     function checkCredentials($username, $password)
     {
+		
 		$check = false;
         $query  = $this->getAuthUserInfoSqlFromUsername($username);
         $dbAuth = $this->getAuthDatabaseConnection(CAMILA_AUTH_DSN);
@@ -176,21 +177,21 @@ class CamilaAuth
 
 	function updatePassword($username, $password)
     {
-		$password = $this->hashPassword($password);
-
-		$check = false;
         $dbAuth = $this->getAuthDatabaseConnection(CAMILA_AUTH_DSN);
         $dbAuth->SetFetchMode(ADODB_FETCH_ASSOC);
-		$result = $dbAuth->Execute(
+        $exists = $dbAuth->Execute(
+            'SELECT id FROM ' . $this->authUserTable . ' WHERE UPPER(username) = UPPER(?)',
+            [$username]
+        );
+        if (!$exists || $exists->RecordCount() === 0) {
+            return false;
+        }
+        $password = $this->hashPassword($password);
+        $result   = $dbAuth->Execute(
             'UPDATE ' . $this->authUserTable . ' SET password = ? WHERE UPPER(username) = UPPER(?)',
             [$password, $username]
         );
-        if ($result === false) {
-            //camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
-        } else {
-            $check = $dbAuth->Affected_Rows() > 0;
-        }
-		return $check;
+        return $result !== false;
     }
 
 	function createUser(string $username, string $password, array $fields = []): bool

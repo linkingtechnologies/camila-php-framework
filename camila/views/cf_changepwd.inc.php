@@ -67,7 +67,7 @@ if (CAMILA_USER_CAN_CHANGE_PWD) {
 				camila_error_text(camila_get_translation('camila.formvalidationerror910').'!');
 			else
 			{
-				if($camilaAuth->updatePassword($username, $new))
+				if($camilaAuth->updatePassword($username, $new2))
 					camila_information_text(camila_get_translation('camila.form.data.updated'));
 				else
 					camila_error_text(camila_get_translation('camila.erroroccurred'));

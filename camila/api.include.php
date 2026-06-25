@@ -4849,6 +4849,10 @@ namespace Tqdev\PhpCrudApi\Middleware {
                 if (count($users) < 1) {
                     return $this->responder->error(ErrorCode::AUTHENTICATION_FAILED, $apiKey . '(1)');
                 }
+				
+				global $_CAMILA;
+				$_CAMILA['user_group'] = $users[0]['grp'];
+				$_CAMILA['adm_user_group'] = ($_CAMILA['user_group'] == '' ? CAMILA_ADM_USER_GROUP : $_CAMILA['user_group']);
                 
 				if ($this->getProperty('driver', '') != '') {
 					$username = $users[0]['username'];
