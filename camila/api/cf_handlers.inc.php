@@ -60,6 +60,11 @@ return [
             return ['__status' => 409, 'message' => 'User already exists'];
         }
         if (!$auth->createUser($username, $password, $body)) {
+            $ts    = date('Y-m-d H:i:s');
+            $dbErr = $auth->db->ErrorMsg();
+            file_put_contents(CAMILA_LOG_DIR . '/cf-api-errors.log',
+                "$ts POST /users\n  username: $username\n  db error: " . ($dbErr ?: '-') . "\n",
+                FILE_APPEND | LOCK_EX);
             return ['__status' => 500, 'message' => 'Failed to create user'];
         }
         return ['status' => 'ok', 'username' => $username];

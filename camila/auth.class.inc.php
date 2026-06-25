@@ -204,9 +204,11 @@ class CamilaAuth
             return false;
         }
         $hashed = $this->hashPassword($password);
+        $newId  = $this->getAutoincrementValue();
         $ok = $this->db->Execute(
-            'INSERT INTO ' . $this->userTable . ' (username, password, name, surname, grp, level, visibility_type) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO ' . $this->userTable . ' (id, username, password, name, surname, grp, level, visibility_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
             [
+                $newId,
                 $username,
                 $hashed,
                 $fields['name']            ?? '',
