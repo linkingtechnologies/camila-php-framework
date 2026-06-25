@@ -176,22 +176,119 @@ class CamilaAuth
 
 	function updatePassword($username, $password)
     {
-		$this->hashPassword($password);
+		$password = $this->hashPassword($password);
 
 		$check = false;
         $dbAuth = $this->getAuthDatabaseConnection(CAMILA_AUTH_DSN);
         $dbAuth->SetFetchMode(ADODB_FETCH_ASSOC);
-		$query   = 'UPDATE ' . $this->authUserTable . ' SET password = '.$dbAuth->Quote($password) ."  WHERE UPPER(username)=UPPER('" . $username . "')";
-
-        $result = $dbAuth->Execute($query);
+		$result = $dbAuth->Execute(
+            'UPDATE ' . $this->authUserTable . ' SET password = ? WHERE UPPER(username) = UPPER(?)',
+            [$password, $username]
+        );
         if ($result === false) {
             //camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
         } else {
-                $check = true;
+            $check = $dbAuth->Affected_Rows() > 0;
         }
 		return $check;
     }
+
+	function createUser(string $username, string $password, array $fields = []): bool
+    {
+        $existing = $this->db->Execute(
+            'SELECT id FROM ' . $this->userTable . ' WHERE UPPER(username) = UPPER(?)',
+            [$username]
+        );
+        if ($existing && $existing->RecordCount() > 0) {
+            return false;
+        }
+        $hashed = $this->hashPassword($password);
+        $ok = $this->db->Execute(
+            'INSERT INTO ' . $this->userTable . ' (username, password, name, surname, grp, level, visibility_type) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [
+                $username,
+                $hashed,
+                $fields['name']            ?? '',
+                $fields['surname']         ?? '',
+                $fields['grp']             ?? 'default',
+                (int)($fields['level']     ?? 5),
+                $fields['visibility_type'] ?? 'public',
+            ]
+        );
+        if ($ok === false) {
+            return false;
+        }
+        if ($this->authUserTable !== $this->userTable) {
+            $dbAuth = $this->getAuthDatabaseConnection(CAMILA_AUTH_DSN);
+            $dbAuth->Execute(
+                'INSERT INTO ' . $this->authUserTable . ' (username, password, grp, level, visibility_type) VALUES (?, ?, ?, ?, ?)',
+                [
+                    $username,
+                    $hashed,
+                    $fields['grp']             ?? 'default',
+                    (int)($fields['level']     ?? 5),
+                    $fields['visibility_type'] ?? 'public',
+                ]
+            );
+        }
+        return true;
+    }
+
+	function updateUser(string $username, array $fields): bool
+    {
+        $allowed = ['name', 'surname', 'grp', 'level', 'visibility_type', 'token'];
+        $set     = [];
+        $values  = [];
+        foreach ($allowed as $field) {
+            if (array_key_exists($field, $fields)) {
+                $set[]    = $field . ' = ?';
+                $values[] = $field === 'level' ? (int)$fields[$field] : $fields[$field];
+            }
+        }
+        if (empty($set)) {
+            return false;
+        }
+        $values[] = $username;
+        $result = $this->db->Execute(
+            'UPDATE ' . $this->userTable . ' SET ' . implode(', ', $set) . ' WHERE UPPER(username) = UPPER(?)',
+            $values
+        );
+        return $result !== false && $this->db->Affected_Rows() > 0;
+    }
 	
+	function getUsers(string $search = '', int $page = 1, int $size = 50): array
+    {
+        global $_CAMILA;
+        $db    = $_CAMILA['db'];
+        $where = '';
+        if ($search !== '') {
+            $where = ' WHERE UPPER(username) LIKE UPPER(' . $db->qstr('%' . $search . '%') . ')';
+        }
+        $size   = min(max($size, 1), 500);
+        $offset = ($page - 1) * $size;
+        $old    = $db->SetFetchMode(ADODB_FETCH_ASSOC);
+        $rs = $db->Execute(
+            'SELECT id, username, name, surname, grp, level, visibility_type, token FROM ' . $this->userTable . $where . ' ORDER BY username'
+        );
+        $all = [];
+        if ($rs) {
+            while (!$rs->EOF) {
+                $all[] = $rs->fields;
+                $rs->MoveNext();
+            }
+        }
+        $db->SetFetchMode($old);
+        $total = count($all);
+        $users = array_slice($all, $offset, $size);
+        return ['records' => $users, 'total' => $total, 'page' => $page, 'size' => $size];
+    }
+
+	function isAdmin(): bool
+    {
+        global $_CAMILA;
+        return isset($_CAMILA['adm_user_group']) && $_CAMILA['adm_user_group'] == CAMILA_ADM_USER_GROUP;
+    }
+
 	function checkUserTable() {
 		$rs = $this->db->execute('SELECT * FROM ' . CAMILA_TABLE_USERS);
 		$count = -1;
