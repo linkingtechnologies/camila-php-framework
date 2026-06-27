@@ -133,6 +133,9 @@ class CamilaReport
     /** Pie slices below this percentage are merged into a single "Altri" slice. */
     public $pieSliceThreshold = 3.0;
 
+    /** Chart PNG files older than this many days are deleted automatically. 0 = never. */
+    public $chartCacheDays = 7;
+
 
     /**
      * @param string $lang       Language code used to locate the reports sub-directory.
@@ -446,6 +449,18 @@ class CamilaReport
      * @param string|null       $filename Destination path for the PNG. If null, outputs directly to browser.
      */
 
+    private function cleanChartCache(): void
+    {
+        if ($this->chartCacheDays <= 0) return;
+        $sentinel = CAMILA_TMP_DIR . '/jp_chart_cleanup.txt';
+        if (file_exists($sentinel) && (time() - filemtime($sentinel)) < 86400) return;
+        $cutoff = time() - $this->chartCacheDays * 86400;
+        foreach (glob(CAMILA_TMP_DIR . '/jp_chart_*.png') ?: [] as $f) {
+            if (filemtime($f) < $cutoff) @unlink($f);
+        }
+        file_put_contents($sentinel, date('Y-m-d H:i:s'));
+    }
+
     private function groupSmallSlices(array $data): array
     {
         if ($this->pieSliceThreshold <= 0) return $data;
@@ -528,6 +543,10 @@ class CamilaReport
         try {
             if ($type === 'pie') {
                 $data    = $this->groupSmallSlices($data);
+                $altri   = isset($data['Altri']) ? $data['Altri'] : null;
+                unset($data['Altri']);
+                arsort($data);
+                if ($altri !== null) $data['Altri'] = $altri;
                 $count   = count($data);
                 $maxLen  = max(array_map('strlen', array_keys($data))) + 10;
                 $cols    = $maxLen > 22 ? 1 : ($maxLen > 14 ? 2 : min($count, 3));
@@ -598,6 +617,7 @@ class CamilaReport
      */
     private function getChartPng(\SimpleXMLElement $graph, array $data): string
     {
+        $this->cleanChartCache();
         $png = $this->createJpgraphPng($graph, $data);
         if ($png !== '') return $png;
         $key      = md5(serialize($data) . (string)$graph->type . (int)$graph->width . (int)$graph->height . (string)$graph->title);
@@ -1000,7 +1020,12 @@ class CamilaReport
 			return;
 		}
 
-		list($widthPx, $heightPx) = getimagesize($imagePath);
+		$imgSize = @getimagesize($imagePath);
+		if (!$imgSize) {
+			$cellOrSection->addText('Immagine non valida.');
+			return;
+		}
+		[$widthPx, $heightPx] = $imgSize;
 
 		$dpi = 96; // Default Word DPI
 		$twipPerInch = 1440;
@@ -1191,6 +1216,7 @@ class CamilaReport
      */
     public function getPhpWordDocument()
 	{
+		\PhpOffice\PhpWord\Settings::setOutputEscapingEnabled(true);
 		$phpWord = new PhpWord();
 		
 		$phpWord->addTitleStyle(1, [
@@ -1239,16 +1265,22 @@ class CamilaReport
 	{
 		$phpWord = $this->getPhpWordDocument();
 
-		// Output a browser
-		$date = $this->camilaWT->db->UserDate(date('Y-m-d'), camila_get_locale_date_adodb_format());
+		$date     = $this->camilaWT->db->UserDate(date('Y-m-d'), camila_get_locale_date_adodb_format());
 		$fileName = 'Report_' . $date . '.docx';
+		$tmpFile  = CAMILA_TMP_DIR . '/report_' . md5(uniqid('', true)) . '.docx';
+
+		$objWriter = IOFactory::createWriter($phpWord, 'Word2007');
+		$objWriter->save($tmpFile);
+
+		while (ob_get_level() > 0) ob_end_clean();
 
 		header("Content-Description: File Transfer");
 		header('Content-Disposition: attachment; filename="' . $fileName . '"');
 		header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+		header('Content-Length: ' . filesize($tmpFile));
 
-		$objWriter = IOFactory::createWriter($phpWord, 'Word2007');
-		$objWriter->save("php://output");
+		readfile($tmpFile);
+		@unlink($tmpFile);
 		exit;
 	}
 
@@ -1257,18 +1289,23 @@ class CamilaReport
     {
 		$phpWord = $this->getPhpWordDocument();
 
-		// Output a browser
-		$date = $this->camilaWT->db->UserDate(date('Y-m-d'), camila_get_locale_date_adodb_format());
+		$date     = $this->camilaWT->db->UserDate(date('Y-m-d'), camila_get_locale_date_adodb_format());
 		$fileName = 'Report_' . $date . '.odt';
+		$tmpFile  = CAMILA_TMP_DIR . '/report_' . md5(uniqid('', true)) . '.odt';
 
-        // Save and output the ODF document to the browser
+        $writer = IOFactory::createWriter($phpWord, 'ODText');
+        $writer->save($tmpFile);
+
+		while (ob_get_level() > 0) ob_end_clean();
+
 		header("Content-Description: File Transfer");
         header('Content-Type: application/vnd.oasis.opendocument.text');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
         header('Cache-Control: max-age=0');
+        header('Content-Length: ' . filesize($tmpFile));
 
-        $writer = IOFactory::createWriter($phpWord, 'ODText');
-        $writer->save('php://output');
+		readfile($tmpFile);
+		@unlink($tmpFile);
 		exit;
     }
 
