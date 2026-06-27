@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'af9fa37115b89df32528de1028ebcfdcfbf6d273',
+        'reference' => '68ddf6070a70c4f30ba85f3b847510b4aeec2e6d',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '__root__' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'af9fa37115b89df32528de1028ebcfdcfbf6d273',
+            'reference' => '68ddf6070a70c4f30ba85f3b847510b4aeec2e6d',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -28,6 +28,15 @@
             'aliases' => array(
                 0 => '9999999-dev',
             ),
+            'dev_requirement' => false,
+        ),
+        'amenadiel/jpgraph' => array(
+            'pretty_version' => 'v4.1.1',
+            'version' => '4.1.1.0',
+            'reference' => 'e196d51a520a4182cc26240b4a0744495706f11a',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../amenadiel/jpgraph',
+            'aliases' => array(),
             'dev_requirement' => false,
         ),
         'bordercloud/sparql' => array(

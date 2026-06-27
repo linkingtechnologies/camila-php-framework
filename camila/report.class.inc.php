@@ -130,6 +130,10 @@ class CamilaReport
     /** @var string Optional custom filename for PDF inline output (default: "Report <date>.pdf"). */
     public $outputFileName;
 
+    /** Pie slices below this percentage are merged into a single "Altri" slice. */
+    public $pieSliceThreshold = 3.0;
+
+
     /**
      * @param string $lang       Language code used to locate the reports sub-directory.
      * @param object $camilaWT   Camila worktable instance (provides DB access).
@@ -441,6 +445,167 @@ class CamilaReport
      * @param array             $data     Key→value pairs from queryWorktableDatabase().
      * @param string|null       $filename Destination path for the PNG. If null, outputs directly to browser.
      */
+
+    private function groupSmallSlices(array $data): array
+    {
+        if ($this->pieSliceThreshold <= 0) return $data;
+        $total  = array_sum($data) ?: 1;
+        $result = [];
+        $other  = 0;
+        foreach ($data as $k => $v) {
+            if ($v / $total * 100 < $this->pieSliceThreshold) {
+                $other += $v;
+            } else {
+                $result[$k] = $v;
+            }
+        }
+        if ($other > 0) $result['Altri'] = $other;
+        return $result ?: $data;
+    }
+
+    private function hueToRgb(float $p, float $q, float $t): float
+    {
+        if ($t < 0) $t += 1;
+        if ($t > 1) $t -= 1;
+        if ($t < 1/6) return $p + ($q - $p) * 6 * $t;
+        if ($t < 1/2) return $q;
+        if ($t < 2/3) return $p + ($q - $p) * (2/3 - $t) * 6;
+        return $p;
+    }
+
+    private function hslToHex(float $h, float $s, float $l): string
+    {
+        $h /= 360; $s /= 100; $l /= 100;
+        if ($s == 0) {
+            $r = $g = $b = $l;
+        } else {
+            $q = $l < 0.5 ? $l * (1 + $s) : $l + $s - $l * $s;
+            $p = 2 * $l - $q;
+            $r = $this->hueToRgb($p, $q, $h + 1/3);
+            $g = $this->hueToRgb($p, $q, $h);
+            $b = $this->hueToRgb($p, $q, $h - 1/3);
+        }
+        return sprintf('#%02X%02X%02X', (int)round($r * 255), (int)round($g * 255), (int)round($b * 255));
+    }
+
+    private function buildPiePalette(int $n): array
+    {
+        $base = ['#4E79A7','#F28E2B','#E15759','#76B7B2','#59A14F','#EDC948','#B07AA1','#FF9DA7','#9C755F','#BAB0AC'];
+        if ($n <= 10) return array_slice($base, 0, $n);
+        $colors = $base;
+        $extra  = $n - 10;
+        for ($i = 0; $i < $extra; $i++) {
+            $colors[] = $this->hslToHex(($i * 360 / $extra + 15) % 360, 55, 48);
+        }
+        return $colors;
+    }
+
+    /**
+     * Renders a pie or bar chart as a PNG using PHP GD (built-in, no extensions needed).
+     *
+     * Primary chart renderer for all output formats (HTML, PDF, Word, ODT).
+     * Requires composer require amenadiel/jpgraph.
+     * Output is cached in CAMILA_TMP_DIR by content hash.
+     *
+     * @param \SimpleXMLElement $graph The <graph> node.
+     * @param array             $data  Key→value pairs from queryWorktableDatabase().
+     * @return string Absolute path to the PNG file, or '' if jpgraph is not installed.
+     */
+    private function createJpgraphPng(\SimpleXMLElement $graph, array $data): string
+    {
+        if (empty($data)) return '';
+        if (!file_exists(CAMILA_VENDOR_DIR . '/amenadiel/jpgraph/src/graph/Graph.php')) return '';
+
+        $width  = (int)$graph->width  ?: 500;
+        $height = (int)$graph->height ?: 400;
+        $type   = (string)$graph->type;
+        $title  = (string)$graph->title;
+
+        $key      = md5(serialize($data) . $type . $width . $height . $title);
+        $filename = CAMILA_TMP_DIR . '/jp_chart_' . $key . '.png';
+        if (file_exists($filename)) return $filename;
+
+        try {
+            if ($type === 'pie') {
+                $data    = $this->groupSmallSlices($data);
+                $count   = count($data);
+                $maxLen  = max(array_map('strlen', array_keys($data))) + 10;
+                $cols    = $maxLen > 22 ? 1 : ($maxLen > 14 ? 2 : min($count, 3));
+                $rows    = (int)ceil($count / $cols);
+                $legH    = $rows * 24 + 20;
+                $totalH  = $height + $legH;
+                $pieSize = min(0.45, (min($width, $height) * 0.38) / min($width, $totalH));
+                $pieY    = ($height * 0.54) / $totalH;
+
+                $g = new \Amenadiel\JpGraph\Graph\PieGraph($width, $totalH);
+                $g->title->Set($title);
+                $g->title->SetFont(FF_ARIAL, FS_BOLD, 12);
+                $p = new \Amenadiel\JpGraph\Plot\PiePlot(array_values($data));
+                $p->SetSliceColors($this->buildPiePalette($count));
+                $p->SetLegends(array_map(fn($k) => "$k (%.1f%%)", array_keys($data)));
+                $p->SetSize($pieSize);
+                $p->SetCenter(0.5, $pieY);
+                $g->legend->SetFont(FF_ARIAL, FS_NORMAL, 9);
+                $g->legend->SetColumns($cols);
+                $g->legend->SetPos(0.5, 0.99, 'center', 'bottom');
+                $g->Add($p);
+            } else {
+                $maxLabelLen  = max(array_map('strlen', array_keys($data)));
+                $labelAngle   = $maxLabelLen > 8 ? 50 : 0;
+                $labelExtra   = $labelAngle > 0
+                    ? (int)($maxLabelLen * 6 * sin(deg2rad($labelAngle))) + 20
+                    : 0;
+                $barH         = $height + $labelExtra;
+
+                $g = new \Amenadiel\JpGraph\Graph\Graph($width, $barH);
+                $g->SetScale('textlin');
+                $g->SetMargin(50, 20, 40, $labelExtra + 20);
+                $g->title->Set($title);
+                $g->title->SetFont(FF_ARIAL, FS_BOLD, 12);
+                $g->xaxis->SetFont(FF_ARIAL, FS_NORMAL, 9);
+                $g->xaxis->SetLabelAngle($labelAngle);
+                $g->yaxis->SetFont(FF_ARIAL, FS_NORMAL, 9);
+                $allInt = array_reduce(array_values($data), fn($c, $v) => $c && (floor($v) == $v), true);
+                $g->yaxis->SetLabelFormat($allInt ? '%d' : '%.1f');
+                $b = new \Amenadiel\JpGraph\Plot\BarPlot(array_values($data));
+                $b->SetWidth(0.6);
+                $b->value->Show();
+                $b->value->SetFont(FF_ARIAL, FS_NORMAL, 9);
+                $b->value->SetFormat($allInt ? '%d' : '%.1f');
+                $g->xaxis->SetTickLabels(array_keys($data));
+                $g->Add($b);
+            }
+            @ob_start();
+            $g->Stroke($filename);
+            @ob_end_clean();
+        } catch (\Throwable $e) {
+            @ob_end_clean();
+            error_log('[' . date('Y-m-d H:i:s') . '] jpgraph: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() . PHP_EOL, 3, CAMILA_LOG_DIR . '/jpgraph_errors.log');
+            return '';
+        }
+
+        return file_exists($filename) ? $filename : '';
+    }
+
+    /**
+     * Returns the path to a PNG chart for any output format.
+     *
+     * Tries amenadiel/jpgraph first (professional quality), then PHPGraphLib as fallback.
+     *
+     * @param \SimpleXMLElement $graph The <graph> node.
+     * @param array             $data  Key→value pairs from queryWorktableDatabase().
+     * @return string Absolute path to the PNG file.
+     */
+    private function getChartPng(\SimpleXMLElement $graph, array $data): string
+    {
+        $png = $this->createJpgraphPng($graph, $data);
+        if ($png !== '') return $png;
+        $key      = md5(serialize($data) . (string)$graph->type . (int)$graph->width . (int)$graph->height . (string)$graph->title);
+        $filename = CAMILA_TMP_DIR . '/chart_' . $key . '.png';
+        $this->createGraph('', $graph, $data, $filename);
+        return $filename;
+    }
+
 	function createGraph($name, $obj, $data, $filename = null) {
 		if (count($data)>0)
 		{
@@ -547,13 +712,11 @@ class CamilaReport
 			if (count($data) > 0) {
 
 				if ($type === 'bar' || $type === 'pie') {
-					$filename = CAMILA_TMP_DIR.'/g'.$rId.'_'.$gId.'.png';
-					$this->createGraph($gId, $graph, $data, $filename);					
-					$width = (int) $graph->width;
-					$height = (int) $graph->height;
 					if ($gCount>1)
 						$html .= '<td width="50%" style="vertical-align: middle;">';
-					$html .= '<div><img src="' . htmlspecialchars($filename) . '" width="' . $width . '" height="' . $height . '" /></div>';
+					$png   = $this->getChartPng($graph, $data);
+					$width = (int)$graph->width ?: 500;
+					$html .= '<div><img src="' . htmlspecialchars($png) . '" width="' . $width . '" /></div>';
 					if ($gCount>1)
 						$html .= '</td>';
 					$notEmptyCount++;
@@ -782,9 +945,7 @@ class CamilaReport
 				if (count($data) > 0) {
 					if ($type == 'bar' || $type == 'pie') {
 						$cell = $table->addCell($equalWidth, $cellStyle);
-						$filename = CAMILA_TMP_DIR . '/g' . $rId . '_' . $gId . '.png';
-						$this->createGraph($gId, $graph, $data, $filename);
-						$this->addAutoScaledImageToCell($cell, $filename, $equalWidth - 200);
+						$this->addAutoScaledImageToCell($cell, $this->getChartPng($graph, $data), $equalWidth - 200);
 						$contentAdded = true;
 					}
 
@@ -809,9 +970,7 @@ class CamilaReport
 
 				if (count($data) > 0) {
 					if ($type === 'bar' || $type === 'pie') {
-						$filename = CAMILA_TMP_DIR . '/g' . $rId . '_' . $gId . '.png';
-						$this->createGraph($gId, $graph, $data, $filename);
-						$this->addAutoScaledImageToCell($section, $filename, $totalWidth);
+						$this->addAutoScaledImageToCell($section, $this->getChartPng($graph, $data), $totalWidth);
 					}
 
 					if ($type === 'table') {
@@ -926,7 +1085,9 @@ class CamilaReport
     /**
      * Renders all reports as HTML widgets and appends them to the current Camila page.
      *
-     * Supports pie, bar (via dashboard image URLs) and table graph types.
+     * Supports pie, bar and table graph types.
+     * Pie/bar charts are rendered as PNG via jpgraph (or PHPGraphLib fallback),
+     * embedded as base64 data URIs.
      * Errors in individual reports are caught and displayed inline.
      */
 	function outputHtmlToBrowser() {
@@ -958,16 +1119,14 @@ class CamilaReport
 					$v3 = $arr[$i];
 					if ($v3->type == 'pie' || $v3->type == 'bar') {
 						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div class="col-xs-12 col-md-8 column is-12-mobile is-8-desktop">'));
-						$image1 = new HAW_image("?dashboard=m1&rid=".$v2->id.'&gid='.$v3->id, "?dashboard=m1&rid=".$v->id.'&gid='.$v3->id.'&report='.urlencode($this->currentReport), ":-)");
-						$image1->set_br(1);
-						if (count($data)>0)
-						{
-							$_CAMILA['page']->add_image($image1);
-						}
-						else
-						{
+						if (count($data) > 0) {
+							$png = $this->getChartPng($v3, $data);
+							if ($png !== '' && file_exists($png)) {
+								$b64 = base64_encode(file_get_contents($png));
+								$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<img src="data:image/png;base64,' . $b64 . '" style="max-width:100%;" />'));
+							}
+						} else {
 							$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<p><i>'.camila_get_translation('camila.nodatafound').'</i></p>'));
-							//$camilaUI->insertWarning($v3->title . ' - Nessun dato!');
 						}
 						$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '</div>'));
 					}
