@@ -93,6 +93,32 @@ return [
         return ['status' => 'ok', 'username' => $username];
     },
 
+    'DELETE /users/*' => function(array $params, ?array $body, array $path): array {
+        global $_CAMILA;
+        if (!(new CamilaAuth())->isAdmin()) {
+            return ['__status' => 403, 'message' => 'Forbidden'];
+        }
+        $username = $path[count($path) - 1] ?? '';
+        if ($username === '') {
+            return ['__status' => 400, 'message' => 'username is required'];
+        }
+        $auth = new CamilaAuth();
+        $auth->db = $_CAMILA['db'];
+        $existing = $auth->db->Execute(
+            'SELECT id FROM ' . CAMILA_TABLE_USERS . ' WHERE UPPER(username) = UPPER(?)', [$username]
+        );
+        if (!$existing || $existing->RecordCount() === 0) {
+            return ['__status' => 404, 'message' => 'User not found'];
+        }
+        $result = $auth->db->Execute(
+            'DELETE FROM ' . CAMILA_TABLE_USERS . ' WHERE UPPER(username) = UPPER(?)', [$username]
+        );
+        if ($result === false) {
+            return ['__status' => 500, 'message' => 'Failed to delete user'];
+        }
+        return ['status' => 'ok', 'username' => $username];
+    },
+
     'POST /users/*/reset-password' => function(array $params, ?array $body, array $path): array {
         global $_CAMILA;
         if (!(new CamilaAuth())->isAdmin()) {
