@@ -153,74 +153,9 @@ Updates the password in `authUserTable` only (via a dedicated auth DB connection
 
 ---
 
-## SPA — app-users.js
+## SPA
 
-lit-html application mounted in `#app` from the Camila dashboard.
-
-### Features
-
-| Feature | Description |
-|---|---|
-| Search | Live filter by username (GET with `username` param) |
-| Pagination | Page navigation via `page`/`size` |
-| Create user | Modal form (POST /users) |
-| Edit user | Pre-filled modal form (PATCH /users/{username}) |
-| Reset password | Dedicated modal (POST /users/{username}/reset-password) |
-| Delete user | Confirm dialog + DELETE /users/{username} |
-
-### Table badges
-
-The **Group** and **Level** badges are not rendered when their value is null or empty string.
-
-### Header
-
-Fixed title with `ri-user-settings-line` icon (Remix Icons) and localised `users.title` text.
-
----
-
-## i18n
-
-UI strings are localised using the Camila lang system.
-
-**Flow:**
-1. Keys with prefix `camila.users.*` are defined in `camila/lang/{lang}.lang.php`
-2. `dashboard_users.inc.php` reads translations via `camila_get_translation()` and injects them as `window.I18N` (JSON object) before the SPA loads
-3. The SPA accesses strings via the `t(key, ...args)` helper with `%s` substitution for parameterised strings
-4. The PHP variable for the i18n object is `$usersI18N` — **not** `$i18n`, which is reserved by Camila/TinyButStrong for the M2Translator instance
-
-**Key prefix:** `camila.users.*`
-
-**Lang cache:** after any edit to `camila/lang/{lang}.lang.php`, delete `app/<app>/var/tmp/{lang}.lang.php` to force regeneration.
-
-**Defined keys:**
-
-| Key | IT | EN |
-|---|---|---|
-| `camila.users.title` | Gestione utenti | User management |
-| `camila.users.modal.create` | Nuovo utente | New user |
-| `camila.users.modal.edit` | Modifica utente | Edit user |
-| `camila.users.modal.reset` | Reset password | Reset password |
-| `camila.users.new` | Nuovo utente | New user |
-| `camila.users.saving` | Salvataggio... | Saving... |
-| `camila.users.error.load` | Errore caricamento utenti | Error loading users |
-| `camila.users.error.save` | Errore salvataggio | Error saving |
-| `camila.users.error.delete` | Errore eliminazione utente | Error deleting user |
-| `camila.users.empty` | Nessun utente trovato | No users found |
-| `camila.users.search.placeholder` | Cerca per username... | Search by username... |
-| `camila.users.reset.button` | Reset pwd | Reset pwd |
-| `camila.users.delete.confirm` | Eliminare l'utente "%s"? L'operazione non e' reversibile. | Delete user "%s"? This action cannot be undone. |
-| `camila.users.page` | Pagina | Page |
-| `camila.users.prev` | Precedente | Previous |
-| `camila.users.next` | Successiva | Next |
-| `camila.users.level.admin` | Amministratore | Administrator |
-| `camila.users.level.default` | Predefinito | Default |
-| `camila.users.field.username` | Username | Username |
-| `camila.users.field.password` | Password | Password |
-| `camila.users.field.name` | Nome | First name |
-| `camila.users.field.surname` | Cognome | Last name |
-| `camila.users.field.group` | Gruppo | Group |
-| `camila.users.field.level` | Livello | Level |
-| `camila.users.field.new_password_for` | Nuova password per | New password for |
+The management SPA (`camila/admin/app-users.js`) is documented separately: [admin-users design](../../admin-users/design.md).
 
 ---
 
@@ -230,7 +165,3 @@ UI strings are localised using the Camila lang system.
 |---|---|
 | `camila/api/cf_handlers.inc.php` | Handler implementation: GET, POST, PATCH, DELETE, reset-password |
 | `camila/auth.class.inc.php` | `CamilaAuth`: createUser, updateUser, updatePassword, getUsers — two-table logic lives here |
-| `camila/admin/app-users.js` | lit-html SPA |
-| `camila/admin/dashboard_users.inc.php` | SPA mount point, injects `window.APP_CONFIG` and `window.I18N` |
-| `camila/lang/it.lang.php` | `camila.users.*` keys — Italian |
-| `camila/lang/en.lang.php` | `camila.users.*` keys — English |
