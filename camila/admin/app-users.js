@@ -100,23 +100,28 @@ function handleSubmit(e) {
 
 function levelLabel(l) { return parseInt(l) === 1 ? t("users.level.admin") : t("users.level.default"); }
 
+function onCreateLevelChange(e) {
+  const grp = e.target.closest('form').querySelector('input[name="grp"]');
+  if (grp) grp.value = e.target.value === '1' ? '' : 'default';
+}
+
 function ModalCreate() {
   return html`
     <div class="field"><label class="label">${t("users.field.username")} *</label>
-      <input class="input" type="text" name="username" required autocomplete="off"></div>
+      <input class="input is-small" type="text" name="username" required autocomplete="off"></div>
     <div class="field"><label class="label">${t("users.field.password")} *</label>
-      <input class="input" type="password" name="password" required autocomplete="new-password"></div>
+      <input class="input is-small" type="password" name="password" required autocomplete="new-password"></div>
     <div class="columns">
       <div class="column field"><label class="label">${t("users.field.name")}</label>
-        <input class="input" type="text" name="name"></div>
+        <input class="input is-small" type="text" name="name"></div>
       <div class="column field"><label class="label">${t("users.field.surname")}</label>
-        <input class="input" type="text" name="surname"></div>
+        <input class="input is-small" type="text" name="surname"></div>
     </div>
     <div class="columns">
       <div class="column field"><label class="label">${t("users.field.group")}</label>
-        <input class="input" type="text" name="grp" value="default"></div>
+        <input class="input is-small" type="text" name="grp" value="default"></div>
       <div class="column field"><label class="label">${t("users.field.level")}</label>
-        <div class="select is-fullwidth"><select name="level">
+        <div class="select is-small is-fullwidth"><select name="level" @change=${onCreateLevelChange}>
           <option value="5">${t("users.level.default")}</option>
           <option value="1">${t("users.level.admin")}</option>
         </select></div>
@@ -128,18 +133,18 @@ function ModalEdit(u) {
   return html`
     <input type="hidden" name="username" value="${u.username}">
     <div class="field"><label class="label">${t("users.field.username")}</label>
-      <input class="input" type="text" value="${u.username}" disabled></div>
+      <input class="input is-small" type="text" value="${u.username}" disabled></div>
     <div class="columns">
       <div class="column field"><label class="label">${t("users.field.name")}</label>
-        <input class="input" type="text" name="name" value="${u.name ?? ""}"></div>
+        <input class="input is-small" type="text" name="name" value="${u.name ?? ""}"></div>
       <div class="column field"><label class="label">${t("users.field.surname")}</label>
-        <input class="input" type="text" name="surname" value="${u.surname ?? ""}"></div>
+        <input class="input is-small" type="text" name="surname" value="${u.surname ?? ""}"></div>
     </div>
     <div class="columns">
       <div class="column field"><label class="label">${t("users.field.group")}</label>
-        <input class="input" type="text" name="grp" value="${u.grp ?? "default"}"></div>
+        <input class="input is-small" type="text" name="grp" value="${u.grp ?? "default"}"></div>
       <div class="column field"><label class="label">${t("users.field.level")}</label>
-        <div class="select is-fullwidth"><select name="level">
+        <div class="select is-small is-fullwidth"><select name="level">
           <option value="5" ?selected=${parseInt(u.level) !== 1}>${t("users.level.default")}</option>
           <option value="1" ?selected=${parseInt(u.level) === 1}>${t("users.level.admin")}</option>
         </select></div>
@@ -151,7 +156,7 @@ function ModalReset(u) {
   return html`
     <input type="hidden" name="username" value="${u.username}">
     <div class="field"><label class="label">${t("users.field.new_password_for")} <strong>${u.username}</strong></label>
-      <input class="input" type="password" name="password" required autocomplete="new-password"></div>`;
+      <input class="input is-small" type="password" name="password" required autocomplete="new-password"></div>`;
 }
 
 function Modal() {
@@ -167,7 +172,7 @@ function Modal() {
           <button class="delete" type="button" @click=${closeModal}></button>
         </header>
         <form @submit=${handleSubmit}>
-          <section class="modal-card-body">
+          <section class="modal-card-body" style="font-size:0.85rem">
             ${mode === "create" ? ModalCreate() : ""}
             ${mode === "edit"   ? ModalEdit(user) : ""}
             ${mode === "reset"  ? ModalReset(user) : ""}
@@ -177,10 +182,10 @@ function Modal() {
               </article>` : ""}
           </section>
           <footer class="modal-card-foot">
-            <button class="button is-primary" type="submit" ?disabled=${state.saving}>
+            <button class="button is-primary is-small" type="submit" ?disabled=${state.saving}>
               ${state.saving ? t("users.saving") : t("save")}
             </button>
-            <button class="button" type="button" @click=${closeModal}>${t("cancel")}</button>
+            <button class="button is-small" type="button" @click=${closeModal}>${t("cancel")}</button>
           </footer>
         </form>
       </div>
@@ -208,7 +213,7 @@ function App() {
       </div>
       <div class="level-right">
         <div class="level-item">
-          <button class="button is-primary" @click=${openCreate}>
+          <button class="button is-primary is-small" @click=${openCreate}>
             <span class="icon"><i class="ri-add-line"></i></span>
             <span>${t("users.new")}</span>
           </button>

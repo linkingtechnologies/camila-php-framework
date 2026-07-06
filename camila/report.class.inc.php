@@ -94,6 +94,94 @@ use PhpOffice\PhpWord\Element\Cell;
  * ```
  *
  * Supported output formats: PDF (mPDF), HTML, Word (.docx), ODT.
+ *
+ * ── Variable substitution ────────────────────────────────────────────────────
+ *
+ * Inside any query tag, use:
+ *   ${TABLE}        — replaced with the actual table name (use in FROM / JOIN)
+ *   ${TABLE.FIELD}  — replaced with the qualified column name
+ *
+ * Because queries live inside XML, the characters <, >, & must be escaped:
+ *   <  →  &lt;     >  →  &gt;     &  →  &amp;
+ *
+ * Example:
+ *   WHERE date(${T.START}) &lt;= '2026-01-01'
+ *
+ * ── How query columns map to graphs ─────────────────────────────────────────
+ *
+ * All graphs in the same <report> share the same query result set.
+ *
+ *   table  — displays ALL columns returned by the query.
+ *   pie    — uses column 0 as slice label, column 1 as numeric value.
+ *   bar    — uses column 0 as X-axis label, column 1 as numeric value.
+ *
+ * Extra columns beyond column 1 are visible in table graphs but silently
+ * ignored by pie and bar. This lets one query feed a table (all columns)
+ * and a chart (first two columns) at the same time.
+ *
+ * ── <sum> semantics ──────────────────────────────────────────────────────────
+ *
+ * <sum>1</sum> appends a totals row by summing each numeric column.
+ * Use it only when the sum is meaningful — i.e. when each entity appears in
+ * exactly one row. If the same entity can appear across multiple rows (e.g.
+ * an organisation present in two provinces) the total will be inflated.
+ * Use COUNT(DISTINCT field) + a separate scalar report for a correct global
+ * total in that case.
+ *
+ * ── pie chart behaviour ───────────────────────────────────────────────────────
+ *
+ * Slices are sorted descending by value. Slices below $pieSliceThreshold %
+ * (default 3 %) are merged into a single "Altri" slice, always placed last.
+ * The legend column count adapts to the longest label automatically.
+ *
+ * ── JOIN guidance ────────────────────────────────────────────────────────────
+ *
+ * Use LEFT JOIN (not INNER JOIN) when every row from the primary table must
+ * appear in the output. An INNER JOIN silently drops rows with no match,
+ * which is rarely the desired behaviour in a report context.
+ *
+ * With LEFT JOIN, right-table columns are NULL for unmatched rows; handle
+ * this explicitly in WHERE predicates:
+ *
+ *   LEFT JOIN ${SERVICES} ON ${SERVICES.NAME} = ${MOV.DESTINATION}
+ *   WHERE (${SERVICES.IS_INTERVENTION} IS NULL
+ *       OR ${SERVICES.IS_INTERVENTION} != 'SI')
+ *
+ * ── Date series by day (cross-database) ──────────────────────────────────────
+ *
+ * To expand [start_date, end_date] ranges into one row per day, use a
+ * recursive CTE. The date-increment syntax differs between engines:
+ *
+ *   SQLite:  DATE(day, '+1 day')
+ *   MySQL:   DATE_ADD(day, INTERVAL 1 DAY)
+ *
+ * SQLite example (use <sqliteQuery> / <mysqlQuery> for the MySQL variant):
+ *
+ * ```xml
+ * <sqliteQuery>WITH RECURSIVE calendar(day) AS (
+ *   SELECT MIN(DATE(${T.START_DATE})) FROM ${T}
+ *   UNION ALL
+ *   SELECT DATE(day, '+1 day') FROM calendar
+ *   WHERE day &lt; (SELECT MAX(DATE(${T.END_DATE})) FROM ${T})
+ * )
+ * SELECT strftime('%d/%m', day)          AS 'DATE',
+ *        COUNT(*)                         AS 'TOTAL',
+ *        COUNT(DISTINCT ${T.KEY_FIELD})   AS 'UNIQUE'
+ * FROM calendar
+ * JOIN ${T} ON DATE(${T.START_DATE}) &lt;= day
+ *          AND DATE(${T.END_DATE})   &gt;= day
+ * GROUP BY day
+ * ORDER BY day</sqliteQuery>
+ * ```
+ *
+ * ── Practical rules ──────────────────────────────────────────────────────────
+ *
+ * 1. Every non-aggregated SELECT column must appear in GROUP BY.
+ * 2. Use COUNT(DISTINCT field) for unique entities; COUNT(*) for occurrences.
+ * 3. When two charts need different data, use two <report> blocks with
+ *    separate queries rather than complicating a single query.
+ * 4. Multiple graphs in one report are laid out side by side. Beyond two
+ *    graphs the width becomes very narrow — split into separate reports.
  */
 class CamilaReport
 {
