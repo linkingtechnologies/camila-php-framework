@@ -131,7 +131,7 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 	$conf['apiKeyDbAuth.apiKeyColumn']='token';
 
 	$conf['authorization.columnHandler'] = function ($operation, $tableName, $columnName) {
-		$ret = true;
+		if (isset($_GET['_sys']) || isset($_GET['_replica'])) return true;
 		$excluded = [
 			'created',
 			'created_by',
@@ -149,10 +149,7 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 			'cf_bool_is_selected',
 			'cf_bool_is_special',
 		];
-		
-		$ret = !in_array($columnName, $excluded);
-
-		return $ret;
+		return !in_array($columnName, $excluded);
 	};
 	$conf['mapping'] = $mapping;
 	$conf['controllers'] = 'records,openapi,status,columns';

@@ -20,13 +20,47 @@ Camila table and column names use spaces and mixed case (e.g. `"Volontari Preacc
 
 ## Authorization
 
-### Excluded columns (always hidden from API responses)
+### Excluded columns (hidden by default)
 
-The following internal columns are never readable or writable via the API:
+The following internal columns are excluded from all API responses and ignored on write:
 
 `created`, `created_by`, `created_by_name`, `created_by_surname`, `created_src`,
 `last_upd`, `last_upd_by`, `last_upd_by_name`, `last_upd_by_surname`, `last_upd_src`,
 `grp`, `mod_num`, `is_deleted`, `cf_bool_is_selected`, `cf_bool_is_special`
+
+### Control parameters
+
+| Parameter | Effect |
+|---|---|
+| `?_sys=1` | Include system/audit columns in responses and accept them on write |
+| `?_replica=1` | Full replica mode: implies `_sys=1` + skips auto-generation of `id` and audit fields on INSERT |
+
+**`?_sys=1`** — expose system columns for read and write:
+
+```
+GET /records/volontari?_sys=1
+GET /records/volontari/abc123?_sys=1
+```
+
+**`?_replica=1`** — replica mode for `_worktable` tables. On INSERT, Camila normally generates `id` via sequence and sets all audit fields automatically. With `_replica=1` those auto-generated values are skipped: whatever you pass in the body is written as-is.
+
+```
+POST /records/volontari?_replica=1
+{
+  "id": 100042,
+  "nome": "Mario",
+  "cognome": "Rossi",
+  "created":            "2025-01-01T10:00:00",
+  "created_by":         "admin",
+  "created_by_name":    "Mario",
+  "created_by_surname": "Rossi",
+  "last_upd":           "2025-06-01T08:30:00",
+  "last_upd_by":        "admin",
+  "mod_num":            3
+}
+```
+
+> `_replica=1` has no effect on UPDATE or DELETE — only INSERT behaviour changes.
 
 ### Excluded tables
 

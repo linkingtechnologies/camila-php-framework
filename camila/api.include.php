@@ -2792,11 +2792,11 @@ namespace Tqdev\PhpCrudApi\Database {
             $insertColumns = $this->columns->getInsert($table, $columnValues);
             $tableRealName = $table->getRealName();
             $pkName = $table->getPk()->getName();
-			if (str_contains($table->getRealName(),'_worktable')) {
+			if (str_contains($table->getRealName(),'_worktable') && !isset($_GET['_replica'])) {
 				$id  = $_CAMILA['db']->GenID(CAMILA_APPLICATION_PREFIX.'worktableseq', 100000);
 				$now = $_CAMILA['db']->BindTimeStamp(date("Y-m-d H:i:s", time()));
 				$columnValues['id'] = $id;
-				
+
 				if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
 					$columnValues['uuid'] = camila_generate_uuid();
 				}
