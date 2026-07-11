@@ -14,16 +14,17 @@ Single-page admin tool for managing Camila framework users. The page is a toolba
 
 ```
 [Search: username…                    ] [+ New user]
-┌──────────────┬──────┬─────────┬─────────┬───────────┬──────────────────────────┐
-│ Username     │ Nome │ Cognome │ Gruppo  │ Livello   │                          │
-├──────────────┼──────┼─────────┼─────────┼───────────┼──────────────────────────┤
-│ mario        │ Mario│ Rossi   │ default │ Default   │ [Edit] [Reset pwd] [Del] │
-│ admin        │      │         │         │ Admin     │ [Edit] [Reset pwd] [Del] │
-└──────────────┴──────┴─────────┴─────────┴───────────┴──────────────────────────┘
-[← Previous                                                             Next →  ]
+┌──────────────┬──────┬─────────┬─────────┬───────────┬───────┬──────────────────────────────────────┐
+│ Username     │ Nome │ Cognome │ Gruppo  │ Livello   │ Token │                                      │
+├──────────────┼──────┼─────────┼─────────┼───────────┼───────┼──────────────────────────────────────┤
+│ mario        │ Mario│ Rossi   │ default │ Default   │       │ [Edit] [Reset pwd] [Token] [Del]     │
+│ admin        │      │         │         │ Admin     │ [key] │ [Edit] [Reset pwd] [Token] [Del]     │
+└──────────────┴──────┴─────────┴─────────┴───────────┴───────┴──────────────────────────────────────┘
+[← Previous                                                                          Next →  ]
 ```
 
-> Column headers are hardcoded in Italian (`Nome`, `Cognome`, `Gruppo`, `Livello`) — not wired to `I18N`.
+> Column headers are hardcoded in Italian (`Nome`, `Cognome`, `Gruppo`, `Livello`) — not wired to `I18N`.  
+> The **Token** column shows a key icon (`ri-key-line`, Bulma tag `is-info is-light`) when `has_token == 1`; empty otherwise. The actual token value is never displayed.
 
 ---
 
@@ -37,7 +38,7 @@ state = {
   search:    String,          // username filter (sent as query param)
   loading:   Boolean,
   error:     String | null,
-  modal:     null | { mode: 'create' | 'edit' | 'reset', user: Object },
+  modal:     null | { mode: 'create' | 'edit' | 'reset' | 'token', user: Object },
   saving:    Boolean,
   saveError: String | null,
 }
@@ -47,13 +48,20 @@ state = {
 
 ## 3. Modals
 
-Three modes share the same outer `Modal()` shell (title bar, form, footer with Save/Cancel):
+Four modes share the same outer `Modal()` shell (title bar, form, footer with Save/Cancel):
 
 | Mode | Content function | Fields |
 |---|---|---|
 | `create` | `ModalCreate()` | username\*, password\*, name, surname, group, level |
 | `edit` | `ModalEdit(user)` | name, surname, group, level (username shown disabled) |
 | `reset` | `ModalReset(user)` | new password\* |
+| `token` | `ModalToken(user)` | token\* (write-only, shown once) |
+
+### Token modal
+
+Shows a warning box ("token shown only once — copy before saving") and a monospace text field. The **Genera** button calls `crypto.randomUUID()` and updates `state.modal.user.token`, triggering a re-render so the generated value appears in the field. The field is `required`: an empty token cannot be saved.
+
+On submit, `PATCH /users/{username}` is called with `{ token: data.token }`. After the modal closes the token is no longer visible anywhere in the UI — only `has_token` (0/1) is shown in the table.
 
 The username field in `edit` mode is a disabled `<input>` for display only; the actual value is carried by a hidden `<input name="username">`.
 
@@ -124,6 +132,12 @@ After editing `camila/lang/{lang}.lang.php`, delete `app/<app>/var/tmp/{lang}.la
 | `camila.users.field.group` | Gruppo | Group |
 | `camila.users.field.level` | Livello | Level |
 | `camila.users.field.new_password_for` | Nuova password per | New password for |
+| `camila.users.modal.token` | Imposta token API | Set API token |
+| `camila.users.token.button` | Token | Token |
+| `camila.users.token.label` | Token MCP | MCP token |
+| `camila.users.token.hint` | Questo token verra' mostrato una sola volta. Copialo prima di salvare. | This token will be shown only once. Copy it before saving. |
+| `camila.users.token.generate` | Genera | Generate |
+| `camila.users.token.placeholder` | Incolla o genera un UUID... | Paste or generate a UUID... |
 
 ---
 
@@ -131,7 +145,7 @@ After editing `camila/lang/{lang}.lang.php`, delete `app/<app>/var/tmp/{lang}.la
 
 | File | Role |
 |---|---|
-| `camila/admin/app-users.js` | Full SPA — state, templates, API calls (~270 lines) |
+| `camila/admin/app-users.js` | Full SPA — state, templates, API calls (~310 lines) |
 | `camila/admin/dashboard_users.inc.php` | PHP bootstrap: injects `APP_CONFIG`, `I18N`, loads module |
 | `camila/lang/it.lang.php` | `camila.users.*` keys — Italian |
 | `camila/lang/en.lang.php` | `camila.users.*` keys — English |

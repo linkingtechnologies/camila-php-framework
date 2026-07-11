@@ -271,7 +271,7 @@ class CamilaAuth
         $offset = ($page - 1) * $size;
         $old    = $db->SetFetchMode(ADODB_FETCH_ASSOC);
         $rs = $db->Execute(
-            'SELECT id, username, name, surname, grp, level, visibility_type, token FROM ' . $this->userTable . $where . ' ORDER BY username'
+            'SELECT id, username, name, surname, grp, level, visibility_type, CASE WHEN token IS NOT NULL AND token <> \'\' THEN 1 ELSE 0 END AS has_token FROM ' . $this->userTable . $where . ' ORDER BY username'
         );
         $all = [];
         if ($rs) {

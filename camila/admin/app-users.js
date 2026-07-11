@@ -25,7 +25,7 @@ const state = {
   search:    "",
   loading:   false,
   error:     null,
-  modal:     null,   // null | { mode: 'create'|'edit'|'reset', user?: {} }
+  modal:     null,   // null | { mode: 'create'|'edit'|'reset'|'token', user?: {} }
   saving:    false,
   saveError: null,
 };
@@ -60,6 +60,8 @@ async function saveUser(data) {
       await api.call("PATCH", `/users/${username}`, fields);
     } else if (state.modal.mode === "reset") {
       await api.call("POST", `/users/${data.username}/reset-password`, { password: data.password });
+    } else if (state.modal.mode === "token") {
+      await api.call("PATCH", `/users/${data.username}`, { token: data.token });
     }
     state.modal  = null;
     state.saving = false;
@@ -76,6 +78,7 @@ async function saveUser(data) {
 function openCreate() { state.modal = { mode: "create", user: {} }; state.saveError = null; mount(); }
 function openEdit(u)   { state.modal = { mode: "edit",   user: { ...u } }; state.saveError = null; mount(); }
 function openReset(u)  { state.modal = { mode: "reset",  user: { username: u.username } }; state.saveError = null; mount(); }
+function openToken(u)  { state.modal = { mode: "token",  user: { username: u.username, token: "" } }; state.saveError = null; mount(); }
 function closeModal()  { state.modal = null; state.saveError = null; mount(); }
 
 async function deleteUser(username) {
@@ -159,10 +162,38 @@ function ModalReset(u) {
       <input class="input is-small" type="password" name="password" required autocomplete="new-password"></div>`;
 }
 
+function ModalToken(u) {
+  function generate(e) {
+    e.preventDefault();
+    state.modal.user.token = crypto.randomUUID();
+    mount();
+  }
+  return html`
+    <input type="hidden" name="username" value="${u.username}">
+    <article class="message is-warning is-small mb-3">
+      <div class="message-body">${t("users.token.hint")}</div>
+    </article>
+    <div class="field">
+      <label class="label">${t("users.token.label")} — <strong>${u.username}</strong></label>
+      <div class="field has-addons mb-0">
+        <div class="control is-expanded">
+          <input class="input is-small is-family-monospace" type="text" name="token"
+            .value=${u.token} required autocomplete="off"
+            placeholder="${t("users.token.placeholder")}">
+        </div>
+        <div class="control">
+          <button class="button is-small is-info is-light" type="button" @click=${generate}>
+            ${t("users.token.generate")}
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+
 function Modal() {
   if (!state.modal) return html``;
   const { mode, user } = state.modal;
-  const titles = { create: t("users.modal.create"), edit: t("users.modal.edit"), reset: t("users.modal.reset") };
+  const titles = { create: t("users.modal.create"), edit: t("users.modal.edit"), reset: t("users.modal.reset"), token: t("users.modal.token") };
   return html`
     <div class="modal is-active">
       <div class="modal-background" @click=${closeModal}></div>
@@ -176,6 +207,7 @@ function Modal() {
             ${mode === "create" ? ModalCreate() : ""}
             ${mode === "edit"   ? ModalEdit(user) : ""}
             ${mode === "reset"  ? ModalReset(user) : ""}
+            ${mode === "token"  ? ModalToken(user) : ""}
             ${state.saveError ? html`
               <article class="message is-danger mt-3">
                 <div class="message-body">${state.saveError}</div>
@@ -228,11 +260,11 @@ function App() {
 
     <table class="table is-fullwidth is-striped is-hoverable">
       <thead><tr>
-        <th>Username</th><th>Nome</th><th>Cognome</th><th>Gruppo</th><th>Livello</th><th></th>
+        <th>Username</th><th>Nome</th><th>Cognome</th><th>Gruppo</th><th>Livello</th><th>Token</th><th></th>
       </tr></thead>
       <tbody>
         ${state.users.length === 0 && !state.loading
-          ? html`<tr><td colspan="6" class="has-text-centered has-text-grey">${t("users.empty")}</td></tr>`
+          ? html`<tr><td colspan="7" class="has-text-centered has-text-grey">${t("users.empty")}</td></tr>`
           : state.users.map(u => html`
             <tr>
               <td><strong>${u.username}</strong></td>
@@ -240,10 +272,12 @@ function App() {
               <td>${u.surname ?? ""}</td>
               <td>${u.grp ? html`<span class="tag">${u.grp}</span>` : ""}</td>
               <td>${u.level != null && u.level !== "" ? html`<span class="tag ${parseInt(u.level) === 1 ? "is-warning" : "is-light"}">${levelLabel(u.level)}</span>` : ""}</td>
+              <td>${u.has_token == 1 ? html`<span class="tag is-info is-light"><span class="icon is-small"><i class="ri-key-line"></i></span></span>` : ""}</td>
               <td class="has-text-right">
                 <div class="buttons is-right">
                   <button class="button is-small is-info is-light" @click=${() => openEdit(u)}>${t("edit")}</button>
                   <button class="button is-small is-warning is-light" @click=${() => openReset(u)}>${t("users.reset.button")}</button>
+                  <button class="button is-small is-primary is-light" @click=${() => openToken(u)}>${t("users.token.button")}</button>
                   <button class="button is-small is-danger is-light" @click=${() => deleteUser(u.username)}>${t("delete")}</button>
                 </div>
               </td>

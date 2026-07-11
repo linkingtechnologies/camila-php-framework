@@ -163,6 +163,14 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 	$request = RequestFactory::fromGlobals();
 	$api = new Api($config);
 
+	if (isset($_GET['mcp'])) {
+		$apiKey   = $request->getHeader('X-API-Key')[0] ?? '';
+		$basePath = '/app/' . CAMILA_APP_DIR . '/cf_api.php';
+		require_once(__DIR__ . '/cf_mcp_handler.inc.php');
+		(new CamilaMcpHandler($api, $apiKey, $basePath))->handle();
+		exit;
+	}
+
 	set_exception_handler(function(Throwable $e) use ($request) {
 		$logDir  = defined('CAMILA_LOG_DIR') ? rtrim(CAMILA_LOG_DIR, '/\\') : sys_get_temp_dir();
 		$logFile = $logDir . '/cf-api-errors.log';

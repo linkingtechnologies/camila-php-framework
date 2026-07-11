@@ -56,13 +56,17 @@ Base path: `/<app>/cf_api.php`
 ```json
 {
   "records": [
-    { "id": 1, "username": "mario", "name": "Mario", "surname": "Rossi", "grp": "default", "level": 5 }
+    { "id": 1, "username": "mario", "name": "Mario", "surname": "Rossi", "grp": "default", "level": 5, "has_token": 0 }
   ],
   "total": 1,
   "page": 1,
   "size": 50
 }
 ```
+
+`has_token` is `1` if an API token is set on the user, `0` otherwise. The actual token value is never returned.
+
+> **Note:** the raw `token` column is excluded from `SELECT` in `getUsers()` by design. The token is write-only: it can be set via `PATCH /users/{username}` but never read back through the API.
 
 ---
 
@@ -100,7 +104,9 @@ Base path: `/<app>/cf_api.php`
 
 **Auth:** private — admins only
 
-**Body:** one or more of `name`, `surname`, `grp`, `level`. `username` and `password` cannot be changed through this endpoint.
+**Body:** one or more of `name`, `surname`, `grp`, `level`, `token`. `username` and `password` cannot be changed through this endpoint.
+
+`token` is write-only: once saved it is never returned by the API. Setting it to an empty string clears it.
 
 **Response (200):**
 ```json

@@ -42,6 +42,12 @@ $usersI18N = [
     'users.field.group'      => camila_get_translation('camila.users.field.group'),
     'users.field.level'      => camila_get_translation('camila.users.field.level'),
     'users.field.new_password_for' => camila_get_translation('camila.users.field.new_password_for'),
+    'users.modal.token'            => camila_get_translation('camila.users.modal.token'),
+    'users.token.button'           => camila_get_translation('camila.users.token.button'),
+    'users.token.label'            => camila_get_translation('camila.users.token.label'),
+    'users.token.hint'             => camila_get_translation('camila.users.token.hint'),
+    'users.token.generate'         => camila_get_translation('camila.users.token.generate'),
+    'users.token.placeholder'      => camila_get_translation('camila.users.token.placeholder'),
 ];
 
 $refrCode  = "<script src='../../camila/js/worktable-client.js'></script>";
