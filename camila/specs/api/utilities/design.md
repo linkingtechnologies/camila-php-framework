@@ -26,6 +26,35 @@ Returns the application name and current server timestamp. No auth required.
 
 ---
 
+## GET /templates
+
+List all template parameters for a given language.
+
+**Query parameter:** `lang` — language code (default: `CAMILA_DEFAULT_LANG`, typically `it`).
+
+**Response (200):**
+
+```json
+{
+  "lang": "it",
+  "templates": [
+    { "name": "evento",  "lang": "it", "value": "Alluvione Romagna 2025" },
+    { "name": "logo",    "lang": "it", "value": "logo-cri.png" }
+  ]
+}
+```
+
+**WorkTableClient:**
+
+```js
+api.call('GET', '/templates').then(res => res.templates);
+api.call('GET', '/templates', null, { lang: 'en' });
+```
+
+**Source:** `cf_handlers.inc.php` — `'GET /templates'`
+
+---
+
 ## GET /templates/{name}
 
 Read a single template parameter by name. Template parameters are key/value pairs stored in the app database and editable from the admin panel (e.g. event name, logo path, event dates).
@@ -58,6 +87,39 @@ api.call('GET', '/templates/logo',   null, { lang: 'en' });
 ```
 
 **Source:** `cf_handlers.inc.php` — `'GET /templates/*'`
+
+---
+
+## PUT /templates/{name}
+
+Update a single template parameter. Requires admin.
+
+**Path parameter:** `name` — the template parameter name.
+
+**Query parameter:** `lang` — language code (default: `CAMILA_DEFAULT_LANG`).
+
+**Request body:**
+
+```json
+{ "value": "Alluvione Romagna 2026" }
+```
+
+**Response (200):**
+
+```json
+{ "status": "ok", "name": "evento", "lang": "it" }
+```
+
+**Errors:** `400` if `value` missing, `403` if not admin.
+
+**WorkTableClient:**
+
+```js
+api.call('PUT', '/templates/evento', { value: 'Alluvione Romagna 2026' });
+api.call('PUT', '/templates/logo',   { value: 'logo-vvf.png' }, { lang: 'en' });
+```
+
+**Source:** `cf_handlers.inc.php` — `'PUT /templates/*'`
 
 ---
 

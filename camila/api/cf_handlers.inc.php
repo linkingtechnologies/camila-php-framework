@@ -15,6 +15,17 @@ return [
         ];
     },
 
+    'GET /templates' => function(array $params, ?array $body, array $path): array {
+        $lang = cfParam($params, 'lang', defined('CAMILA_DEFAULT_LANG') ? CAMILA_DEFAULT_LANG : 'it');
+        $tmpl = new CamilaTemplate($lang);
+        $all  = $tmpl->getParameters();
+        $list = [];
+        foreach ($all as $name => $value) {
+            $list[] = ['name' => $name, 'lang' => $lang, 'value' => $value];
+        }
+        return ['lang' => $lang, 'templates' => $list];
+    },
+
     'GET /templates/*' => function(array $params, ?array $body, array $path): array {
         $name = $path[1] ?? '';
         $lang = cfParam($params, 'lang', defined('CAMILA_DEFAULT_LANG') ? CAMILA_DEFAULT_LANG : 'it');
@@ -24,6 +35,23 @@ return [
             return ['error' => 'not found', 'name' => $name];
         }
         return ['name' => $name, 'lang' => $lang, 'value' => $all[$name]];
+    },
+
+    'PUT /templates/*' => function(array $params, ?array $body, array $path): array {
+        if (!(new CamilaAuth())->isAdmin()) {
+            return ['__status' => 403, 'message' => 'Forbidden'];
+        }
+        $name = $path[1] ?? '';
+        if ($name === '') {
+            return ['__status' => 400, 'message' => 'name is required'];
+        }
+        if (!isset($body['value'])) {
+            return ['__status' => 400, 'message' => 'value is required'];
+        }
+        $lang = cfParam($params, 'lang', defined('CAMILA_DEFAULT_LANG') ? CAMILA_DEFAULT_LANG : 'it');
+        $tmpl = new CamilaTemplate($lang);
+        $tmpl->setParameter($name, $body['value']);
+        return ['status' => 'ok', 'name' => $name, 'lang' => $lang];
     },
 
     // --- User management (admin only) ---
