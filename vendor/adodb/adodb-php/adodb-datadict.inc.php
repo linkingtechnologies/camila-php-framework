@@ -668,6 +668,7 @@ class ADODB_DataDict {
 			$txt = $flds.$padding;
 			$flds = array();
 			$flds0 = lens_ParseArgs($txt,',');
+			$flds0 = array_filter($flds0);
 			$hasparam = false;
 			foreach($flds0 as $f0) {
 				$f1 = array();
@@ -843,17 +844,9 @@ class ADODB_DataDict {
 			//--------------------
 			// CONSTRUCT FIELD SQL
 			if ($fdefts) {
-				if (substr($this->connection->databaseType,0,5) == 'mysql') {
-					$ftype = 'TIMESTAMP';
-				} else {
-					$fdefault = $this->connection->sysTimeStamp;
-				}
+				$fdefault = $this->connection->sysTimeStamp;
 			} else if ($fdefdate) {
-				if (substr($this->connection->databaseType,0,5) == 'mysql') {
-					$ftype = 'TIMESTAMP';
-				} else {
-					$fdefault = $this->connection->sysDate;
-				}
+				$fdefault = $this->connection->sysDate;
 			} else if ($fdefault !== false && !$fnoquote) {
 				if ($ty == 'C' or $ty == 'X' or
 					( substr($fdefault,0,1) != "'" && !is_numeric($fdefault))) {
@@ -1014,7 +1007,7 @@ class ADODB_DataDict {
 
 		$s = "CREATE TABLE $tabname (\n";
 		$s .= implode(",\n", $lines);
-		if (sizeof($pkey)>0) {
+		if (is_array($pkey) && sizeof($pkey)>0) {
 			$s .= ",\n                 PRIMARY KEY (";
 			$s .= implode(", ",$pkey).")";
 		}

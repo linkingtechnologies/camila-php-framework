@@ -63,6 +63,22 @@ class ADODB_mssqlnative extends ADOConnection {
 	var $length = 'len';
 	var $hasAffectedRows = true;
 	var $poorAffectedRows = false;
+
+	/**
+	 * Holds the affected rows if triggered by close
+	 *
+	 * @var bool|int
+	 */
+	public $affectedRowCount = false;
+
+	/**
+	 * Flag that indicates if an affected_rows value
+	 * is required
+	 *
+	 * @var bool
+	 */
+	public bool $needsAffectedRowCount = false;
+
 	var $metaDatabasesSQL = "select name from sys.sysdatabases where name <> 'master'";
 	var $metaTablesSQL="select name,case when type='U' then 'T' else 'V' end from sysobjects where (type='U' or type='V') and (name not in ('sysallocations','syscolumns','syscomments','sysdepends','sysfilegroups','sysfiles','sysfiles1','sysforeignkeys','sysfulltextcatalogs','sysindexes','sysindexkeys','sysmembers','sysobjects','syspermissions','sysprotects','sysreferences','systypes','sysusers','sysalternates','sysconstraints','syssegments','REFERENTIAL_CONSTRAINTS','CHECK_CONSTRAINTS','CONSTRAINT_TABLE_USAGE','CONSTRAINT_COLUMN_USAGE','VIEWS','VIEW_TABLE_USAGE','VIEW_COLUMN_USAGE','SCHEMATA','TABLES','TABLE_CONSTRAINTS','TABLE_PRIVILEGES','COLUMNS','COLUMN_DOMAIN_USAGE','COLUMN_PRIVILEGES','DOMAINS','DOMAIN_CONSTRAINTS','KEY_COLUMN_USAGE','dtproperties'))";
 	var $metaColumnsSQL =
@@ -95,10 +111,11 @@ class ADODB_mssqlnative extends ADOConnection {
 	var $identitySQL = 'select SCOPE_IDENTITY()'; // 'select SCOPE_IDENTITY'; # for mssql 2000
 	var $uniqueOrderBy = true;
 	var $_bindInputArray = true;
-	var $_dropSeqSQL = "drop table %s";
+
+	/** @var string SQL statement to drop a Sequence. */
+	var $_dropSeqSQL = "DROP SEQUENCE %s";
 
 	var $connectionInfo    = array('ReturnDatesAsStrings'=>true);
-	var $cachedSchemaFlush = false;
 
 	var $sequences = false;
 	var $mssql_version = '';
@@ -170,8 +187,11 @@ class ADODB_mssqlnative extends ADOConnection {
 
 	function _affectedrows()
 	{
+
 		if ($this->_queryID && is_resource($this->_queryID)) {
 			return sqlsrv_rows_affected($this->_queryID);
+		} else if ($this->affectedRowCount !== false) {
+			return $this->affectedRowCount;
 		}
 		return false;
 	}
@@ -203,7 +223,15 @@ class ADODB_mssqlnative extends ADOConnection {
 
 	/**
 	 * For Server 2005,2008, duplicate a sequence with an identity table
-	 */
+	 * 
+	 * 
+	 * @param string $seq The name of the sequence
+	 * @param int    $start the start number of the sequence
+	 * 
+	 * @return bool|object
+	 * 
+	 * @deprecated  
+	*/
 	function CreateSequence2008($seq='adodbseq',$start=1)
 	{
 		if($this->debug) ADOConnection::outp("<hr>CreateSequence($seq,$start)");
@@ -217,25 +245,42 @@ class ADODB_mssqlnative extends ADOConnection {
 			return false;
 		}
 		sqlsrv_commit($this->_connectionID);
-		return true;
+		return $ok;
 	}
 
 	/**
 	 * Proper Sequences Only available to Server 2012 and up
+	 * 
+	 * @param string $seq The name of the sequence
+	 * @param int    $start the start number of the sequence
+	 * 
+	 * @return bool|object
 	 */
-	function CreateSequence2012($seq='adodbseq',$start=1){
+	function CreateSequence2012($seq='adodbseq',$start=1) {
+		
 		if (!$this->sequences){
 			$sql = "SELECT name FROM sys.sequences";
 			$this->sequences = $this->GetCol($sql);
 		}
-		$ok = $this->Execute("CREATE SEQUENCE $seq START WITH $start INCREMENT BY 1");
-		if (!$ok)
-			die("CANNOT CREATE SEQUENCE" . print_r(sqlsrv_errors(),true));
+
+		$sql = "CREATE SEQUENCE $seq START WITH $start INCREMENT BY 1";
+		$ok = $this->execute($sql);
+		
+		if (!$ok) {
+			$creationErrors = print_r(sqlsrv_errors(), true);
+			ADOConnection::outp("Error creating sequence:" . $creationErrors);
+			return false;
+		}
+		
 		$this->sequences[] = $seq;
+
+		return new ADORecordSet_empty;
 	}
 
 	/**
 	 * For Server 2005,2008, duplicate a sequence with an identity table
+	 * 
+	 * @deprecated
 	 */
 	function GenID2008($seq='adodbseq',$start=1)
 	{
@@ -261,6 +306,11 @@ class ADODB_mssqlnative extends ADOConnection {
 	 * Cannot do this the normal adodb way by trapping an error if the
 	 * sequence does not exist because sql server will auto create a
 	 * sequence with the starting number of -9223372036854775808
+	 * 
+	 * @param string $seq   The sequence name
+	 * @param int    $start The start number for the sequence
+	 * 
+	 * @return int
 	 */
 	function GenID2012($seq='adodbseq',$start=1)
 	{
@@ -272,17 +322,47 @@ class ADODB_mssqlnative extends ADOConnection {
 		 * we need access to at least 1. If we really care about
 		 * performance, we could maybe flag a 'nocheck' class variable
 		 */
-		if (!$this->sequences){
+		if (!$this->sequences) {
 			$sql = "SELECT name FROM sys.sequences";
 			$this->sequences = $this->GetCol($sql);
 		}
 		if (!is_array($this->sequences)
-		|| is_array($this->sequences) && !in_array($seq,$this->sequences)){
+		|| is_array($this->sequences) && !in_array($seq, $this->sequences)){
 			$this->CreateSequence2012($seq, $start);
 
 		}
 		$num = $this->GetOne("SELECT NEXT VALUE FOR $seq");
-		return $num;
+		return (int)$num;
+	}
+
+	/**
+	 * Drops a sequence
+	 * Overrides the default because SQL Server returns
+	 * a resource for the drop which confuses execute()
+	 *
+	 * @param string $seqname
+	 * 
+	 * @return bool|ADORecordset_empty
+	 */
+	public function dropSequence($seqname='adodbseq') {
+		
+		if (!$seqname) {
+			return false;
+		}
+		
+		$success = $this->_query(sprintf($this->_dropSeqSQL,$seqname));
+
+		if ($success) {
+			/*
+			* Remove from the sequence list
+			*/
+			$index = array_search($seqname,$this->sequences);
+			if ($index !== false) {
+				unset($this->sequences[$index]);
+			}
+			return new ADORecordSet_empty;
+		}
+		return false;
 	}
 
 	// Format date column in sql string given an input format that understands Y M D
@@ -606,6 +686,9 @@ class ADODB_mssqlnative extends ADOConnection {
 			$sql = $sql[1];
 		}
 
+		$this->affectedRowCount      = false;
+		$this->needsAffectedRowCount = false;
+
 		// Handle native driver flaw for retrieving the last insert ID
 		if ($this->hasInsertID) {
 			// Check if it's an INSERT statement
@@ -620,6 +703,10 @@ class ADODB_mssqlnative extends ADOConnection {
 			}
 		} else {
 			$retrieveLastInsertID = false;
+		}
+
+		if ($sql && preg_match('/^\W*(update|delete)/i',$sql)){
+			$this->needsAffectedRowCount = true;
 		}
 
 		if ($inputarr) {
@@ -665,8 +752,26 @@ class ADODB_mssqlnative extends ADOConnection {
 	}
 
 
+	/**
+	 * List indexes on a table as an array
+	 * 
+	 * @param string $table   table name to query
+	 * @param bool   $primary true to only show primary keys. Not actually used for most databases
+	 * @param string $owner   Discarded for this driver
+	 * 
+	 * @return array of indexes on current table
+	 */
 	function MetaIndexes($table,$primary=false, $owner = false)
 	{
+
+		global $ADODB_FETCH_MODE;
+
+		$metaTables = $this->metaTables('T',$owner,$table);
+
+		if (!$metaTables) {
+			return false;
+		}
+
 		$table = $this->qstr($table);
 
 		$sql = "SELECT i.name AS ind_name, C.name AS col_name, USER_NAME(O.uid) AS Owner, c.colid, k.Keyno,
@@ -678,7 +783,7 @@ class ADODB_mssqlnative extends ADOConnection {
 			WHERE LEFT(i.name, 8) <> '_WA_Sys_' AND o.status >= 0 AND O.Name LIKE $table
 			ORDER BY O.name, I.Name, K.keyno";
 
-		global $ADODB_FETCH_MODE;
+		
 		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 		if ($this->fetchMode !== FALSE) {
@@ -697,11 +802,18 @@ class ADODB_mssqlnative extends ADOConnection {
 
 		$indexes = array();
 		while ($row = $rs->FetchRow()) {
-			if (!$primary && $row[5]) continue;
+			if (!$primary && $row[5]) {
+				continue;
+			}
 
 			$indexes[$row[0]]['unique'] = $row[6];
 			$indexes[$row[0]]['columns'][] = $row[1];
 		}
+
+		if (count($indexes) == 0) {
+			return false;
+		}
+		
 		return $indexes;
 	}
 
@@ -709,8 +821,37 @@ class ADODB_mssqlnative extends ADOConnection {
 	{
 		global $ADODB_FETCH_MODE;
 
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
+		$tableName = $this->MetaTables('T','',$table);
+		if (!$tableName) {
+			return false;
+		}
+
+		$referenceSchema = $this->database;
+
+		if ( !empty($owner) ) {
+			/*
+			* SQL Server is using this for schema, so call metaDatabases to see if
+			* the schema exists
+			*/
+			$alternateDb = array_map('strtolower', $this->MetaDatabases());
+			if (!in_array(strtolower($owner), $alternateDb)) {
+				return false;
+			}
+			$referenceSchema = $owner;
+		}
+
+		if ($ADODB_FETCH_MODE == ADODB_FETCH_ASSOC) {
+			$associative = true;
+		}
+		
+		$saveFetchModes = [
+			$ADODB_FETCH_MODE,
+			$this->fetchMode
+		];
+		
+		$ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+		$this->SetFetchMode(ADODB_FETCH_ASSOC);
+
 		$table = $this->qstr(strtoupper($table));
 
 		$sql =
@@ -722,47 +863,101 @@ class ADODB_mssqlnative extends ADOConnection {
 			where upper(object_name(fkeyid)) = $table
 			order by constraint_name, referenced_table_name, keyno";
 
-		$constraints = $this->GetArray($sql);
+		$constraintList = $this->GetArray($sql);
 
-		$ADODB_FETCH_MODE = $save;
+		$ADODB_FETCH_MODE = $saveFetchModes[0];
+		$this->SetFetchMode($saveFetchModes[1]);
 
-		$arr = false;
-		foreach($constraints as $constr) {
-			//print_r($constr);
-			$arr[$constr[0]][$constr[2]][] = $constr[1].'='.$constr[3];
-		}
-		if (!$arr) return false;
+		if (!$constraintList || count($constraintList) == 0) {
+            return false;
+        }
 
-		$arr2 = false;
+        $sortKeys    = [];
 
-		foreach($arr as $k => $v) {
-			foreach($v as $a => $b) {
-				if ($upper) $a = strtoupper($a);
-				if (is_array($arr2[$a])) {	// a previous foreign key was define for this reference table, we merge the new one
-					$arr2[$a] = array_merge($arr2[$a], $b);
-				} else {
-					$arr2[$a] = $b;
-				}
-			}
-		}
-		return $arr2;
+        foreach ($constraintList as $element) {
+
+			/*
+			* Standardize the returned data keys
+			*/
+			$element = array_change_key_case($element, CASE_UPPER);
+
+			/*
+			* Change the values to match the requested return type
+			*/
+            if ($upper) {
+                $element = array_map('strtoupper', $element);
+            } else {
+                $element = array_map('strtolower', $element);
+            }
+
+            $id = $element['CONSTRAINT_NAME'];
+
+            if (!array_key_exists($id, $sortKeys)) {
+                $sortKeys[$id] = new \stdClass();
+                $sortKeys[$id]->tableName = $element['REFERENCED_TABLE_NAME'];
+                $sortKeys[$id]->assocKeys = [];
+                $sortKeys[$id]->numKeys   = [];
+            }
+
+            $sortKeys[$id]->assocKeys[$element['COLUMN_NAME']] = $element['REFERENCED_COLUMN_NAME'];
+            $sortKeys[$id]->numKeys[] = sprintf(
+                '%s=%s',
+                $element['COLUMN_NAME'],
+                $element['REFERENCED_COLUMN_NAME']
+            );
+        }
+
+        /*
+		* Now the array is built, pick off the right elements
+		*/
+		$foreignKeys = [];
+        foreach ($sortKeys as $sortObject) {
+            if ($associative) {
+                $foreignKeys[$sortObject->tableName] = $sortObject->assocKeys;
+            } else {
+                $foreignKeys[$sortObject->tableName] = $sortObject->numKeys;
+            }
+        }
+
+        return $foreignKeys;
+
 	}
 
-	//From: Fernando Moreira <FMoreira@imediata.pt>
-	function MetaDatabases()
+	/**
+	 * Returns a list of current visible databases
+	 *
+	 * @return array
+	 */
+	public function MetaDatabases()
 	{
+		global $ADODB_FETCH_MODE;
+
+		$saveFetchModes = [
+			$ADODB_FETCH_MODE,
+			$this->fetchMode
+		];
+
+		$saveDatabaseName = $this->database;
+		
+		$this->SetFetchMode(ADODB_FETCH_NUM);
+		
 		$this->SelectDB("master");
+		
 		$rs = $this->Execute($this->metaDatabasesSQL);
 		$rows = $rs->GetRows();
-		$ret = array();
-		for($i=0;$i<count($rows);$i++) {
-			$ret[] = $rows[$i][0];
-		}
-		$this->SelectDB($this->database);
-		if($ret)
-			return $ret;
-		else
-			return false;
+
+		$ADODB_FETCH_MODE = $saveFetchModes[0];
+		$this->fetchMode  = $saveFetchModes[1];
+
+		/*
+		* Flatten and lowercase the array
+		*/
+		$ret = array_map('strtolower',array_merge(...$rows));
+		
+		$this->SelectDB($saveDatabaseName);
+
+		return $ret ? $ret : false;
+	
 	}
 
 	// "Stein-Aksel Basma" <basma@accelero.no>
@@ -799,6 +994,7 @@ class ADODB_mssqlnative extends ADOConnection {
 			$mask = $this->qstr(($mask));
 			$this->metaTablesSQL .= " AND name like $mask";
 		}
+		
 		$ret = ADOConnection::MetaTables($ttype,$showSchema);
 
 		if ($mask) {
@@ -806,6 +1002,7 @@ class ADODB_mssqlnative extends ADOConnection {
 		}
 		return $ret;
 	}
+
 	function MetaColumns($table, $upper=true, $schema=false){
 
 		/*
@@ -1024,6 +1221,19 @@ class ADODB_mssqlnative extends ADOConnection {
 
 		return sprintf($dateFormat,$fraction,$date);
 
+	}
+
+	/**
+	 * Returns SQL to obtain the length of data in a column, including
+	 * CHAR fields
+	 *
+	 * @param string $fieldName The field length to measure
+ 	 * 
+	 * @return string
+	 */
+	public function length(string $fieldName): string
+	{
+		return sprintf('LEN(TRIM(%s))', $fieldName);
 	}
 
 }
@@ -1266,6 +1476,12 @@ class ADORecordset_mssqlnative extends ADORecordSet {
 		*/
 		$this->connection->errorMsg();
 		if(is_resource($this->_queryID)) {
+			if ($this->connection->needsAffectedRowCount) {
+				$this->connection->affectedRowCount = sqlsrv_rows_affected($this->_queryID);
+			} else {
+				$this->connection->affectedRowCount = false;
+			}
+				
 			$rez = sqlsrv_free_stmt($this->_queryID);
 			$this->_queryID = false;
 			return $rez;

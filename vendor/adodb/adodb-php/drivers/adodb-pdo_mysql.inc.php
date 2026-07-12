@@ -17,19 +17,25 @@
  *
  * @copyright 2000-2013 John Lim
  * @copyright 2014 Damien Regad, Mark Newnham and the ADOdb community
+ *
+ * @noinspection PhpComposerExtensionStubsInspection
  */
 
-class ADODB_pdo_mysql extends ADODB_pdo {
+class ADODB_pdo_mysql extends ADODB_pdo_base {
 
-	var $metaTablesSQL = "SELECT
+	var $metaDatabasesSQL = "SHOW DATABASES
+		WHERE `database` NOT IN ('mysql', 'information_schema', 'performance_schema')";
+	var $metaTablesSQL =  /** @lang text */
+		"SELECT
 			TABLE_NAME,
 			CASE WHEN TABLE_TYPE = 'VIEW' THEN 'V' ELSE 'T' END
 		FROM INFORMATION_SCHEMA.TABLES
 		WHERE TABLE_SCHEMA=";
 	var $metaColumnsSQL = "SHOW COLUMNS FROM `%s`";
-	var $sysDate = 'CURDATE()';
-	var $sysTimeStamp = 'NOW()';
+	var $sysDate = '(CURDATE())';
+	var $sysTimeStamp = '(NOW())';
 	var $hasGenID = true;
+	/** @noinspection SqlWithoutWhere */
 	var $_genIDSQL = "UPDATE %s SET id=LAST_INSERT_ID(id+1);";
 	var $_genSeqSQL = "CREATE TABLE  if NOT EXISTS %s (id int not null)";
 	var $_genSeqCountSQL = "SELECT count(*) FROM %s";
@@ -38,12 +44,14 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 	var $fmtTimeStamp = "'Y-m-d H:i:s'";
 	var $nameQuote = '`';
 
-	function _init($parentDriver)
+	protected function _init(ADODB_pdo $parentDriver)
 	{
 		$parentDriver->hasTransactions = false;
-		#$parentDriver->_bindInputArray = false;
 		$parentDriver->hasInsertID = true;
-		$parentDriver->_connectionID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+		$parentDriver->_connectionID->setAttribute(
+			PHP_VERSION_ID < 80400 ? PDO::MYSQL_ATTR_USE_BUFFERED_QUERY : Pdo\Mysql::ATTR_USE_BUFFERED_QUERY,
+			true
+		);
 	}
 
 	// dayFraction is a day in floating point
@@ -158,14 +166,14 @@ class ADODB_pdo_mysql extends ADODB_pdo {
 		return $ret;
 	}
 
-    /**
-     * @param bool $auto_commit
-     * @return void
-     */
-    function SetAutoCommit($auto_commit)
-    {
-        $this->_connectionID->setAttribute(PDO::ATTR_AUTOCOMMIT, $auto_commit);
-    }
+	/**
+	 * @param bool $auto_commit
+	 * @return void
+	 */
+	function SetAutoCommit($auto_commit)
+	{
+		$this->_connectionID->setAttribute(PDO::ATTR_AUTOCOMMIT, $auto_commit);
+	}
 
 	function SetTransactionMode($transaction_mode)
 	{
