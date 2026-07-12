@@ -56,9 +56,9 @@ class CAMILA_XLS_deck extends CHAW_deck
         $spreadsheet->getActiveSheet()->setTitle(substr($_CAMILA['page_short_title'],0,$maxlength-strlen($i18nStr)) . ' - ' . camila_get_translation('camila.worktable.worksheet.data'));
         
         $i = 0;
-        $m = camila_get_translation('camila.dateformat.monthpos');
-        $d = camila_get_translation('camila.dateformat.daypos');
-        $y = camila_get_translation('camila.dateformat.yearpos');
+        $m = (int) camila_get_translation('camila.dateformat.monthpos');
+        $d = (int) camila_get_translation('camila.dateformat.daypos');
+        $y = (int) camila_get_translation('camila.dateformat.yearpos');
         
         //$date_format = $workbook->addFormat();
         //$fmt = str_replace(Array('d', 'm', 'y'), Array('dd', 'mm', 'yyyy'), strtolower($_CAMILA['date_format']));

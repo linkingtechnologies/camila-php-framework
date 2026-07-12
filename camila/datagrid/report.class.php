@@ -459,16 +459,16 @@ class report
                     
                     $value = $_REQUEST['camila_w' . $count . 'v'];
                     if ($type == 'D' && strlen($value) == 10) {
-                        $mm    = substr($value, camila_get_translation('camila.dateformat.monthpos'), 2);
-                        $dd    = substr($value, camila_get_translation('camila.dateformat.daypos'), 2);
-                        $yyyy  = substr($value, camila_get_translation('camila.dateformat.yearpos'), 4);
+                        $mm    = substr($value, (int) camila_get_translation('camila.dateformat.monthpos'), 2);
+                        $dd    = substr($value, (int) camila_get_translation('camila.dateformat.daypos'), 2);
+                        $yyyy  = substr($value, (int) camila_get_translation('camila.dateformat.yearpos'), 4);
                         $value = date('Y-m-d', mktime(0, 0, 0, $mm, $dd, $yyyy));
                     }
                     
                     if ($type == 'T' && strlen($value) == 10) {
-                        $mm    = substr($value, camila_get_translation('camila.dateformat.monthpos'), 2);
-                        $dd    = substr($value, camila_get_translation('camila.dateformat.daypos'), 2);
-                        $yyyy  = substr($value, camila_get_translation('camila.dateformat.yearpos'), 4);
+                        $mm    = substr($value, (int) camila_get_translation('camila.dateformat.monthpos'), 2);
+                        $dd    = substr($value, (int) camila_get_translation('camila.dateformat.daypos'), 2);
+                        $yyyy  = substr($value, (int) camila_get_translation('camila.dateformat.yearpos'), 4);
                         $value = date('Ymd', mktime(0, 0, 0, $mm, $dd, $yyyy));
                     }
                     

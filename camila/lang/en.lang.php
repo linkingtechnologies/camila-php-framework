@@ -1,4 +1,4 @@
-//English Language File - Please don't remove this line!!!
+﻿//English Language File - Please don't remove this line!!!
 camila.decimal.separator = ,
 camila.dateformat.yearpos = 6
 camila.dateformat.monthpos = 3

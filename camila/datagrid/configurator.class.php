@@ -2052,207 +2052,11 @@ class configurator
             }
 
             if ($filename != '') {
- 
-				if ($this->ends_with($filename,'xlsx'))
-					require_once(CAMILA_DIR . 'datagrid/php-excel-reader/excel_reader_wrapper.php');
-			
-				if ($this->ends_with($filename,'xls'))
-					require_once(CAMILA_LIB_DIR . 'php-excel-reader/excel_reader2.php');
-			
-                $data = new Spreadsheet_Excel_Reader($filenamePath);
+                $importResult = $this->importXlsData($id, $filenamePath, $filename, (int) $sheetnum);
+                $successCount = $importResult['imported'];
+                $failCount    = $importResult['failed'];
 
-                $excelColNames = Array();
-                
-                $i = 0;
-                while ($data->val(1, $i + 1, $sheetnum) != '') {
-                    $name              = $data->val(1, $i + 1, $sheetnum);
-					$excelColNames[$i] = mb_strtoupper(\ForceUTF8\Encoding::toUTF8($name), 'UTF-8');
-                    $i++;
-                }
-                
-                $result = $_CAMILA['db']->Execute('select * from ' . CAMILA_TABLE_WORKC . ' where (wt_id=' . $_CAMILA['db']->qstr($id) . ' and is_deleted<>' . $_CAMILA['db']->qstr('y') . ') order by sequence');
-                if ($result === false)
-                    camila_error_page(camila_get_translation('camila.sqlerror') . ' ' . $_CAMILA['db']->ErrorMsg());
-                
-                $fields       = Array();
-                $types        = Array();
-                $defVals      = Array();
-                $forceCase    = Array();
-                $orig_types   = Array();
-                $fieldMapping = Array();
-                
-                $forceArr = camila_get_translation_array('camila.worktable.options.force');
-                
-                $count = 0;
-                
-                while (!$result->EOF) {
-                    $colName                = $result->fields['col_name'];
-                    $name                   = mb_strtoupper(\ForceUTF8\Encoding::toUTF8($result->fields['name']), 'UTF-8');
-                    $fieldMapping[$colName] = \ForceUTF8\Encoding::toUTF8($name);
-                    $fields[$count]         = $colName;
-                    $types[$count]          = $result->fields['type'];
-                    $orig_types[$count]     = $result->fields['orig_type'];
-                    $defVals[$count]        = $result->fields['default_value'];
-                    $forceCase[$count]      = $result->fields['force_case'];
-                    $count++;
-                    $result->MoveNext();
-                }
-                
-                $successCount = 0;
-                $failCount    = 0;
-				$totalRowCount = $data->rowcount($sheetnum);
-				//$trPending = false;
-				
-				$reflector = new ReflectionClass(get_class($data));					
-
-                //db fields
-                for ($i = 2; $i <= $totalRowCount; $i++) {
-					
-					$_CAMILA['db']->beginTrans();
-					//$trPending = true;
-
-                    $record   = Array();
-                    $emptyrow = true;
-                    
-                    //db fields
-                    reset($fields);
-                    foreach ($fields as $k => $v) {
-                        
-                        //k  Field position into database
-                        //k2 Position in Excel file
-                        $k2 = array_search($fieldMapping[$v], $excelColNames);
-                        
-                        //Is it in Excel file?
-                        if ($k2 !== false) {
-                            
-                            $excelColName     = mb_strtoupper(\ForceUTF8\Encoding::toUTF8($data->value(1, $k2 + 1, $sheetnum)), 'UTF-8');
-                            //$excelColName = $v;
-                            $worktableColName = array_search($excelColName, $fieldMapping);
-                            $worktableColName = $v;
-                            
-                            if ($worktableColName != '') {
-                                if ($types[$k] == 'date' && $data->val($i, $k2 + 1, $sheetnum) != '') {
-									if ($this->ends_with($reflector->getFileName(),'excel_reader_wrapper.php')) {
-										$value = $data->val($i, $k2 + 1, $sheetnum);
-										if (substr_count($value, '/') === 2) {
-											$mm = substr($value, camila_get_translation('camila.dateformat.monthpos'), 2);
-											$dd = substr($value, camila_get_translation('camila.dateformat.daypos'), 2);
-											$yyyy = substr($value, camila_get_translation('camila.dateformat.yearpos'), 4);
-											$record[$worktableColName] = $_CAMILA['db']->BindDate($yyyy.'-'.$mm.'-'. $dd);
-										} else {
-											$dt = $data->excelToDateTimeObject($data->value($i, $k2 + 1, $sheetnum));
-											$record[$worktableColName] = $_CAMILA['db']->BindDate($dt->format('Y-m-d'));
-										}
-									} else {
-										$numValue = $data->sheets[$sheetnum]['cellsInfo'][$i][$k2 + 1]['raw'];
-                                    
-										$utcDays  = floor($numValue - ($data->nineteenFour ? SPREADSHEET_EXCEL_READER_UTCOFFSETDAYS1904 : SPREADSHEET_EXCEL_READER_UTCOFFSETDAYS));
-										$utcValue = ($utcDays) * SPREADSHEET_EXCEL_READER_MSINADAY;
-										$dateinfo = gmgetdate($utcValue);
-										
-										$fractionalDay = $numValue - floor($numValue) + .0000001; // The .0000001 is to fix for php/excel fractional diffs
-										
-										$totalseconds = floor(SPREADSHEET_EXCEL_READER_MSINADAY * $fractionalDay);
-										$secs         = $totalseconds % 60;
-										$totalseconds -= $secs;
-										$hours                     = floor($totalseconds / (60 * 60));
-										$mins                      = floor($totalseconds / 60) % 60;
-										$dt                        = date('Y-m-d', mktime($hours, $mins, $secs, $dateinfo["mon"], $dateinfo["mday"], $dateinfo["year"]));
-										$record[$worktableColName] = $_CAMILA['db']->BindDate($dt);
-									}
-                                } elseif ($orig_types[$k] == 'number' && $data->sheets[$sheetnum]['cellsInfo'][$i][$k2 + 1]['raw'] != '')
-                                    $record[$worktableColName] = $data->sheets[$sheetnum]['cellsInfo'][$i][$k2 + 1]['raw'];
-                                elseif ($types[$k] == 'hyperlink' && $data->hyperlink($i, $k2 + 1, $sheetnum) != '') {
-                                    //$record[$worktableColName] = '<a href="' . $data->hyperlink($i, $k2+1, $sheetnum) . '" target="_blank">' . $data->value($i, $k2+1, $sheetnum) . '</a>';
-                                    $record[$worktableColName] = $data->hyperlink($i, $k2 + 1, $sheetnum);
-                                }
-								elseif ($types[$k] == 'datetime' && $data->value($i, $k2 + 1, $sheetnum) != '' && strlen($data->value($i, $k2 + 1, $sheetnum))==19) {
-									$value = $data->value($i, $k2 + 1, $sheetnum);
-									$mm = substr($value, camila_get_translation('camila.dateformat.monthpos'), 2);
-									$dd = substr($value, camila_get_translation('camila.dateformat.daypos'), 2);
-									$yyyy = substr($value, camila_get_translation('camila.dateformat.yearpos'), 4);
-									$h = substr($value, 11, 2);
-									$m = substr($value, 14, 2);
-									$s = substr($value, 17, 2);
-									$dbVal = $_CAMILA['db']->BindTimeStamp($yyyy.'-'.$mm.'-'.$dd.' '.$h.':'.$m.':'.$s);									
-									$record[$worktableColName] = $dbVal;
-                                }
-								elseif ($types[$k] == 'datetime' && $data->value($i, $k2 + 1, $sheetnum) != '' && is_numeric($data->value($i, $k2 + 1, $sheetnum))) {									
-									$numValue = $data->value($i, $k2 + 1, $sheetnum);
-                                    $unixDate = ($numValue - 25569) * 86400;
-									$dbVal = $_CAMILA['db']->BindTimeStamp(gmdate("Y-m-d H:i:s", $unixDate));									
-									$record[$worktableColName] = $dbVal;									
-								}
-								else {
-                                    $record[$worktableColName] = $data->value($i, $k2 + 1, $sheetnum);
-								}
-
-                                
-                                if ($defVals[$k] != '' && $record[$worktableColName] == '')
-                                    $record[$worktableColName] = camila_parse_default_expression($defVals[$k], '_camila_seq_num_', true);
-                                
-                                if ($record[$worktableColName] != '') {
-                                    if ($forceCase[$k] == 'upper')
-                                        $record[$worktableColName] = mb_strtoupper($record[$worktableColName], 'UTF-8');
-                                    if ($forceCase[$k] == 'lower')
-                                        $record[$worktableColName] = mb_strtolower($record[$worktableColName], 'UTF-8');
-                                    $emptyrow = false;
-                                }
-                            }
-                        } else {
-                            if ($defVals[$k] != '')
-                                $record[$fields[$k]] = camila_parse_default_expression($defVals[$k], '_camila_seq_num_', true);
-                        }
-                        
-                    }
-                    
-                    if (!$emptyrow) {
-
-                        $now = $_CAMILA['db']->BindTimeStamp(gmdate("Y-m-d H:i:s", time()));
-                        $id  = $_CAMILA['db']->GenID(CAMILA_APPLICATION_PREFIX.'worktableseq', 100000);
-                      
-                        foreach ($record as $k => $v)
-                            $record[$k] = str_replace('_camila_seq_num_', $id, $v);
-
-                        $record['id']                  = $id;
-						
-						if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true) {
-							$uuid = camila_generate_uuid();
-							$record['uuid'] = $uuid;
-						}
-
-						//echo '<'.$record['id'].'>';
-                        $record['created']             = $now;
-                        $record['created_by']          = $_CAMILA['user'];
-                        $record['created_src']         = 'import';
-                        $record['created_by_surname']  = $_CAMILA['user_surname'];
-                        $record['created_by_name']     = $_CAMILA['user_name'];
-                        $record['last_upd']            = $now;
-                        $record['last_upd_by']         = $_CAMILA['user'];
-                        $record['last_upd_src']        = 'import';
-                        $record['last_upd_by_surname'] = $_CAMILA['user_surname'];
-                        $record['last_upd_by_name']    = $_CAMILA['user_name'];
-                        $record['mod_num']             = 0;
-                        
-                        $insertSQL = $_CAMILA['db']->AutoExecute($table, $record, 'INSERT');
-                        
-                        if (!$insertSQL) {
-                            //camila_information_text(camila_get_translation('camila.worktable.db.importerror'));
-                            $failCount++;
-                            $success = false;
-                        } else
-                            $successCount++;
-                    }
-
-					if ($i % 200 == 0)
-					{
-						$_CAMILA['db']->commitTrans();
-						$_CAMILA['db']->beginTrans();
-					}
-                }
             }
-			
-			$_CAMILA['db']->commitTrans();
 			
 			$myText = new CHAW_text('');
 			$_CAMILA['page']->add_text($myText);
@@ -2313,6 +2117,180 @@ class configurator
     }
     
     
+    public function importXlsData(string $worktableId, string $filenamePath, string $originalFilename, int $sheetnum = 0): array
+    {
+        global $_CAMILA;
+
+        if ($this->ends_with($originalFilename, 'xlsx'))
+            require_once(CAMILA_DIR . 'datagrid/php-excel-reader/excel_reader_wrapper.php');
+        elseif ($this->ends_with($originalFilename, 'xls'))
+            require_once(CAMILA_LIB_DIR . 'php-excel-reader/excel_reader2.php');
+
+        $wtResult = $_CAMILA['db']->Execute(
+            'select tablename from ' . CAMILA_TABLE_WORKT . ' where id=' . $_CAMILA['db']->qstr($worktableId)
+        );
+        if ($wtResult === false || $wtResult->RecordCount() === 0)
+            return ['imported' => 0, 'failed' => 0, 'total' => 0, 'error' => 'worktable not found'];
+        $table = $wtResult->fields['tablename'];
+
+        $colResult = $_CAMILA['db']->Execute(
+            'select * from ' . CAMILA_TABLE_WORKC .
+            ' where (wt_id=' . $_CAMILA['db']->qstr($worktableId) .
+            ' and is_deleted<>' . $_CAMILA['db']->qstr('y') . ') order by sequence'
+        );
+        if ($colResult === false)
+            return ['imported' => 0, 'failed' => 0, 'total' => 0, 'error' => 'failed to load columns'];
+
+        $fields = []; $types = []; $defVals = []; $forceCase = []; $orig_types = []; $fieldMapping = [];
+        $count = 0;
+        while (!$colResult->EOF) {
+            $colName                = $colResult->fields['col_name'];
+            $name                   = mb_strtoupper(\ForceUTF8\Encoding::toUTF8($colResult->fields['name']), 'UTF-8');
+            $fieldMapping[$colName] = \ForceUTF8\Encoding::toUTF8($name);
+            $fields[$count]         = $colName;
+            $types[$count]          = $colResult->fields['type'];
+            $orig_types[$count]     = $colResult->fields['orig_type'];
+            $defVals[$count]        = $colResult->fields['default_value'];
+            $forceCase[$count]      = $colResult->fields['force_case'];
+            $count++;
+            $colResult->MoveNext();
+        }
+
+        $data      = new Spreadsheet_Excel_Reader($filenamePath);
+        $reflector = new ReflectionClass(get_class($data));
+
+        $excelColNames = [];
+        $i = 0;
+        while ($data->val(1, $i + 1, $sheetnum) != '') {
+            $excelColNames[$i] = mb_strtoupper(\ForceUTF8\Encoding::toUTF8($data->val(1, $i + 1, $sheetnum)), 'UTF-8');
+            $i++;
+        }
+
+        $successCount  = 0;
+        $failCount     = 0;
+        $totalRowCount = $data->rowcount($sheetnum);
+
+        for ($i = 2; $i <= $totalRowCount; $i++) {
+            $_CAMILA['db']->beginTrans();
+
+            $record   = [];
+            $emptyrow = true;
+
+            reset($fields);
+            foreach ($fields as $k => $v) {
+                $k2 = array_search($fieldMapping[$v], $excelColNames);
+                if ($k2 !== false) {
+                    $excelColName     = mb_strtoupper(\ForceUTF8\Encoding::toUTF8($data->value(1, $k2 + 1, $sheetnum)), 'UTF-8');
+                    $worktableColName = array_search($excelColName, $fieldMapping);
+                    $worktableColName = $v;
+
+                    if ($worktableColName != '') {
+                        if ($types[$k] == 'date' && $data->val($i, $k2 + 1, $sheetnum) != '') {
+                            if ($this->ends_with($reflector->getFileName(), 'excel_reader_wrapper.php')) {
+                                $value = $data->val($i, $k2 + 1, $sheetnum);
+                                if (substr_count($value, '/') === 2) {
+                                    $mm   = substr($value, (int) camila_get_translation('camila.dateformat.monthpos'), 2);
+                                    $dd   = substr($value, (int) camila_get_translation('camila.dateformat.daypos'), 2);
+                                    $yyyy = substr($value, (int) camila_get_translation('camila.dateformat.yearpos'), 4);
+                                    $record[$worktableColName] = $_CAMILA['db']->BindDate($yyyy . '-' . $mm . '-' . $dd);
+                                } else {
+                                    $dt = $data->excelToDateTimeObject($data->value($i, $k2 + 1, $sheetnum));
+                                    $record[$worktableColName] = $_CAMILA['db']->BindDate($dt->format('Y-m-d'));
+                                }
+                            } else {
+                                $numValue      = $data->sheets[$sheetnum]['cellsInfo'][$i][$k2 + 1]['raw'];
+                                $utcDays       = floor($numValue - ($data->nineteenFour ? SPREADSHEET_EXCEL_READER_UTCOFFSETDAYS1904 : SPREADSHEET_EXCEL_READER_UTCOFFSETDAYS));
+                                $utcValue      = $utcDays * SPREADSHEET_EXCEL_READER_MSINADAY;
+                                $dateinfo      = gmgetdate($utcValue);
+                                $fractionalDay = $numValue - floor($numValue) + .0000001;
+                                $totalseconds  = floor(SPREADSHEET_EXCEL_READER_MSINADAY * $fractionalDay);
+                                $secs          = $totalseconds % 60;
+                                $totalseconds -= $secs;
+                                $hours         = floor($totalseconds / (60 * 60));
+                                $mins          = floor($totalseconds / 60) % 60;
+                                $record[$worktableColName] = $_CAMILA['db']->BindDate(date('Y-m-d', mktime($hours, $mins, $secs, $dateinfo["mon"], $dateinfo["mday"], $dateinfo["year"])));
+                            }
+                        } elseif ($orig_types[$k] == 'number' && $data->sheets[$sheetnum]['cellsInfo'][$i][$k2 + 1]['raw'] != '') {
+                            $record[$worktableColName] = $data->sheets[$sheetnum]['cellsInfo'][$i][$k2 + 1]['raw'];
+                        } elseif ($types[$k] == 'hyperlink' && $data->hyperlink($i, $k2 + 1, $sheetnum) != '') {
+                            $record[$worktableColName] = $data->hyperlink($i, $k2 + 1, $sheetnum);
+                        } elseif ($types[$k] == 'datetime' && $data->value($i, $k2 + 1, $sheetnum) != '' && strlen($data->value($i, $k2 + 1, $sheetnum)) == 19) {
+                            $value = $data->value($i, $k2 + 1, $sheetnum);
+                            $mm   = substr($value, (int) camila_get_translation('camila.dateformat.monthpos'), 2);
+                            $dd   = substr($value, (int) camila_get_translation('camila.dateformat.daypos'), 2);
+                            $yyyy = substr($value, (int) camila_get_translation('camila.dateformat.yearpos'), 4);
+                            $h    = substr($value, 11, 2);
+                            $m    = substr($value, 14, 2);
+                            $s    = substr($value, 17, 2);
+                            $record[$worktableColName] = $_CAMILA['db']->BindTimeStamp($yyyy . '-' . $mm . '-' . $dd . ' ' . $h . ':' . $m . ':' . $s);
+                        } elseif ($types[$k] == 'datetime' && $data->value($i, $k2 + 1, $sheetnum) != '' && is_numeric($data->value($i, $k2 + 1, $sheetnum))) {
+                            $numValue = $data->value($i, $k2 + 1, $sheetnum);
+                            $record[$worktableColName] = $_CAMILA['db']->BindTimeStamp(gmdate("Y-m-d H:i:s", ($numValue - 25569) * 86400));
+                        } else {
+                            $record[$worktableColName] = $data->value($i, $k2 + 1, $sheetnum);
+                        }
+
+                        if ($defVals[$k] != '' && $record[$worktableColName] == '')
+                            $record[$worktableColName] = camila_parse_default_expression($defVals[$k], '_camila_seq_num_', true);
+
+                        if ($record[$worktableColName] != '') {
+                            if ($forceCase[$k] == 'upper')
+                                $record[$worktableColName] = mb_strtoupper($record[$worktableColName], 'UTF-8');
+                            if ($forceCase[$k] == 'lower')
+                                $record[$worktableColName] = mb_strtolower($record[$worktableColName], 'UTF-8');
+                            $emptyrow = false;
+                        }
+                    }
+                } else {
+                    if ($defVals[$k] != '')
+                        $record[$fields[$k]] = camila_parse_default_expression($defVals[$k], '_camila_seq_num_', true);
+                }
+            }
+
+            if (!$emptyrow) {
+                $now   = $_CAMILA['db']->BindTimeStamp(gmdate("Y-m-d H:i:s", time()));
+                $rowId = $_CAMILA['db']->GenID(CAMILA_APPLICATION_PREFIX . 'worktableseq', 100000);
+
+                foreach ($record as $k => $v)
+                    $record[$k] = str_replace('_camila_seq_num_', $rowId, $v);
+
+                $record['id'] = $rowId;
+
+                if (defined('CAMILA_APPLICATION_UUID_ENABLED') && CAMILA_APPLICATION_UUID_ENABLED === true)
+                    $record['uuid'] = camila_generate_uuid();
+
+                $record['created']             = $now;
+                $record['created_by']          = $_CAMILA['user'];
+                $record['created_src']         = 'import';
+                $record['created_by_surname']  = $_CAMILA['user_surname'];
+                $record['created_by_name']     = $_CAMILA['user_name'];
+                $record['last_upd']            = $now;
+                $record['last_upd_by']         = $_CAMILA['user'];
+                $record['last_upd_src']        = 'import';
+                $record['last_upd_by_surname'] = $_CAMILA['user_surname'];
+                $record['last_upd_by_name']    = $_CAMILA['user_name'];
+                $record['mod_num']             = 0;
+
+                $insertSQL = $_CAMILA['db']->AutoExecute($table, $record, 'INSERT');
+                if (!$insertSQL) {
+                    $failCount++;
+                } else {
+                    $successCount++;
+                }
+            }
+
+            if ($i % 200 == 0) {
+                $_CAMILA['db']->commitTrans();
+                $_CAMILA['db']->beginTrans();
+            }
+        }
+
+        $_CAMILA['db']->commitTrans();
+
+        return ['imported' => $successCount, 'failed' => $failCount, 'total' => max(0, $totalRowCount - 1)];
+    }
+
+
     function get_field_name($name)
     {
         $fieldname = preg_replace('/[^a-z]/', '', strtolower($name));

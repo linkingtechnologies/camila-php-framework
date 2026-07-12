@@ -12,6 +12,9 @@
  *   /permissions/<table>                  (GET table permissions)
  *   /sequence/<table>                     (GET next sequence id for table)
  *   /tables                               (GET list of visible tables)
+ *   /tables?metadata=1                    (GET list with id + short_title per table)
+ *   /tables?metadata=1&count=1            (GET list with id, short_title, record count per table)
+ *   /tables/<name>/import                 (POST import: body { filepath } or multipart file upload)
  *   /attachments/<table>/<id>             (POST upload image, GET serve binary, HEAD exists, DELETE remove)
  *   /attachments/<table>                  (GET list of IDs with an attachment)
  *
@@ -54,7 +57,9 @@
  *   permissions(table, query)
  *   sequence(table, query)
  *   distinct(table, column, query)
- *   tables()
+ *   tables(query)                          optional query: {metadata:"1", count:"1"}
+ *   importTable(name, filepath, sheet)     POST /tables/{name}/import (server-side file) → Promise<{status,imported,failed,total}>
+ *   importTableUpload(name, file, sheet)  POST /tables/{name}/import (multipart upload) → Promise<{status,imported,failed,total}>
  *   uploadAttachment(table, id, file)     POST multipart → Promise<{url}>
  *   attachmentUrl(table, id)              returns URL string (triggers download)
  *   fetchAttachment(table, id)            GET → Promise<{blob, mime, ext}>
@@ -672,14 +677,73 @@
         );
       },
 
-      tables: function () {
+      /**
+       * Lists visible tables.
+       * @param {Object} [query]  e.g. { metadata: "1", count: "1" }
+       * @returns {Promise<{tables: Array}>}
+       */
+      tables: function (query) {
         var controller = new AbortController();
         var timer = setTimeout(function () { controller.abort(); }, timeoutMs);
         var headers = {};
         if (apiKeyHeaderName && apiKeyHeaderValue) {
           headers[apiKeyHeaderName] = apiKeyHeaderValue;
         }
-        return fetch(baseTables, { method: "GET", headers: headers, signal: controller.signal })
+        var qs = (query && Object.keys(query).length)
+          ? "?" + new URLSearchParams(query).toString()
+          : "";
+        return fetch(baseTables + qs, { method: "GET", headers: headers, signal: controller.signal })
+          .then(function (res) {
+            var ct = res.headers.get("content-type") || "";
+            var reader = ct.indexOf("application/json") !== -1 ? res.json() : res.text();
+            return reader.then(function (payload) {
+              if (!res.ok) {
+                var err = new Error("HTTP " + res.status);
+                err.status = res.status;
+                err.payload = payload;
+                throw err;
+              }
+              return payload;
+            });
+          })
+          .finally(function () { clearTimeout(timer); });
+      },
+
+      /**
+       * Imports a server-side file into a worktable.
+       * @param {string} name      Mapped API table name (e.g. "materiali"), as returned by tables()
+       * @param {string} filepath  Path relative to CAMILA_APP_PATH
+       * @param {number} [sheet]   Zero-based sheet index (default: 0)
+       * @returns {Promise<{status: string, imported: number, failed: number, total: number}>}
+       */
+      importTable: function (name, filepath, sheet) {
+        var query = sheet !== undefined ? { sheet: String(sheet) } : undefined;
+        return requestRaw("/tables/" + encode(name) + "/import", "POST", { filepath: filepath }, query);
+      },
+
+      /**
+       * Imports a browser File into a worktable via multipart upload.
+       * @param {string} name    Mapped API table name (e.g. "materiali"), as returned by tables()
+       * @param {File}   file    Browser File object (xlsx or xls)
+       * @param {number} [sheet] Zero-based sheet index (default: 0)
+       * @returns {Promise<{status: string, imported: number, failed: number, total: number}>}
+       */
+      importTableUpload: function (name, file, sheet) {
+        var controller = new AbortController();
+        var timer = setTimeout(function () { controller.abort(); }, timeoutMs);
+
+        var headers = {};
+        if (apiKeyHeaderName && apiKeyHeaderValue) {
+          headers[apiKeyHeaderName] = apiKeyHeaderValue;
+        }
+
+        var fd = new FormData();
+        fd.append("file", file);
+
+        var qs = sheet !== undefined ? "?sheet=" + encodeURIComponent(sheet) : "";
+        var url = baseUrl + "/tables/" + encode(name) + "/import" + qs;
+
+        return fetch(url, { method: "POST", headers: headers, body: fd, signal: controller.signal })
           .then(function (res) {
             var ct = res.headers.get("content-type") || "";
             var reader = ct.indexOf("application/json") !== -1 ? res.json() : res.text();

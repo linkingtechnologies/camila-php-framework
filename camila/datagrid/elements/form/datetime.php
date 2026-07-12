@@ -225,9 +225,9 @@
 
           if ($this->value != '') {
               if ($this->form->validator->date($this->field, $fmt)) {
-                  $mm = substr($this->value, camila_get_translation('camila.dateformat.monthpos'), 2);
-                  $dd = substr($this->value, camila_get_translation('camila.dateformat.daypos'), 2);
-	          $yyyy = substr($this->value, camila_get_translation('camila.dateformat.yearpos'), 4);
+                  $mm = substr($this->value, (int) camila_get_translation('camila.dateformat.monthpos'), 2);
+                  $dd = substr($this->value, (int) camila_get_translation('camila.dateformat.daypos'), 2);
+	          $yyyy = substr($this->value, (int) camila_get_translation('camila.dateformat.yearpos'), 4);
                   $this->value = $_CAMILA['db']->BindTimeStamp($yyyy.'-'.$mm.'-'.$dd.' '.$this->value_hour.':'.$this->value_minute.':00');
               }
           }

@@ -9454,16 +9454,18 @@ namespace Tqdev\PhpCrudApi {
 
 		private $responder;
 		private $reflection;
+		private $db;
 
 		public function __construct(Router $router, Responder $responder, GenericDB $db, ReflectionService $reflection, Cache $cache)
 		{
 			$router->register('GET', '/tables', array($this, 'getTables'));
 			$this->responder = $responder;
 			$this->reflection = $reflection;
+			$this->db = $db;
 		}
 
 		public function getTables(ServerRequestInterface $request): ResponseInterface
-		{	
+		{
 			$tables = $this->reflection->getTableNames();
 			$suffixesToRemove = [
 				'_bookmarkseq',
@@ -9486,10 +9488,43 @@ namespace Tqdev\PhpCrudApi {
 					}
 				}
 			}
-			
+
 			$fArray = array_values($tables);
 			sort($fArray);
-			return $this->responder->success(['tables' => $fArray]);
+
+			$params = RequestUtils::getParams($request);
+			$withMetadata = isset($params['metadata']) && ($params['metadata'][0] ?? '') === '1';
+			$withCount    = isset($params['count'])    && ($params['count'][0]    ?? '') === '1';
+
+			if (!$withMetadata) {
+				return $this->responder->success(['tables' => $fArray]);
+			}
+
+			$stmt = $this->db->pdo()->prepare(
+				'SELECT id, short_title, tablename FROM ' . CAMILA_TABLE_WORKT
+			);
+			$stmt->execute();
+			$meta = [];
+			foreach ($stmt->fetchAll() as $row) {
+				$meta[$row['tablename']] = ['id' => (int) $row['id'], 'short_title' => $row['short_title'], 'tablename' => $row['tablename']];
+			}
+
+			$result = [];
+			foreach ($fArray as $name) {
+				$entry = ['name' => $name];
+				$realName = $this->reflection->getTable($name)->getRealName();
+				if (isset($meta[$realName])) {
+					$entry['id']          = $meta[$realName]['id'];
+					$entry['short_title'] = $meta[$realName]['short_title'];
+					if ($withCount) {
+						$cntStmt = $this->db->pdo()->query('SELECT COUNT(*) FROM "' . $realName . '"');
+						$entry['count'] = $cntStmt ? (int) $cntStmt->fetchColumn(0) : null;
+					}
+				}
+				$result[] = $entry;
+			}
+
+			return $this->responder->success(['tables' => $result]);
 		}
 	}
 }

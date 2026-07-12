@@ -54,6 +54,63 @@ return [
         return ['status' => 'ok', 'name' => $name, 'lang' => $lang];
     },
 
+    // --- Worktable import ---
+
+    'POST /tables/*/import' => function(array $params, ?array $body, array $path): array {
+        global $_CAMILA;
+        $apiName = $path[1] ?? '';
+        if ($apiName === '') {
+            return ['__status' => 400, 'message' => 'table name required'];
+        }
+
+        $lang = defined('CAMILA_DEFAULT_LANG') ? CAMILA_DEFAULT_LANG : 'it';
+        $camilaWT = new CamilaWorkTable();
+        $camilaWT->db = $_CAMILA['db'];
+        $sheets = $camilaWT->getWorktableSheets();
+        $worktableId = null;
+        while ($sheets && !$sheets->EOF) {
+            $mapped = $camilaWT->removeSpaces(strtolower($camilaWT->remove_accents($sheets->fields['short_title'], $lang)));
+            if ($mapped === $apiName) {
+                $worktableId = $sheets->fields['id'];
+                break;
+            }
+            $sheets->MoveNext();
+        }
+        if ($worktableId === null) {
+            return ['__status' => 404, 'message' => 'worktable not found'];
+        }
+
+        $sheetnum = (int) cfParam($params, 'sheet', 0);
+
+        if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+            $filenamePath = $_FILES['file']['tmp_name'];
+            $originalName = $_FILES['file']['name'];
+        } elseif (!empty($body['filepath'])) {
+            $filenamePath = CAMILA_APP_PATH . $body['filepath'];
+            $originalName = basename($body['filepath']);
+        } else {
+            return ['__status' => 400, 'message' => 'provide a file upload (multipart field "file") or a filepath in the body'];
+        }
+
+        if (!file_exists($filenamePath)) {
+            return ['__status' => 404, 'message' => 'file not found'];
+        }
+
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['xls', 'xlsx'])) {
+            return ['__status' => 400, 'message' => 'only .xlsx and .xls files are supported'];
+        }
+
+        $result = (new configurator())->importXlsData($worktableId, $filenamePath, $originalName, $sheetnum);
+
+        if (isset($result['error'])) {
+            $code = $result['error'] === 'worktable not found' ? 404 : 500;
+            return ['__status' => $code, 'message' => $result['error']];
+        }
+
+        return ['status' => 'ok', 'imported' => $result['imported'], 'failed' => $result['failed'], 'total' => $result['total']];
+    },
+
     // --- User management (admin only) ---
 
     'GET /users' => function(array $params, ?array $body, array $path): array {

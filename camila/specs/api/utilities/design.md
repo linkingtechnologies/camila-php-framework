@@ -133,18 +133,44 @@ List all table names visible through the API. Internal Camila system tables are 
 `_camila_plugins`, `_camila_template_params`, `_camila_worktables`,
 `_camila_worktables_cols`, `_worktablecolseq`, `_worktableseq`
 
-**Response (200):**
+Table names are the **mapped API names** derived from the worktable `short_title` (kebab-case, lowercased, accents removed). The underlying DB table name (e.g. `sc_worktable29`) is never exposed.
+
+**Query parameters:**
+
+| Parameter | Description |
+|---|---|
+| `metadata=1` | Return objects instead of strings, with worktable registry data (`id`, `short_title`) |
+| `count=1` | Requires `metadata=1`. Add a `count` field with the number of records in each table |
+
+**Response (200) — default:**
+
+```json
+{ "tables": ["materiali", "volontari"] }
+```
+
+**Response (200) — with `?metadata=1`:**
 
 ```json
 {
   "tables": [
-    "materiali",
-    "mezzi",
-    "servizi",
-    "volontari"
+    { "name": "materiali", "id": 29, "short_title": "Materiali" },
+    { "name": "volontari", "id": 30, "short_title": "Volontari" }
   ]
 }
 ```
+
+**Response (200) — with `?metadata=1&count=1`:**
+
+```json
+{
+  "tables": [
+    { "name": "materiali", "id": 29, "short_title": "Materiali", "count": 150 },
+    { "name": "volontari", "id": 30, "short_title": "Volontari", "count": 42 }
+  ]
+}
+```
+
+Tables without a registry entry appear with only `name` (no `id`, `short_title`, or `count`).
 
 Tables are returned sorted alphabetically.
 
@@ -152,6 +178,8 @@ Tables are returned sorted alphabetically.
 
 ```js
 api.tables().then(res => console.log(res.tables));
+api.call('GET', '/tables', null, { metadata: '1' });
+api.call('GET', '/tables', null, { metadata: '1', count: '1' });
 ```
 
 **Source:** `CamilaWorktableController` in `api.include.php`

@@ -128,9 +128,9 @@
 
           if ($this->value != '') {
               if ($this->form->validator->date($this->field, $fmt)) {
-                  $mm = substr($this->value, camila_get_translation('camila.dateformat.monthpos'), 2);
-                  $dd = substr($this->value, camila_get_translation('camila.dateformat.daypos'), 2);
-                  $yyyy = substr($this->value, camila_get_translation('camila.dateformat.yearpos'), 4);
+                  $mm = substr($this->value, (int) camila_get_translation('camila.dateformat.monthpos'), 2);
+                  $dd = substr($this->value, (int) camila_get_translation('camila.dateformat.daypos'), 2);
+                  $yyyy = substr($this->value, (int) camila_get_translation('camila.dateformat.yearpos'), 4);
                   $this->value = date('Y-m-d', mktime(0,0,0,$mm,$dd,$yyyy));
               }
           }
