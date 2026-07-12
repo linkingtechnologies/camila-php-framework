@@ -65,15 +65,7 @@ class ADODB_oci8 extends ADOConnection {
 	var $concat_operator='||';
 	var $sysDate = "TRUNC(SYSDATE)";
 	var $sysTimeStamp = 'SYSDATE'; // requires oracle 9 or later, otherwise use SYSDATE
-	var $metaDatabasesSQL = "
-SELECT LOWER(USERNAME) FROM ALL_USERS 
- WHERE USERNAME NOT IN ('SYS','SYSTEM','OUTLN','DBSNMP',
-'APPQOSSYS','AUDSYS','CTXSYS','DVSYS','GSMADMIN_INTERNAL',
-'LBACSYS','MDSYS','OJVMSYS','ORDDATA','ORDPLUGINS','ORDSYS',
-'SI_INFORMTN_SCHEMA','WMSYS','XDB','XS\$NULL','BAASSYS'
-,'DBSFWUSER','DGPDB_INT','DIP','DVF','GGSHAREDCAP','GGSYS','GSMCATUSER'
-,'GSMUSER','MDDATA','OLAPSYS','PDBADMIN','REMOTE_SCHEDULER_AGENT','SYS\$UMF','SYSBACKUP'
-,'SYSDG','SYSKM','SYSRAC','VECSYS') ORDER BY 1";
+	var $metaDatabasesSQL = "SELECT USERNAME FROM ALL_USERS WHERE USERNAME NOT IN ('SYS','SYSTEM','DBSNMP','OUTLN') ORDER BY 1";
 	var $_stmt;
 	var $_commit = OCI_COMMIT_ON_SUCCESS;
 	var $_initdate = true; // init date to YYYY-MM-DD
@@ -178,14 +170,10 @@ END;
 					$fld->type = 'INT';
 				}
 				$fld->max_length = $rs->fields[4];
-				$fld->default_value = trim($rs->fields[6] ?? '');
-			} else {
-				$fld->default_value = $rs->fields[6];
 			}
 			$fld->not_null = $rs->fields[5] == 'N';
 			$fld->binary = (strpos($fld->type,'BLOB') !== false);
-			
-			
+			$fld->default_value = $rs->fields[6];
 
 			if ($ADODB_FETCH_MODE == ADODB_FETCH_NUM) {
 				$retarr[] = $fld;
@@ -493,72 +481,60 @@ END;
 		}
 		$ret = ADOConnection::MetaTables($ttype,$showSchema);
 
-		if (!$ret || is_array($ret) && count($ret) == 0) {
-			$ret = false;
-		}
-
 		if ($mask) {
 			$this->metaTablesSQL = $save;
 		}
 		return $ret;
 	}
 
-	/**
-      * Return a list of indexes for a specified table
-      *
-      * We don't use db2_statistics as the function does not seem to play
-      * well with mixed case table names
-      *
-      * @param string   $table
-      * @param bool     $primary    (optional) return primary key
-      * @param bool     $owner      (optional) not used in this driver
-      *
-      * @return string[]    Array of indexes
-      */
-
+	// Mark Newnham
 	function MetaIndexes ($table, $primary = FALSE, $owner=false)
 	{
 		// save old fetch mode
 		global $ADODB_FETCH_MODE;
 
-		$tableName = $this->metatables('T', false, $table);
-		if ($tableName == false) {
-			return false;
-		}
-		
-		$saveModes = [
-			$ADODB_FETCH_MODE,
-			$this->fetchMode
-		];
+		$save = $ADODB_FETCH_MODE;
+		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-		$this->SetFetchMode(ADODB_FETCH_NUM);
+		if ($this->fetchMode !== FALSE) {
+			$savem = $this->SetFetchMode(FALSE);
+		}
 
 		// get index details
 		$table = strtoupper($table);
 
 		// get Primary index
 		$primary_key = '';
-		
-		$p1 = $this->param('p1');
-		$bind = ['p1' => $table];
 
-		$sql = "SELECT CONSTRAINT_NAME FROM ALL_CONSTRAINTS 
-				WHERE UPPER(TABLE_NAME) = $p1  
-				AND CONSTRAINT_TYPE='P'";
-		
-		$primary_key = $this->getOne($sql,$bind);
+		$rs = $this->Execute(sprintf("SELECT * FROM ALL_CONSTRAINTS WHERE UPPER(TABLE_NAME)='%s' AND CONSTRAINT_TYPE='P'",$table));
+		if (!is_object($rs)) {
+			if (isset($savem)) {
+				$this->SetFetchMode($savem);
+			}
+			$ADODB_FETCH_MODE = $save;
+			return false;
+		}
 
-		$sql = "SELECT ALL_INDEXES.INDEX_NAME, ALL_INDEXES.UNIQUENESS, 
-			        ALL_IND_COLUMNS.COLUMN_POSITION, ALL_IND_COLUMNS.COLUMN_NAME 
-			   FROM ALL_INDEXES,ALL_IND_COLUMNS 
-			   WHERE UPPER(ALL_INDEXES.TABLE_NAME)=$p1 
-			     AND ALL_IND_COLUMNS.INDEX_NAME=ALL_INDEXES.INDEX_NAME";
-		
-		$rs = $this->Execute($sql, $bind);
+		if ($row = $rs->FetchRow()) {
+			$primary_key = $row[1]; //constraint_name
+		}
+
+		if ($primary==TRUE && $primary_key=='') {
+			if (isset($savem)) {
+				$this->SetFetchMode($savem);
+			}
+			$ADODB_FETCH_MODE = $save;
+			return false; //There is no primary key
+		}
+
+		$rs = $this->Execute(sprintf("SELECT ALL_INDEXES.INDEX_NAME, ALL_INDEXES.UNIQUENESS, ALL_IND_COLUMNS.COLUMN_POSITION, ALL_IND_COLUMNS.COLUMN_NAME FROM ALL_INDEXES,ALL_IND_COLUMNS WHERE UPPER(ALL_INDEXES.TABLE_NAME)='%s' AND ALL_IND_COLUMNS.INDEX_NAME=ALL_INDEXES.INDEX_NAME",$table));
+
 
 		if (!is_object($rs)) {
-			$ADODB_FETCH_MODE = $saveModes[0];
-			$this->fetchMode  = $saveModes[1];
+			if (isset($savem)) {
+				$this->SetFetchMode($savem);
+			}
+			$ADODB_FETCH_MODE = $save;
 			return false;
 		}
 
@@ -566,14 +542,13 @@ END;
 		// parse index data into array
 
 		while ($row = $rs->FetchRow()) {
-			if (!$primary && $row[0] == $primary_key) {
+			if ($primary && $row[0] != $primary_key) {
 				continue;
 			}
 			if (!isset($indexes[$row[0]])) {
 				$indexes[$row[0]] = array(
 					'unique' => ($row[1] == 'UNIQUE'),
-					'columns' => [],
-					'primary' => ($primary_key == $row[0] ? 1 : 0)
+					'columns' => array()
 				);
 			}
 			$indexes[$row[0]]['columns'][$row[2] - 1] = $row[3];
@@ -584,9 +559,10 @@ END;
 			ksort ($indexes[$index]['columns']);
 		}
 
-		$ADODB_FETCH_MODE = $saveModes[0];
-		$this->fetchMode  = $saveModes[1];
-		
+		if (isset($savem)) {
+			$this->SetFetchMode($savem);
+			$ADODB_FETCH_MODE = $save;
+		}
 		return $indexes;
 	}
 
@@ -1560,37 +1536,20 @@ SELECT /*+ RULE */ distinct b.column_name
 	/**
 	 * Returns a list of Foreign Keys associated with a specific table.
 	 *
-	 * @param string $table	      Name of the table
-	 * @param string $owner		  Owner of the table
-	 * @param bool   $upper       Return keys in uppercase (true)
-	 * @param bool   $associative Force associative mode
+	 * @param string $table
+	 * @param string $owner
+	 * @param bool   $upper       discarded
+	 * @param bool   $associative discarded
 	 *
 	 * @return string[]|false An array where keys are tables, and values are foreign keys;
-	 *                     false if no foreign keys could be found.
+	 *                        false if no foreign keys could be found.
 	 */
 	public function metaForeignKeys($table, $owner = '', $upper = false, $associative = false)
 	{
 		global $ADODB_FETCH_MODE;
-		
-		$tableName = $this->metaTables('T', $owner, $table);
-		if ($tableName == false) {
-			return false;
-		}
 
-		$saveModes = [
-			$ADODB_FETCH_MODE,
-			$this->fetchMode
-		];
-
-		if ($saveModes[1] && $saveModes[1] <> ADODB_FETCH_NUM) {
-			$associative = true;
-		} else if (!$saveModes[1] && $saveModes[0] <> ADODB_FETCH_NUM ) {
-			$associative = true;
-		}
-
+		$save = $ADODB_FETCH_MODE;
 		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		$this->SetFetchMode(ADODB_FETCH_NUM);
-
 		$table = $this->qstr(strtoupper($table));
 		if (!$owner) {
 			$owner = $this->user;
@@ -1598,85 +1557,29 @@ SELECT /*+ RULE */ distinct b.column_name
 		} else
 			$tabp = 'all_';
 
-		$owner = ' AND owner='.$this->qstr(strtoupper($owner));
+		$owner = ' and owner='.$this->qstr(strtoupper($owner));
 
 		$sql =
-"SELECT constraint_name,r_owner,r_constraint_name
-   FROM {$tabp}constraints
-  WHERE constraint_type = 'R' 
-	AND table_name = $table $owner";
+"select constraint_name,r_owner,r_constraint_name
+	from {$tabp}constraints
+	where constraint_type = 'R' and table_name = $table $owner";
 
 		$constraints = $this->GetArray($sql);
-		$arr = [];
+		$arr = false;
 		foreach($constraints as $constr) {
-			$cons   = $this->qstr($constr[0]);
+			$cons = $this->qstr($constr[0]);
 			$rowner = $this->qstr($constr[1]);
-			$rcons  = $this->qstr($constr[2]);
+			$rcons = $this->qstr($constr[2]);
+			$cols = $this->GetArray("select column_name from {$tabp}cons_columns where constraint_name=$cons $owner order by position");
+			$tabcol = $this->GetArray("select table_name,column_name from {$tabp}cons_columns where owner=$rowner and constraint_name=$rcons order by position");
 
-			$sql = "SELECT column_name 
-					  FROM {$tabp}cons_columns 
-					 WHERE constraint_name=$cons $owner 
-					 ORDER BY position";
-			$sourceData = $this->GetCol($sql);
-			
-			$sql = "SELECT table_name,column_name 
-			          FROM {$tabp}cons_columns 
-					  WHERE owner=$rowner 
-					  AND constraint_name=$rcons 
-					  ORDER BY position";
-			$targetData = $this->GetArray($sql);
-
-			if ($sourceData && $targetData) {
-
-				$max = sizeof($sourceData);
-				foreach ($targetData as $k => $v) {
-					if ($upper) {
-						$tableName = strtoupper($v[0]);
-					} else {
-						$tableName = strtolower($v[0]);
-					}
-					
-					if (!array_key_exists($tableName, $arr)) {
-						$arr[$tableName] = [];
-					}
-					if ($associative) {
-						/*
-						* Write ADODB_FETCH_ASSOC format
-						*/
-						if ($upper) {
-							$arr[$tableName][strtoupper($sourceData[$k])] = strtoupper($v[1]);
-						} else {
-							$arr[$tableName][strtolower($sourceData[$k])] = strtolower($v[1]);
-						}
-					} else {
-						/*
-						* Write ADODB_FETCH_NUM format
-						*/
-						if ($upper) {
-						$arr[$tableName][] = sprintf(
-							'%s=%s', 		
-							strtoupper($sourceData[$k]),
-							strtoupper($v[1])
-						);
-						} else {
-							$arr[$tableName][] = sprintf(
-							'%s=%s', 
-							strtolower($sourceData[$k]),
-							strtolower($v[1])
-						);
-						}
-					} 
+			if ($cols && $tabcol)
+				for ($i=0, $max=sizeof($cols); $i < $max; $i++) {
+					$arr[$tabcol[$i][0]] = $cols[$i][0].'='.$tabcol[$i][1];
 				}
-			}
 		}
-		
-		$ADODB_FETCH_MODE = $saveModes[0];
-		$this->fetchMode  = $saveModes[1];
-		
-		if (!$arr || count($arr) == 0) { 
-			return false;
-		}
-		
+		$ADODB_FETCH_MODE = $save;
+
 		return $arr;
 	}
 

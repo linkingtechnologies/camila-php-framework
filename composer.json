@@ -13,7 +13,7 @@
         "ext-sqlite3": "*",
         "ext-xsl": "*",
         "ext-zip": "*",
-        "adodb/adodb-php": "dev-master",
+        "adodb/adodb-php": "dev-master#51e7797",
         "amenadiel/jpgraph": "^4.1",
         "bordercloud/sparql": "2.1.0",
         "ezyang/htmlpurifier": "4.18.0",

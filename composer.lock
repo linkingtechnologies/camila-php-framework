@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0f067335950f782f8825410f8ffd50e5",
+    "content-hash": "9f9ab67cde60e998fc49bc2b7e6b8021",
     "packages": [
         {
             "name": "adodb/adodb-php",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ADOdb/ADOdb.git",
-                "reference": "0e1ac40dd292620c8450411d832429b81e4d21d0"
+                "reference": "51e7797"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ADOdb/ADOdb/zipball/0e1ac40dd292620c8450411d832429b81e4d21d0",
-                "reference": "0e1ac40dd292620c8450411d832429b81e4d21d0",
+                "url": "https://api.github.com/repos/ADOdb/ADOdb/zipball/51e7797",
+                "reference": "51e7797",
                 "shasum": ""
             },
             "require": {

@@ -427,7 +427,7 @@ class ADODB_firebird extends ADOConnection {
 			$rs = $this->Execute($getnext);
 		}
 		if ($rs && !$rs->EOF) {
-			$this->genID = (int) reset($rs->fields);
+			$this->genID = (integer) reset($rs->fields);
 		}
 		else {
 			$this->genID = 0; // false
@@ -454,7 +454,7 @@ class ADODB_firebird extends ADOConnection {
 
 	public function errorNo()
 	{
-		return (int) $this->_errorCode;
+		return (integer) $this->_errorCode;
 	}
 
 	function errorMsg()
@@ -989,8 +989,8 @@ class ADODB_firebird extends ADOConnection {
 	 */
 	public function selectLimit($sql,$nrows=-1,$offset=-1,$inputarr=false, $secs2cache=0)
 	{
-		$nrows = (int) $nrows;
-		$offset = (int) $offset;
+		$nrows = (integer) $nrows;
+		$offset = (integer) $offset;
 		$str = 'SELECT ';
 		if ($nrows >= 0) $str .= "FIRST $nrows ";
 		$str .=($offset>=0) ? "SKIP $offset " : '';
@@ -1002,19 +1002,6 @@ class ADODB_firebird extends ADOConnection {
 			$rs = $this->execute($sql,$inputarr);
 
 		return $rs;
-	}
-
-	/**
-	 * Returns SQL to obtain the length of data in a column, including
-	 * CHAR fields
-	 *
-	 * @param string $fieldName The field length to measure
- 	 * 
-	 * @return string
-	 */
-	public function length(string $fieldName): string
-	{
-		return sprintf('CHAR_LEN(TRIM(%s))', $fieldName);
 	}
 
 }

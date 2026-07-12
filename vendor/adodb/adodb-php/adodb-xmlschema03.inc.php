@@ -254,10 +254,7 @@ class dbTable extends dbObject {
 	var $drop_field = array();
 
 	/**
-	 * Does the current platform match the db type of
-	 * platform-specific options
-	 * 
-	 * @var    bool Platform-specific options
+	 * @var array Platform-specific options
 	 * @access private
 	 */
 	var $currentPlatform = true;
@@ -333,7 +330,6 @@ class dbTable extends dbObject {
 			case 'CONSTRAINT':
 				// Accept platform-specific options
 				$this->currentPlatform = ( !isset( $attributes['PLATFORM'] ) OR $this->supportedPlatform( $attributes['PLATFORM'] ) );
-				
 				break;
 			default:
 				// print_r( array( $tag, $attributes ) );
@@ -510,20 +506,10 @@ class dbTable extends dbObject {
 	 * and appends them to the table object.
 	 *
 	 * @param string $opt Table option
-	 * 
 	 * @return array Options
 	 */
 	function addTableOpt( $opt ) {
-		
-		if($this->currentPlatform) {
-			
-			$this->parent->logMsg(
-				$opt, 
-				'Adding current platform or global table opt',
-				false,
-				$this 
-			);
-			
+		if(isset($this->currentPlatform)) {
 			$this->opts[$this->parent->db->dataProvider] = $opt;
 		}
 		return $this->opts;
@@ -628,9 +614,7 @@ class dbTable extends dbObject {
 			switch( $xmls->upgrade ) {
 				// Use ChangeTableSQL
 				case 'ALTER':
-					
 					$sql[] = $xmls->dict->changeTableSQL( $this->name, $fldarray, $this->opts );
-	
 					$xmls->logMsg($sql, 'Generated changeTableSQL (ALTERing table)', false, $this );
 					break;
 				case 'REPLACE':
@@ -1661,9 +1645,7 @@ class adoSchema {
 			}
 		}
 
-		if( PHP_VERSION_ID < 80000 ) {
-			xml_parser_free( $xmlParser );
-		}
+		xml_parser_free( $xmlParser );
 
 		return $this->sqlArray;
 	}
@@ -1707,9 +1689,7 @@ class adoSchema {
 			) );
 		}
 
-		if( PHP_VERSION_ID < 80000 ) {
-			xml_parser_free( $xmlParser );
-		}
+		xml_parser_free( $xmlParser );
 
 		return $this->sqlArray;
 	}

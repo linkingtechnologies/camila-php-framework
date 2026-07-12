@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '5dd44b63ee7fdcbcce46140dccd6c352e1a8f067',
+        'reference' => 'ad0683f7f2591583579781bc33fdbba4e939de34',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '__root__' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '5dd44b63ee7fdcbcce46140dccd6c352e1a8f067',
+            'reference' => 'ad0683f7f2591583579781bc33fdbba4e939de34',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -22,7 +22,7 @@
         'adodb/adodb-php' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '0e1ac40dd292620c8450411d832429b81e4d21d0',
+            'reference' => '51e7797',
             'type' => 'library',
             'install_path' => __DIR__ . '/../adodb/adodb-php',
             'aliases' => array(

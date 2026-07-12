@@ -19,17 +19,18 @@
  * @copyright 2014 Damien Regad, Mark Newnham and the ADOdb community
  */
 
-class ADODB_pdo_mssql extends ADODB_pdo_base {
+class ADODB_pdo_mssql extends ADODB_pdo {
 
 	var $hasTop = 'top';
 	var $sysDate = 'convert(datetime,convert(char,GetDate(),102),102)';
 	var $sysTimeStamp = 'GetDate()';
 
 
-	protected function _init(ADODB_pdo $parentDriver)
+	function _init($parentDriver)
 	{
-		$parentDriver->_bindInputArray = false;
+
 		$parentDriver->hasTransactions = false; ## <<< BUG IN PDO mssql driver
+		$parentDriver->_bindInputArray = false;
 		$parentDriver->hasInsertID = true;
 	}
 

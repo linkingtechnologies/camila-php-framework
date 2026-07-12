@@ -313,10 +313,10 @@ class ADODB_pdo extends ADOConnection {
 		return $this->_driver->MetaColumns($table,$normalize);
 	}
 
-	public function metaIndexes($table, $primary=true, $owner=false)
+	public function metaIndexes($table,$normalize=true,$owner=false)
 	{
 		if (method_exists($this->_driver,'metaIndexes'))
-			return $this->_driver->metaIndexes($table, $primary, $owner);
+			return $this->_driver->metaIndexes($table,$normalize,$owner);
 	}
 
 	/**
@@ -417,7 +417,7 @@ class ADODB_pdo extends ADOConnection {
 			if (sizeof($arr)<2) {
 				return '';
 			}
-			if ((int)$arr[0]) {
+			if ((integer)$arr[0]) {
 				return $arr[2];
 			}
 			else {
@@ -625,7 +625,7 @@ class ADODB_pdo extends ADOConnection {
 		if ($stmt) {
 
 			$arr = $stmt->errorinfo();
-			if ((int)$arr[1]) {
+			if ((integer)$arr[1]) {
 				$this->_errormsg = $arr[2];
 				$this->_errorno = $arr[1];
 			}
@@ -665,13 +665,10 @@ class ADODB_pdo extends ADOConnection {
 	 * @param bool   $magic_quotes This param is not used since 5.21.0.
 	 *                             It remains for backwards compatibility.
 	 *
-	 * @return null|string Quoted string
+	 * @return string Quoted string
 	 */
 	function qStr($s, $magic_quotes = false)
 	{
-		if (!$s) {
-			return $s;
-		}
 		if ($this->_connectionID) {
 			return $this->_connectionID->quote($s);
 		}
@@ -737,18 +734,14 @@ class ADODB_pdo extends ADOConnection {
  */
 class ADODB_pdo_base extends ADODB_pdo {
 
-	/**
-	 * Initialize parent driver properties with driver-specific values.
-	 *
-	 * Called by {@see ADODB_pdo::_UpdatePDO()}.
-	 *
-	 * @param ADODB_pdo $parentDriver
-	 * @return void
-	 * @internal
-	 */
-	protected function _init(ADODB_pdo $parentDriver)
+	var $sysDate = "'?'";
+	var $sysTimeStamp = "'?'";
+
+
+	function _init($parentDriver)
 	{
 		$parentDriver->_bindInputArray = true;
+		#$parentDriver->_connectionID->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY,true);
 	}
 
 	function ServerInfo()
@@ -820,7 +813,7 @@ class ADOPDOStatement {
 		}
 
 		if (is_array($arr)) {
-			if ((int) $arr[0] && isset($arr[2])) {
+			if ((integer) $arr[0] && isset($arr[2])) {
 				return $arr[2];
 			}
 			else {

@@ -236,14 +236,14 @@ if (!defined('_ADODB_LAYER')) {
 		public $name = '';
 
 		/**
-		 * @var string Field type.
-		 */
-		public $type = '';
-
-		/**
 		 * @var int Field size
 		 */
 		public $max_length = 0;
+
+		/**
+		 * @var string Field type.
+		 */
+		public $type = '';
 
 		/**
 		 * @var int|null Numeric field scale.
@@ -755,15 +755,6 @@ if (!defined('_ADODB_LAYER')) {
 
 	/** @var string a specified locale. */
 	var $locale;
-
-	/**
-	 * Setting true forces {@see metaColumns()} to read the db for
-	 * each access of a table instead of using cached version.
-	 * Currently only works on mssqlnative
-	 *
-	 * @var bool
-	 */
-	public bool $cachedSchemaFlush = false;
 
 
 	/**
@@ -1832,7 +1823,7 @@ if (!defined('_ADODB_LAYER')) {
 			$rs->Close();
 		}
 
-		return (int)$this->genID;
+		return $this->genID;
 	}
 
 	/**
@@ -2170,8 +2161,7 @@ if (!defined('_ADODB_LAYER')) {
 		$rs2->sql = $rs->sql;
 		$rs2->dataProvider = $this->dataProvider;
 		$rs2->InitArrayFields($arr,$flds);
-
-		$rs2->adodbFetchMode = $rs2->fetchMode = isset($rs->adodbFetchMode) ? $rs->adodbFetchMode : $rs->fetchMode;
+		$rs2->fetchMode = isset($rs->adodbFetchMode) ? $rs->adodbFetchMode : $rs->fetchMode;
 		return $rs2;
 	}
 
@@ -2278,7 +2268,7 @@ if (!defined('_ADODB_LAYER')) {
 			return false;
 		}
 
-		$midrow = (int) ($total/2);
+		$midrow = (integer) ($total/2);
 		$rs = $this->SelectLimit("select $field from $table $where order by 1",1,$midrow);
 		if ($rs && !$rs->EOF) {
 			return reset($rs->fields);
@@ -2759,56 +2749,41 @@ if (!defined('_ADODB_LAYER')) {
 	 * @noinspection PhpUnusedParameterInspection
 	 */
 	function autoExecute($table, $fields_values, $mode = 'INSERT', $where = '', $forceUpdate = true, $magic_quotes = false) {
-		switch($mode) {
-			case DB_AUTOQUERY_INSERT:
-			case DB_AUTOQUERY_UPDATE:
-				break;
-			case 'UPDATE':
-				$mode = DB_AUTOQUERY_UPDATE;
-				break;
-			case 'INSERT':
-				$mode = DB_AUTOQUERY_INSERT;
-				break;
-			default:
-				$this->outp_throw("AutoExecute: Unknown mode=$mode", 'AutoExecute');
-				return false;
-		}
-
 		if (empty($fields_values)) {
 			$this->outp_throw('AutoExecute: Empty fields array', 'AutoExecute');
 			return false;
 		}
-		if (empty($where) && $mode == DB_AUTOQUERY_UPDATE) {
+		if (empty($where) && ($mode == 'UPDATE' || $mode == 2 /* DB_AUTOQUERY_UPDATE */)) {
 			$this->outp_throw('AutoExecute: Illegal mode=UPDATE with empty WHERE clause', 'AutoExecute');
 			return false;
 		}
 
 		$sql = "SELECT * FROM $table";
-		if (!empty($where)) {
-			$sql .= " WHERE $where";
-		}
-
 		$rs = $this->SelectLimit($sql, 1);
-		if (!$rs || $mode == DB_AUTOQUERY_UPDATE && $rs->EOF) {
-			// Table does not exist or udpate where clause matches no rows
-			return false;
+		if (!$rs) {
+			return false; // table does not exist
 		}
 
 		$rs->tableName = $table;
+		if (!empty($where)) {
+			$sql .= " WHERE $where";
+		}
 		$rs->sql = $sql;
 
-		if ($mode == DB_AUTOQUERY_UPDATE) {
-			$sql = $this->getUpdateSQL($rs, $fields_values, $forceUpdate);
-		} else {
-			$sql = $this->getInsertSQL($rs, $fields_values);
+		switch($mode) {
+			case 'UPDATE':
+			case DB_AUTOQUERY_UPDATE:
+				$sql = $this->GetUpdateSQL($rs, $fields_values, $forceUpdate);
+				break;
+			case 'INSERT':
+			case DB_AUTOQUERY_INSERT:
+				$sql = $this->GetInsertSQL($rs, $fields_values);
+				break;
+			default:
+				$this->outp_throw("AutoExecute: Unknown mode=$mode", 'AutoExecute');
+				return false;
 		}
-
-		if (!$sql) {
-			return false;
-		}
-
-		$response = $this->Execute($sql);
-		return $response;
+		return $sql && $this->Execute($sql);
 	}
 
 
@@ -3247,61 +3222,63 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * Returns an array of table names and/or views in the database.
 	 *
 	 * @param string|bool $ttype Can be either `TABLE`, `VIEW`, or false.
-	 *   - If false, both views and tables are returned.
-	 *   - `TABLE` (or `T`) returns only tables
-	 *   - `VIEW` (or `V` returns only views
+	 *                           - If false, both views and tables are returned.
+	 *                           - `TABLE` (or `T`) returns only tables
+	 *                           - `VIEW` (or `V` returns only views
 	 * @param string|bool $showSchema Prepends the schema/user to the table name,
 	 *                                eg. USER.TABLE
 	 * @param string|bool $mask Input mask - not supported by all drivers
 	 *
 	 * @return array|false Tables/Views for current database.
 	 */
-	function metaTables($ttype=false, $showSchema=false, $mask=false) {
+	function MetaTables($ttype=false,$showSchema=false,$mask=false) {
 		global $ADODB_FETCH_MODE;
-
-		if (!$this->metaTablesSQL) {
-			return false;
-		}
 
 		if ($mask) {
 			return false;
 		}
+		if ($this->metaTablesSQL) {
+			$save = $ADODB_FETCH_MODE;
+			$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
 
-		$save = $ADODB_FETCH_MODE;
-		$ADODB_FETCH_MODE = ADODB_FETCH_NUM;
-		if ($this->fetchMode !== false) {
-			$savem = $this->setFetchMode(false);
+			if ($this->fetchMode !== false) {
+				$savem = $this->SetFetchMode(false);
+			}
+
+			$rs = $this->Execute($this->metaTablesSQL);
+			if (isset($savem)) {
+				$this->SetFetchMode($savem);
+			}
+			$ADODB_FETCH_MODE = $save;
+
+			if ($rs === false) {
+				return false;
+			}
+			$arr = $rs->GetArray();
+			$arr2 = array();
+
+			if ($hast = ($ttype && isset($arr[0][1]))) {
+				$showt = strncmp($ttype,'T',1);
+			}
+
+			for ($i=0; $i < sizeof($arr); $i++) {
+				if ($hast) {
+					if ($showt == 0) {
+						if (strncmp($arr[$i][1],'T',1) == 0) {
+							$arr2[] = trim($arr[$i][0]);
+						}
+					} else {
+						if (strncmp($arr[$i][1],'V',1) == 0) {
+							$arr2[] = trim($arr[$i][0]);
+						}
+					}
+				} else
+					$arr2[] = trim($arr[$i][0]);
+			}
+			$rs->Close();
+			return $arr2;
 		}
-
-		$rs = $this->execute($this->metaTablesSQL);
-
-		if (isset($savem)) {
-			$this->setFetchMode($savem);
-		}
-		$ADODB_FETCH_MODE = $save;
-
-		if ($rs === false) {
-			return false;
-		}
-
-		$res = $rs->getArray();
-
-		// Filter result to keep only the selected type
-		if ($res && $ttype && isset($res[0][1])) {
-			$ttype = strtoupper($ttype[0]);
-			$res = array_filter($res,
-				/**
-				 * @param array $table metaTablesSQL query result row.
-				 *
-				 * @return bool true if $ttype matches the table's type.
-				 */
-				function (array $table) use ($ttype): bool {
-					return $table[1][0] == $ttype;
-				}
-			);
-		}
-
-		return array_column($res, 0);
+		return false;
 	}
 
 
@@ -3395,43 +3372,29 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	}
 
 	/**
-	 * List columns names in a table as an array
+	 * List columns names in a table as an array.
+	 * @param table	table name to query
 	 *
-	 * @param string $table	     table name to query
-	 * @param bool   $numIndexes return numeric keys
-	 * @param bool   $useattnum  discarded in base class
-	 *
-	 * @return false|array of column names for current table.
+	 * @return  array of column names for current table.
 	 */
-	public function MetaColumnNames(
-		string $table,
-		bool $numIndexes=false,
-		bool $useattnum=false
-	) {
-
+	function MetaColumnNames($table, $numIndexes=false,$useattnum=false /* only for postgres */) {
 		$objarr = $this->MetaColumns($table);
 		if (!is_array($objarr)) {
 			return false;
 		}
-
-		if ($useattnum) {
-			/*
-			* Assume we want a numeric array to
-			* match the postgres option
-			*/
-			$numIndexes = true;
-		}
-
-		$columnNames = [];
-		foreach($objarr as $v) {
-			$columnNames[strtoupper($v->name)] = $v->name;
-		}
-
+		$arr = array();
 		if ($numIndexes) {
-			return array_values($columnNames);
-		}
+			$i = 0;
+			if ($useattnum) {
+				foreach($objarr as $v)
+					$arr[$v->attnum] = $v->name;
 
-		return $columnNames;
+			} else
+				foreach($objarr as $v) $arr[$i++] = $v->name;
+		} else
+			foreach($objarr as $v) $arr[strtoupper($v->name)] = $v->name;
+
+		return $arr;
 	}
 
 	/**
@@ -3671,15 +3634,11 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 	 * @param bool   $magic_quotes This param is not used since 5.21.0.
 	 *                             It remains for backwards compatibility.
 	 *
-	 * @return null|string Quoted string
+	 * @return string Quoted string
 	 *
 	 * @noinspection PhpUnusedParameterInspection
 	 */
 	function addQ($s, $magic_quotes=false) {
-		
-		if (!$s) {
-			return $s;
-		}
 		if ($this->replaceQuote[0] == '\\') {
 			$s = str_replace(
 				array('\\', "\0"),
@@ -3889,19 +3848,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		return '';
 	}
 
-	/**
-	 * Returns SQL to obtain the length of data in a column, including
-	 * CHAR fields
-	 *
-	 * @param string $fieldName The field length to measure
- 	 *
-	 * @return string
-	 */
-	public function length(string $fieldName): string
-	{
-		return sprintf('LENGTH(TRIM(%s))', $fieldName);
-	}
-
 } // end class ADOConnection
 
 	/**
@@ -4010,13 +3956,6 @@ http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_1
 		/** @var bool|array  */
 		var $fields = false;
 		var $connection = false;
-
-		/**
-		 * The timestamp that the recordset was created
-		 *
-		 * @var integer
-		 */
-		public int $timeCreated = 0;
 
 		function RowCount() {
 			return 0;
@@ -4162,8 +4101,6 @@ class ADORecordSet implements IteratorAggregate {
 							/// in other words, we use a text area for editing.
 	var $canSeek = false;	/// indicates that seek is supported
 	var $sql;				/// sql text
-
-	var $BOF = false;
 	var $EOF = false;		/// Indicates that the current record position is after the last record in a Recordset object.
 
 	var $emptyTimeStamp = '&nbsp;'; /// what to display when $time==0
@@ -4799,62 +4736,24 @@ class ADORecordSet implements IteratorAggregate {
 	 * @return bool true if there still rows available, or false if there are no more rows (EOF).
 	 */
 	function Move($rowNumber = 0) {
-
-		/*
-		* Is the recordset already in BOF or EOF state?
-		*/
-		if ($this->BOF) {
-			$currentRow = -1;
-		} elseif ($this->EOF) {
-			$currentRow = $this->_numOfRows + 1;
-		} else {
-			$currentRow = $this->_currentRow;
-		}
-
-		if ($rowNumber == $currentRow
-			|| ($this->EOF && $rowNumber > $currentRow)
-			|| ($this->BOF && $rowNumber < $currentRow)
-		) {
-			/*
-			* Ensure the correct EOF state is retained and
-			* return appropriate status
-			*/
-			if ($this->EOF || $this->BOF) {
-				$this->_currentRow = false;
-				return false;
-			}
-
+		$this->EOF = false;
+		if ($rowNumber == $this->_currentRow) {
 			return true;
 		}
-
-		$this->EOF = false;
-		$this->BOF = false;
-
 		if ($rowNumber >= $this->_numOfRows) {
-			$this->EOF         = true;
-			$this->fields      = false;
-			$this->_currentRow = false;
-			return false;
+			if ($this->_numOfRows != -1) {
+				$rowNumber = $this->_numOfRows-2;
+			}
 		}
 
 		if ($rowNumber < 0) {
-			$this->BOF    = true;
-			$this->fields = false;
-			$this->_currentRow = false;
+			$this->EOF = true;
 			return false;
 		}
 
 		if ($this->canSeek) {
-			/*
-			* Database supports cursor movement to arbitrary record
-			* number
-			*/
 			if ($this->_seek($rowNumber)) {
 				$this->_currentRow = $rowNumber;
-				/*
-				* now use a native function to retrieve a record
-				* at that point
-				*/
 				if ($this->_fetch()) {
 					return true;
 				}
@@ -4864,10 +4763,6 @@ class ADORecordSet implements IteratorAggregate {
 			}
 		} else {
 			if ($rowNumber < $this->_currentRow) {
-				/*
-				* If canseek is not supported, then the system
-				* cannot go backwards
-				*/
 				return false;
 			}
 			while (! $this->EOF && $this->_currentRow < $rowNumber) {
@@ -5094,7 +4989,7 @@ class ADORecordSet implements IteratorAggregate {
 	 *
 	 * Must be defined by child class.
 	 *
-	 * @param int $fieldOffset Optional field offset
+	 * @param int $fieldOffset
 	 *
 	 * @return ADOFieldObject|false
 	 */
@@ -5133,21 +5028,16 @@ class ADORecordSet implements IteratorAggregate {
 	 *
 	 * @param bool $isUpper True to convert field names to uppercase.
 	 *
-	 * @return bool|ADOFetchObj The object with properties set to the current row's fields.
+	 * @return ADOFetchObj The object with properties set to the current row's fields.
 	 */
 	function fetchObject($isUpper = true) {
-
-		if (!$this->fields) {
-			/*
-			* past EOF
-			*/
-			return false;
+		$fields = [];
+		foreach ($this->fieldTypesArray() as $metadata) {
+			$fields[$metadata->name] = $this->fields($metadata->name);
 		}
-
-		$casing = $isUpper ? CASE_UPPER : CASE_LOWER;
-
-		$fields = array_change_key_case($this->fields, $casing);
-
+		if ($isUpper) {
+			$fields = array_change_key_case($fields, CASE_UPPER);
+		}
 		return new ADOFetchObj($fields);
 	}
 
@@ -5473,7 +5363,7 @@ class ADORecordSet implements IteratorAggregate {
 		 * @param int|bool     $mode    The ADODB_FETCH_MODE value
 		 */
 		function __construct($queryID, $mode=false) {
-			parent::__construct(self::DUMMY_QUERY_ID, $mode);
+			parent::__construct(self::DUMMY_QUERY_ID);
 
 			// fetch() on EOF does not delete $this->fields
 			global $ADODB_COMPAT_FETCH;
@@ -5569,21 +5459,13 @@ class ADORecordSet implements IteratorAggregate {
 		}
 
 		/**
-		 * @param int $fieldOffset The required offset
+		 * @param int [$fieldOffset]
 		 *
-		 * @return false|\ADOFieldObject
+		 * @return \ADOFieldObject
 		 */
 		function FetchField($fieldOffset = -1) {
 			if (isset($this->_fieldobjects)) {
-				if (array_key_exists($fieldOffset, $this->_fieldobjects)) {
-					return $this->_fieldobjects[$fieldOffset];
-				} else {
-					return false;
-				}
-			}
-
-			if (!array_key_exists($fieldOffset, $this->_colnames)) {
-				return false;
+				return $this->_fieldobjects[$fieldOffset];
 			}
 			$o =  new ADOFieldObject();
 			$o->name = $this->_colnames[$fieldOffset];
@@ -5922,10 +5804,10 @@ class ADORecordSet implements IteratorAggregate {
 										$nconnect = true; $persist = true; break;
 					case 'persist':
 					case 'persistent':	$persist = $v; break;
-					case 'debug':		$obj->debug = (int) $v; break;
+					case 'debug':		$obj->debug = (integer) $v; break;
 					#ibase
 					case 'role':		$obj->role = $v; break;
-					case 'dialect':	$obj->dialect = (int) $v; break;
+					case 'dialect':	$obj->dialect = (integer) $v; break;
 					case 'charset':		$obj->charset = $v; $obj->charSet=$v; break;
 					case 'buffers':		$obj->buffers = $v; break;
 					case 'fetchmode':   $obj->SetFetchMode($v); break;

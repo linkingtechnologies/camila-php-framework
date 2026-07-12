@@ -188,8 +188,8 @@ class ADODB_sybase extends ADOConnection {
 			return $rs;
 		}
 
-		$nrows = (int) $nrows;
-		$offset = (int) $offset;
+		$nrows = (integer) $nrows;
+		$offset = (integer) $offset;
 
 		$cnt = ($nrows >= 0) ? $nrows : 999999999;
 		if ($offset > 0 && $cnt) $cnt += $offset;

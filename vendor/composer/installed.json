@@ -7,12 +7,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ADOdb/ADOdb.git",
-                "reference": "0e1ac40dd292620c8450411d832429b81e4d21d0"
+                "reference": "51e7797"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ADOdb/ADOdb/zipball/0e1ac40dd292620c8450411d832429b81e4d21d0",
-                "reference": "0e1ac40dd292620c8450411d832429b81e4d21d0",
+                "url": "https://api.github.com/repos/ADOdb/ADOdb/zipball/51e7797",
+                "reference": "51e7797",
                 "shasum": ""
             },
             "require": {

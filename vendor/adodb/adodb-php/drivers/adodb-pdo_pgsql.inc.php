@@ -19,10 +19,7 @@
  * @copyright 2014 Damien Regad, Mark Newnham and the ADOdb community
  */
 
-/**
- * @noinspection SqlResolve
- */
-class ADODB_pdo_pgsql extends ADODB_pdo_base {
+class ADODB_pdo_pgsql extends ADODB_pdo {
 	var $metaDatabasesSQL = "select datname from pg_database where datname not in ('template0','template1') order by 1";
 	var $metaTablesSQL = "select tablename,'T' from pg_tables where tablename not like 'pg\_%'
 		and tablename not in ('sql_features', 'sql_implementation_info', 'sql_languages',
@@ -67,9 +64,8 @@ class ADODB_pdo_pgsql extends ADODB_pdo_base {
 	var $random = 'random()';		/// random function
 	var $concat_operator='||';
 
-	protected function _init(ADODB_pdo $parentDriver)
+	function _init($parentDriver)
 	{
-		parent::_init($parentDriver);
 
 		$parentDriver->hasTransactions = false; ## <<< BUG IN PDO pgsql driver
 		$parentDriver->hasInsertID = true;
@@ -151,7 +147,8 @@ select viewname,'V' from pg_views where viewname like $mask";
 		$ADODB_FETCH_MODE = $save;
 
 		if ($rs === false) {
-			return false;
+			$false = false;
+			return $false;
 		}
 		if (!empty($this->metaKeySQL)) {
 			// If we want the primary keys, we have to issue a separate query
@@ -183,8 +180,7 @@ select viewname,'V' from pg_views where viewname like $mask";
 				while (!$rsdef->EOF) {
 					$num = $rsdef->fields['num'];
 					$s = $rsdef->fields['def'];
-					if (strpos($s,'::')===false && substr($s, 0, 1) == "'") {
-						// FIXME: quoted strings hack... for now...
+					if (strpos($s,'::')===false && substr($s, 0, 1) == "'") { /* quoted strings hack... for now... fixme */
 						$s = substr($s, 1);
 						$s = substr($s, 0, strlen($s) - 1);
 					}
@@ -239,7 +235,8 @@ select viewname,'V' from pg_views where viewname like $mask";
 		}
 		$rs->Close();
 		if (empty($retarr)) {
-			return false;
+			$false = false;
+			return $false;
 		} else return $retarr;
 
 	}
