@@ -208,7 +208,7 @@ class CamilaMcpHandler
                         $args['data'] ?? [], []);
                     break;
                 case 'update_record':
-                    $data = $this->apiCall('PATCH',
+                    $data = $this->apiCall('PUT',
                         '/records/' . rawurlencode($args['table'] ?? '') . '/' . rawurlencode($args['id'] ?? ''),
                         $args['data'] ?? [], []);
                     break;
