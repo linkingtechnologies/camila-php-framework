@@ -127,16 +127,24 @@ function camila_configurator_worktable_title_db_onupdate($lform)
         $record['share_canupdate'] = $lform->fields['share_canupdate']->value;
     if ($lform->fields['share_candelete']->value != '')
         $record['share_candelete'] = $lform->fields['share_candelete']->value;*/
-	
+
 	/*if ($lform->fields['filter']->value != '')
         $record['filter'] = $lform->fields['share_candelete']->value;*/
-    
-    $updateSQL = $_CAMILA['db']->AutoExecute(CAMILA_TABLE_PAGES, $record, 'UPDATE', 'url=' . $_CAMILA['db']->qstr($scriptname));
-    
-    if (!$updateSQL) {
-        camila_information_text(camila_get_translation('camila.worktable.db.error'));
+
+    // NOTE: the block above is fully commented out (sharing fields are not part of the
+    // admin form either — see the commented-out form_* calls in admin()), so $record is
+    // always empty here. Skip the AutoExecute entirely instead of calling it with an empty
+    // array, which ADOdb rejects with "AutoExecute: Empty fields array" and which always
+    // made this function report camila.worktable.db.error even though the earlier updates
+    // in this same function (title, description, sequence, category) already succeeded.
+    if (!empty($record)) {
+        $updateSQL = $_CAMILA['db']->AutoExecute(CAMILA_TABLE_PAGES, $record, 'UPDATE', 'url=' . $_CAMILA['db']->qstr($scriptname));
+
+        if (!$updateSQL) {
+            camila_information_text(camila_get_translation('camila.worktable.db.error'));
+        }
     }
-    
+
     
     return true;
 }
