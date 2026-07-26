@@ -68,6 +68,8 @@ class ComposerStaticInitb05ec368514a31f084854d6eb430adfc
         'D' => 
         array (
             'DeepCopy\\' => 9,
+            'DantSu\\PHPImageEditor\\' => 22,
+            'DantSu\\OpenStreetMapStaticAPI\\' => 30,
         ),
         'C' => 
         array (
@@ -184,6 +186,14 @@ class ComposerStaticInitb05ec368514a31f084854d6eb430adfc
         'DeepCopy\\' => 
         array (
             0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
+        ),
+        'DantSu\\PHPImageEditor\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dantsu/php-image-editor/src',
+        ),
+        'DantSu\\OpenStreetMapStaticAPI\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src',
         ),
         'Composer\\Pcre\\' => 
         array (
@@ -442,6 +452,19 @@ class ComposerStaticInitb05ec368514a31f084854d6eb430adfc
         'Composer\\Pcre\\Regex' => __DIR__ . '/..' . '/composer/pcre/src/Regex.php',
         'Composer\\Pcre\\ReplaceResult' => __DIR__ . '/..' . '/composer/pcre/src/ReplaceResult.php',
         'Composer\\Pcre\\UnexpectedNullMatchException' => __DIR__ . '/..' . '/composer/pcre/src/UnexpectedNullMatchException.php',
+        'DantSu\\OpenStreetMapStaticAPI\\Circle' => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src/Circle.php',
+        'DantSu\\OpenStreetMapStaticAPI\\Interfaces\\Draw' => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src/Interfaces/Draw.php',
+        'DantSu\\OpenStreetMapStaticAPI\\LatLng' => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src/LatLng.php',
+        'DantSu\\OpenStreetMapStaticAPI\\Line' => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src/Line.php',
+        'DantSu\\OpenStreetMapStaticAPI\\MapData' => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src/MapData.php',
+        'DantSu\\OpenStreetMapStaticAPI\\Markers' => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src/Markers.php',
+        'DantSu\\OpenStreetMapStaticAPI\\OpenStreetMap' => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src/OpenStreetMap.php',
+        'DantSu\\OpenStreetMapStaticAPI\\Polygon' => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src/Polygon.php',
+        'DantSu\\OpenStreetMapStaticAPI\\TileLayer' => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src/TileLayer.php',
+        'DantSu\\OpenStreetMapStaticAPI\\Utils\\GeographicConverter' => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src/Utils/GeographicConverter.php',
+        'DantSu\\OpenStreetMapStaticAPI\\XY' => __DIR__ . '/..' . '/dantsu/php-osm-static-api/src/XY.php',
+        'DantSu\\PHPImageEditor\\Geometry2D' => __DIR__ . '/..' . '/dantsu/php-image-editor/src/Geometry2D.php',
+        'DantSu\\PHPImageEditor\\Image' => __DIR__ . '/..' . '/dantsu/php-image-editor/src/Image.php',
         'DeepCopy\\DeepCopy' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/DeepCopy.php',
         'DeepCopy\\Exception\\CloneException' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/Exception/CloneException.php',
         'DeepCopy\\Exception\\PropertyException' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/Exception/PropertyException.php',
@@ -1250,6 +1273,7 @@ class ComposerStaticInitb05ec368514a31f084854d6eb430adfc
         'PhpOffice\\PhpSpreadsheet\\Chart\\ChartColor' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Chart/ChartColor.php',
         'PhpOffice\\PhpSpreadsheet\\Chart\\DataSeries' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Chart/DataSeries.php',
         'PhpOffice\\PhpSpreadsheet\\Chart\\DataSeriesValues' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Chart/DataSeriesValues.php',
+        'PhpOffice\\PhpSpreadsheet\\Chart\\DataTable' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Chart/DataTable.php',
         'PhpOffice\\PhpSpreadsheet\\Chart\\Exception' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Chart/Exception.php',
         'PhpOffice\\PhpSpreadsheet\\Chart\\GridLines' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Chart/GridLines.php',
         'PhpOffice\\PhpSpreadsheet\\Chart\\Layout' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Chart/Layout.php',
@@ -1289,6 +1313,7 @@ class ComposerStaticInitb05ec368514a31f084854d6eb430adfc
         'PhpOffice\\PhpSpreadsheet\\Reader\\CsvNoEscape' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/CsvNoEscape.php',
         'PhpOffice\\PhpSpreadsheet\\Reader\\Csv\\Delimiter' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Csv/Delimiter.php',
         'PhpOffice\\PhpSpreadsheet\\Reader\\DefaultReadFilter' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/DefaultReadFilter.php',
+        'PhpOffice\\PhpSpreadsheet\\Reader\\EmptyWorksheetInfo' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/EmptyWorksheetInfo.php',
         'PhpOffice\\PhpSpreadsheet\\Reader\\Exception' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Exception.php',
         'PhpOffice\\PhpSpreadsheet\\Reader\\Gnumeric' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Gnumeric.php',
         'PhpOffice\\PhpSpreadsheet\\Reader\\Gnumeric\\PageSetup' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Gnumeric/PageSetup.php',
@@ -1297,6 +1322,7 @@ class ComposerStaticInitb05ec368514a31f084854d6eb430adfc
         'PhpOffice\\PhpSpreadsheet\\Reader\\Html' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Html.php',
         'PhpOffice\\PhpSpreadsheet\\Reader\\IReadFilter' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/IReadFilter.php',
         'PhpOffice\\PhpSpreadsheet\\Reader\\IReader' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/IReader.php',
+        'PhpOffice\\PhpSpreadsheet\\Reader\\IReader2' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/IReader2.php',
         'PhpOffice\\PhpSpreadsheet\\Reader\\Ods' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Ods.php',
         'PhpOffice\\PhpSpreadsheet\\Reader\\Ods\\AutoFilter' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Ods/AutoFilter.php',
         'PhpOffice\\PhpSpreadsheet\\Reader\\Ods\\BaseLoader' => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Reader/Ods/BaseLoader.php',

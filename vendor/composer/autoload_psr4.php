@@ -28,6 +28,8 @@ return array(
     'Matrix\\' => array($vendorDir . '/markbaker/matrix/classes/src'),
     'Flow\\JSONPath\\' => array($vendorDir . '/softcreatr/jsonpath/src'),
     'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
+    'DantSu\\PHPImageEditor\\' => array($vendorDir . '/dantsu/php-image-editor/src'),
+    'DantSu\\OpenStreetMapStaticAPI\\' => array($vendorDir . '/dantsu/php-osm-static-api/src'),
     'Composer\\Pcre\\' => array($vendorDir . '/composer/pcre/src'),
     'Complex\\' => array($vendorDir . '/markbaker/complex/classes/src'),
     'BorderCloud\\SPARQL\\Tests\\' => array($vendorDir . '/bordercloud/sparql/tests'),
