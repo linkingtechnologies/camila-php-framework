@@ -620,7 +620,8 @@ class configurator
                 $canInsert  = $data->val(23, 2, $sheetnum + 1);
                 $canDelete  = $data->val(24, 2, $sheetnum + 1);
                 $category   = $data->val(25, 2, $sheetnum + 1);
-                
+                $filter     = $data->val(26, 2, $sheetnum + 1);
+
                 $shortTitle = \ForceUTF8\Encoding::toUTF8($shortTitle);
                 $fullTitle  = \ForceUTF8\Encoding::toUTF8($fullTitle);
                 $orderField = \ForceUTF8\Encoding::toUTF8($orderField);
@@ -629,6 +630,7 @@ class configurator
                 $canInsert  = \ForceUTF8\Encoding::toUTF8($canInsert);
                 $canDelete  = \ForceUTF8\Encoding::toUTF8($canDelete);
                 $category   = \ForceUTF8\Encoding::toUTF8($category);
+                $filter     = \ForceUTF8\Encoding::toUTF8($filter);
 
                 $record                = Array();
                 $record['id']          = $id;
@@ -640,6 +642,7 @@ class configurator
                 $record['caninsert']   = array_search($canInsert, $yesNoArr);
                 $record['candelete']   = array_search($canDelete, $yesNoArr);
                 $record['category']    = $category;
+                $record['filter']      = $filter;
 
 				//echo $this->db->qstr($id);
                 $updateSQL = $this->db->AutoExecute(CAMILA_TABLE_WORKT, $record, 'UPDATE', 'id=' . $this->db->qstr($id));

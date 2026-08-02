@@ -201,7 +201,8 @@ class CAMILA_XLS_deck extends CHAW_deck
             $opt[] = camila_get_translation('camila.worktable.caninsert');
             $opt[] = camila_get_translation('camila.worktable.candelete');
             $opt[] = camila_get_translation('camila.worktable.category');
-            
+            $opt[] = camila_get_translation('camila.worktable.visibility.filter');
+
             foreach ($opt as $key => $value) {
                 $text = $opt[$key];
                 $spreadsheet->getActiveSheet()->setCellValue([1, intval($key) + 2], ($text));
@@ -284,7 +285,9 @@ class CAMILA_XLS_deck extends CHAW_deck
             $spreadsheet->getActiveSheet()->setCellValue([2, 24], ($text));
             $text = $result->fields['category'];
             $spreadsheet->getActiveSheet()->setCellValue([2, 25], ($text));
-            
+            $text = $result->fields['filter'];
+            $spreadsheet->getActiveSheet()->setCellValue([2, 26], ($text));
+
             $text = camila_get_translation('camila.worktable.bookmarks');
             $spreadsheet->getActiveSheet()->setCellValue([3, 17], ($text));
         
