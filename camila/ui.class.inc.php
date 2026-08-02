@@ -385,7 +385,31 @@ function addTimelineSection(array $events, string $commonIcon = 'ri-calendar-lin
 		$current = Array();
 		global $_CAMILA;
 		$menu = new SimpleXMLElement(file_get_contents($confFile));
-		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div id="linkset2"><div id="nav" class="tabs is-boxed"><ul class="nav nav-tabs">'));
+
+		$isBulma = defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma';
+
+		$activeTitle = '';
+		foreach ($menu as $k => $v) {
+			if ((isset($_REQUEST['dashboard']) && strpos('?'.$_SERVER['QUERY_STRING'], (string)($v->url)) !==  false) || ((string)($v->id) == $defaultId) || (isset($_REQUEST['dashboard']) && strpos(','.(string)($v->pages).',', ','.$_REQUEST['dashboard'].',') !==  false))
+			{
+				$activeTitle = ((string)$v->lic_title != '') ? camila_get_translation((string)$v->lic_title) : (string)$v->title;
+			}
+		}
+
+		$navOpen = '<div id="linkset2">';
+		if ($isBulma) {
+			// kept outside #nav: legacy xWalkUL(xFirstChild(#nav), ...) in camila.js
+			// assumes #nav's first child is the tabs <ul> itself.
+			$navOpen .= '<div class="camila-hometabs-toggle-row">';
+			$navOpen .= '<a role="button" class="navbar-burger camila-hometabs-burger" data-target="camilaHomeMenuTabs" aria-label="menu" aria-expanded="false"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></a>';
+			if ($activeTitle != '') {
+				$navOpen .= '<span class="camila-active-tab-label">'.$activeTitle.'</span>';
+			}
+			$navOpen .= '</div>';
+		}
+		$navOpen .= '<div id="nav" class="tabs is-boxed">';
+		$navOpen .= '<ul' . ($isBulma ? ' id="camilaHomeMenuTabs"' : '') . ' class="nav nav-tabs">';
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $navOpen));
 
 		foreach ($menu as $k => $v) {
 			$curr = false;

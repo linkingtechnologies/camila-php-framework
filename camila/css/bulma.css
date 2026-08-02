@@ -52,3 +52,57 @@ hr {
 .table-bordered td {
   vertical-align: middle;
 }
+
+.camila-hometabs-burger {
+  /* Bulma's base .navbar-burger rule sets margin-inline-start:auto to push
+     it to the right inside .navbar-brand; here it's the first item, so undo it. */
+  margin-inline-start: 0;
+}
+
+#camilaHomeMenuTabs {
+  display: none;
+}
+#camilaHomeMenuTabs.is-active {
+  display: flex;
+  flex-direction: column;
+}
+@media screen and (min-width: 1024px) {
+  #camilaHomeMenuTabs {
+    display: flex;
+  }
+  .camila-hometabs-burger {
+    display: none;
+  }
+}
+
+.camila-active-tab-label {
+  font-weight: bold;
+  color: #000080;
+}
+@media screen and (min-width: 1024px) {
+  .camila-active-tab-label {
+    display: none;
+  }
+}
+
+.camila-hometabs-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+}
+.camila-hometabs-toggle-row .camila-active-tab-label {
+  line-height: 1;
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media screen and (min-width: 1024px) {
+  .camila-hometabs-toggle-row {
+    display: none;
+  }
+}

@@ -112,7 +112,7 @@ class CHAW_deck extends HAW_deck
 		  if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
 			  $this->camila_add_js("<link href=\"".CAMILA_LIB_DIR."bulma/css/bulma.min.css\" rel=\"stylesheet\">\n");
 			  $this->camila_add_js("<link href=\"".CAMILA_LIB_DIR."remixicon/fonts/remixicon.css\" rel=\"stylesheet\">\n");
-			  $this->camila_add_js("<link href=\"".CAMILA_DIR."css/bulma.css\" rel=\"stylesheet\">\n");
+			  $this->camila_add_js("<link href=\"".CAMILA_DIR."css/bulma.css?v=".$this->camila_force_js_update_token."\" rel=\"stylesheet\">\n");
 			  $this->camila_add_js("<script type=\"text/javascript\" src=\"".CAMILA_DIR."js/bulma.js?v=".$this->camila_force_js_update_token."\"></script>\n");
 		  }
 
@@ -268,12 +268,13 @@ class CHAW_deck extends HAW_deck
   
  function print_menu_children($parents,$titles,$visible,$urls,$father)
  {
+   $html = '';
    $count = 0;
    for($i=0;$i<count($parents);$i++) {
 	   if($parents[$i] == $father) {
 	       if ($father!='' && $count==0)
 		   {
-              echo "<ul class=\"dropdown-menu\">";
+              $html .= "<ul class=\"dropdown-menu\">";
 			}
 
 		  $count++;
@@ -287,32 +288,24 @@ class CHAW_deck extends HAW_deck
 			     $class = 'current';
 		  }
 
-	      echo '<li><a href="'.$urls[$i].'" class="'.$class.'">'.$titles[$i].'</a>';
+	      $html .= '<li><a href="'.$urls[$i].'" class="'.$class.'">'.$titles[$i].'</a>';
 
-	      $this->print_menu_children($parents,$titles,$visible,$urls,$urls[$i]);
-		  echo '</li>';
+	      $html .= $this->print_menu_children($parents,$titles,$visible,$urls,$urls[$i]);
+		  $html .= '</li>';
 	   }
    }
 
    if ($father!='' && $count>0)
-          echo "</ul>";
+          $html .= "</ul>";
+
+   return $html;
  }
 
  function print_menu_children_bulma($parents,$titles,$visible,$urls,$father)
  {
-   $count = 0;
+   $html = '';
    for($i=0;$i<count($parents);$i++) {
 	   if($parents[$i] == $father) {
-	       if ($father!='' && $count==0)
-		   {
-              ////echo "<ul class=\"dropdown-menu\">";
-			  //echo '<div class="navbar-item has-dropdown is-hoverable>';
-			  //echo '<div class="navbar-dropdown">';
-			  
-			}
-
-		  $count++;
-
 
 		  $class="";
 		  if ($father == '')
@@ -322,8 +315,8 @@ class CHAW_deck extends HAW_deck
 			     $class = 'is-selected';
 		  }
 if ($father=='')
-echo '<div class="navbar-item has-dropdown is-hoverable">';
-	      echo '<a href="'.$urls[$i].'" class="navbar-item '.$class.'">'.$titles[$i].'</a>';
+$html .= '<div class="navbar-item has-dropdown is-hoverable">';
+	      $html .= '<a href="'.$urls[$i].'" class="navbar-item '.$class.'">'.$titles[$i].'</a>';
 
 		$c = 0;
 		for($j=0;$j<count($parents);$j++) {
@@ -333,22 +326,18 @@ echo '<div class="navbar-item has-dropdown is-hoverable">';
 
 if ($father=='') {
 	if ($c>0)
-		echo '<div class="navbar-dropdown">';
+		$html .= '<div class="navbar-dropdown">';
 }
-	      $this->print_menu_children_bulma($parents,$titles,$visible,$urls,$urls[$i]);
+	      $html .= $this->print_menu_children_bulma($parents,$titles,$visible,$urls,$urls[$i]);
 if ($father=='')
-		  echo '</div>';
+		  $html .= '</div>';
 if ($father=='')
 	if ($c>0)
-		  echo '</div>';
-		  echo '';
+		  $html .= '</div>';
 	   }
    }
 
-   if ($father!='' && $count>0) {
-          ////echo "</ul>";
-		  //echo '</div>';
-   }
+   return $html;
  }
  
  function add_footer($code) {
@@ -649,6 +638,16 @@ if ($father=='')
 
         //Camila Framework: new block START
 
+        $_CAMILA['camila_menu_empty'] = true;
+        if (is_array($_CAMILA['mainmenu']) || is_object($_CAMILA['mainmenu'])) {
+            foreach ($_CAMILA['mainmenu'] as $camila_mm_item) {
+                if ($camila_mm_item['parent'] == '') {
+                    $_CAMILA['camila_menu_empty'] = false;
+                    break;
+                }
+            }
+        }
+
         if (!$this->camila_exporting() && !isset($_REQUEST['camila_popup']) && intval($_CAMILA['error'])==0) {
             $myPreferences = new CHAW_preferences();
             $myPreferences->create($this);
@@ -681,22 +680,7 @@ if ($father=='')
 		if (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') {
 			  if (is_array($_CAMILA['mainmenu']) || is_object($_CAMILA['mainmenu']))
 		  {
-			   
-			  echo '<nav class="navbar is-light" role="navigation" aria-label="main navigation">';
-			  echo '  <div class="navbar-brand">';
-			  echo '    <a class="navbar-item" href="'.CAMILA_HOME.'">'.CAMILA_APPLICATION_TITLE.'</a>';
-			  echo '    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="mainNavbar">';
-			  echo '      <span aria-hidden="true"></span>';
-			  echo '      <span aria-hidden="true"></span>';
-			  echo '      <span aria-hidden="true"></span>';
-			  echo '    </a>';
-			  
-			  echo '  </div>';
-			  echo '  <div id="mainNavbar" class="navbar-menu">';
-
-		  echo '<div class="navbar-start">';
-
-		      $parents = array();
+			  $parents = array();
 			  $titles = array();
 			  $visible = array();
 			  $urls = array();
@@ -709,12 +693,42 @@ if ($father=='')
 				$urls[$key]=$value['url'];
 			  }
 
-			  $this->print_menu_children_bulma($parents, $titles, $visible, $urls, $father);
+			  $menuHtml = $this->print_menu_children_bulma($parents, $titles, $visible, $urls, $father);
+
+			  $camila_active_top_title = '';
+			  $camila_currpage = substr($_SERVER["SCRIPT_NAME"], strrpos($_SERVER["SCRIPT_NAME"], "/") + 1);
+			  foreach ($urls as $camila_mm_key => $camila_mm_url) {
+				  if ($parents[$camila_mm_key] == '' && $camila_currpage == $camila_mm_url) {
+					  $camila_active_top_title = $titles[$camila_mm_key];
+					  break;
+				  }
+			  }
+
+			  if ($menuHtml != '') {
+			  echo '<nav class="navbar is-light" role="navigation" aria-label="main navigation">';
+			  echo '  <div class="navbar-brand">';
+			  echo '    <a class="navbar-item" href="'.CAMILA_HOME.'">'.CAMILA_APPLICATION_TITLE.'</a>';
+			  if ($camila_active_top_title != '') {
+				  echo '    <span class="navbar-item camila-active-tab-label">'.$camila_active_top_title.'</span>';
+			  }
+			  echo '    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="mainNavbar">';
+			  echo '      <span aria-hidden="true"></span>';
+			  echo '      <span aria-hidden="true"></span>';
+			  echo '      <span aria-hidden="true"></span>';
+			  echo '    </a>';
+
+			  echo '  </div>';
+			  echo '  <div id="mainNavbar" class="navbar-menu">';
+
+		  echo '<div class="navbar-start">';
+
+			  echo $menuHtml;
 
 			  		  echo "</div>";
-		  
+
 echo '		    </div><!--/.nav-collapse -->';
 echo '</nav>';
+			  }
 
 		}
 
@@ -723,6 +737,22 @@ else
 {
 		  if (is_array($_CAMILA['mainmenu']) || is_object($_CAMILA['mainmenu']))
 		  {
+			  $parents = array();
+			  $titles = array();
+			  $visible = array();
+			  $urls = array();
+
+			  foreach($_CAMILA['mainmenu'] as $key => $value)
+			  {
+			    $parents[$key]=$value['parent'];
+				$titles[$key]=$value['short_title'];
+				$visible[$key]=$value['visible'];
+				$urls[$key]=$value['url'];
+			  }
+
+			  $menuHtml = $this->print_menu_children($parents, $titles, $visible, $urls, $father);
+
+			  if ($menuHtml != '') {
 			  echo '<div class="navbar navbar-default" role="navigation">';
 			  echo '  <div class="navbar-header">';
 			  echo '    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">';
@@ -737,25 +767,13 @@ else
 
 		  echo "<ul id=\"main-menu\" class=\"nav navbar-nav\">";
 
-		      $parents = array();
-			  $titles = array();
-			  $visible = array();
-			  $urls = array();
-
-			  foreach($_CAMILA['mainmenu'] as $key => $value)
-			  {
-			    $parents[$key]=$value['parent'];
-				$titles[$key]=$value['short_title'];
-				$visible[$key]=$value['visible'];
-				$urls[$key]=$value['url'];
-			  }
-
-			  $this->print_menu_children($parents, $titles, $visible, $urls, $father);
+			  echo $menuHtml;
 
 			  		  echo "</ul>";
-		  
+
 echo '		    </div><!--/.nav-collapse -->';
 echo '</div>';
+			  }
 
 		}
 }		  
@@ -1138,11 +1156,14 @@ class CHAW_preferences
 	
 		global $anonLogin;
 		$anonLogin = 1;
-	
+
 		global $logoutLink;
 		$logoutLink = 0;
 		if (!CAMILA_ANON_LOGIN)
 			$anonLogin = 0;
+
+		global $camilaMenuEmpty;
+		$camilaMenuEmpty = !empty($_CAMILA['camila_menu_empty']) ? 1 : 0;
 		
 	
       //if (!CAMILA_ANON_LOGIN)

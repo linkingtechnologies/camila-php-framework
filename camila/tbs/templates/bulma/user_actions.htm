@@ -2,7 +2,8 @@
   <div class="container">
     <div class="columns is-mobile is-vcentered">
       <div class="column is-half">
-        [onshow..cst.CAMILA_APPLICATION_GROUP]
+        <span>[onload;block=span;when [var.camilaMenuEmpty]=0][onshow..cst.CAMILA_APPLICATION_GROUP]</span>
+        <span>[onload;block=span;when [var.camilaMenuEmpty]=1][onshow..cst.CAMILA_APPLICATION_TITLE]</span>
       </div>
       <div class="column has-text-right">
         <span>[onload;block=span;when [var.anonLogin]=0][onshow._CAMILA.user_surname] [onshow._CAMILA.user_name] |</span>

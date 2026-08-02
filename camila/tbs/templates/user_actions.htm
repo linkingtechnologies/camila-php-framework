@@ -2,7 +2,10 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-xs-4 pull-left">
-				<div class="logo-small">[onshow..cst.CAMILA_APPLICATION_GROUP]</div>
+				<div class="logo-small">
+					<span>[onload;block=span;when [var.camilaMenuEmpty]=0][onshow..cst.CAMILA_APPLICATION_GROUP]</span>
+					<span>[onload;block=span;when [var.camilaMenuEmpty]=1][onshow..cst.CAMILA_APPLICATION_TITLE]</span>
+				</div>
 			</div>
 			<div class="col-xs-8 pull-right text-right">
 				<span>[onload;block=span;when [var.anonLogin]=0][onshow._CAMILA.user_surname] [onshow._CAMILA.user_name] |</span>

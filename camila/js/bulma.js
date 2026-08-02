@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = document.getElementById(targetId);
       burger.classList.toggle('is-active');
       target.classList.toggle('is-active');
+      document.querySelectorAll('.camila-active-tab-label').forEach(label => {
+        label.classList.toggle('is-hidden');
+      });
     });
   });
 

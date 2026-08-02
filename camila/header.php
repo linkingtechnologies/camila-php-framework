@@ -714,7 +714,18 @@ $camilaAuth->applicationName = CAMILA_APPLICATION_NAME;
 
       $camila_temp_text = new CHAW_text(camila_get_translation('camila.youarein'), HAW_TEXTFORMAT_SMALL | HAW_TEXTFORMAT_ITALIC);
       $camila_temp_text->set_br(0);
-      if ($_CAMILA['user_loggedin']) {
+
+      $camila_menu_has_items = false;
+      if (is_array($_CAMILA['mainmenu']) || is_object($_CAMILA['mainmenu'])) {
+          foreach ($_CAMILA['mainmenu'] as $camila_mm_item) {
+              if ($camila_mm_item['parent'] == '') {
+                  $camila_menu_has_items = true;
+                  break;
+              }
+          }
+      }
+
+      if ($_CAMILA['user_loggedin'] && $camila_menu_has_items) {
           $_CAMILA['page']->add_text($camila_temp_text);
           //$_CAMILA['page']->add_text($camila_linkset_sep);
           $camila_link = new CHAW_link(camila_get_translation('camila.homemenu'), CAMILA_HOME);
