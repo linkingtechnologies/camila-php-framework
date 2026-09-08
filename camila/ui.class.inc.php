@@ -331,12 +331,18 @@ function addTimelineSection(array $events, string $commonIcon = 'ri-calendar-lin
 	
 	function mountMiniApp($pluginName, $bootScript, $cssFilePath = '') {
 		global $_CAMILA;
-		
+
 		$scheme = $this->isHttps() ? 'https' : 'http';
 		$host = $_SERVER['HTTP_HOST'];
+		// Derived from the currently-executing script's own path (cf_app.php /
+		// index.php live alongside cf_api.php in the app's own directory), not
+		// hardcoded to '/app/<dir>/' — so this still resolves correctly when the
+		// whole app is served from a URL prefix (e.g. reverse-proxied under a
+		// subfolder), where a hardcoded '/app/...' would silently drop the prefix.
+		$appBasePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 
 		$config = [
-			'baseUrl' => $scheme.'://'.$host.'/app/'.CAMILA_APP_DIR.'/cf_api.php',
+			'baseUrl' => $scheme.'://'.$host.$appBasePath.'/cf_api.php',
 			'apiKeyHeaderName' => 'Authorization',
 			'apiKeyHeaderValue' => 'PHPSESSID'
 		];
@@ -385,31 +391,7 @@ function addTimelineSection(array $events, string $commonIcon = 'ri-calendar-lin
 		$current = Array();
 		global $_CAMILA;
 		$menu = new SimpleXMLElement(file_get_contents($confFile));
-
-		$isBulma = defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma';
-
-		$activeTitle = '';
-		foreach ($menu as $k => $v) {
-			if ((isset($_REQUEST['dashboard']) && strpos('?'.$_SERVER['QUERY_STRING'], (string)($v->url)) !==  false) || ((string)($v->id) == $defaultId) || (isset($_REQUEST['dashboard']) && strpos(','.(string)($v->pages).',', ','.$_REQUEST['dashboard'].',') !==  false))
-			{
-				$activeTitle = ((string)$v->lic_title != '') ? camila_get_translation((string)$v->lic_title) : (string)$v->title;
-			}
-		}
-
-		$navOpen = '<div id="linkset2">';
-		if ($isBulma) {
-			// kept outside #nav: legacy xWalkUL(xFirstChild(#nav), ...) in camila.js
-			// assumes #nav's first child is the tabs <ul> itself.
-			$navOpen .= '<div class="camila-hometabs-toggle-row">';
-			$navOpen .= '<a role="button" class="navbar-burger camila-hometabs-burger" data-target="camilaHomeMenuTabs" aria-label="menu" aria-expanded="false"><span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span></a>';
-			if ($activeTitle != '') {
-				$navOpen .= '<span class="camila-active-tab-label">'.$activeTitle.'</span>';
-			}
-			$navOpen .= '</div>';
-		}
-		$navOpen .= '<div id="nav" class="tabs is-boxed">';
-		$navOpen .= '<ul' . ($isBulma ? ' id="camilaHomeMenuTabs"' : '') . ' class="nav nav-tabs">';
-		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, $navOpen));
+		$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<div id="linkset2"><div id="nav" class="tabs is-boxed"><ul class="nav nav-tabs">'));
 
 		foreach ($menu as $k => $v) {
 			$curr = false;

@@ -85,7 +85,7 @@ class CamilaMcpHandler
         switch ($method) {
             case 'initialize':
                 $this->respond($id, [
-                    'protocolVersion' => '2024-11-05',
+                    'protocolVersion' => '2026-07-28',
                     'capabilities'    => ['tools' => (object) []],
                     'serverInfo'      => ['name' => 'camila-mcp', 'version' => '1.0.0'],
                 ]);
