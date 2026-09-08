@@ -26,8 +26,14 @@ Core admin SPAs live in `camila/admin/`. Plugin feature SPAs live in the plugin 
 
 ```php
 // 1. Build the API config
+// $appBasePath is derived from the currently-executing script's own path
+// (cf_app.php / index.php live alongside cf_api.php in the app's directory),
+// NOT hardcoded to '/app/<dir>/' — a hardcoded prefix silently breaks once the
+// app is served from under a URL prefix (e.g. a reverse-proxied subfolder),
+// since it drops that prefix from every REST call the SPA makes.
+$appBasePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 $config = [
-    'baseUrl'           => $scheme . '://' . $host . '/app/' . CAMILA_APP_DIR . '/cf_api.php',
+    'baseUrl'           => $scheme . '://' . $host . $appBasePath . '/cf_api.php',
     'apiKeyHeaderName'  => 'Authorization',
     'apiKeyHeaderValue' => 'PHPSESSID',
 ];

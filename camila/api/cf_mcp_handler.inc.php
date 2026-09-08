@@ -26,7 +26,7 @@
  * Usage in cf_api_controller.inc.php (after $api = new Api($config)):
  *   if (isset($_GET['mcp'])) {
  *       $apiKey   = $request->getHeader('X-API-Key')[0] ?? '';
- *       $basePath = '/app/' . CAMILA_APP_DIR . '/cf_api.php';
+ *       $basePath = $_SERVER['SCRIPT_NAME']; // cf_api.php's own path, prefix and all
  *       require_once(__DIR__ . '/cf_mcp_handler.inc.php');
  *       (new CamilaMcpHandler($api, $apiKey, $basePath))->handle();
  *       exit;

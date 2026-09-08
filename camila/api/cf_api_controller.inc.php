@@ -48,17 +48,26 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 	$camilaWT->db = $_CAMILA['db'];
 	$mapping = $camilaWT->getWorktableColumnMapping();
 
+	// This code runs as part of cf_api.php's own request, so SCRIPT_NAME is
+	// already cf_api.php's real path — including any URL prefix the app is
+	// served under (e.g. a reverse-proxied subfolder). The CRUD API router
+	// strips this basePath from the request path to find the route ("/users"),
+	// so a hardcoded '/app/<dir>/cf_api.php' here breaks routing entirely
+	// under a prefix (leaves the prefix in, so no route ever matches) instead
+	// of just breaking the base URL like the other occurrences of this pattern.
+	$apiBasePath = $_SERVER['SCRIPT_NAME'];
+
 	$conf = [];
 	if ($_CAMILA['db']->databaseType == 'sqlite' || $_CAMILA['db']->databaseType == 'sqlite3') {
 		$conf = [
 			 'driver' => $_CAMILA['db']->dataProvider,
 			 'address' => $_CAMILA['db']->host,
-			 'basePath' => '/app/'.CAMILA_APP_DIR.'/cf_api.php'];
+			 'basePath' => $apiBasePath];
 	} else {
 		$conf = [
 			'driver' => $_CAMILA['db']->dataProvider,
 			'address' => $_CAMILA['db']->host,
-			'basePath' => '/app/'.CAMILA_APP_DIR.'/cf_api.php',
+			'basePath' => $apiBasePath,
 			'port' => $_CAMILA['db']->port,
 			'username' => $_CAMILA['db']->user,
 			'password' => parse_url(CAMILA_DB_DSN, PHP_URL_PASS),
@@ -162,7 +171,8 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 
 	if (isset($_GET['mcp'])) {
 		$apiKey   = $request->getHeader('X-API-Key')[0] ?? '';
-		$basePath = '/app/' . CAMILA_APP_DIR . '/cf_api.php';
+		// Same reasoning as $apiBasePath above: use the real, prefix-aware path.
+		$basePath = $_SERVER['SCRIPT_NAME'];
 		require_once(__DIR__ . '/cf_mcp_handler.inc.php');
 		(new CamilaMcpHandler($api, $apiKey, $basePath))->handle();
 		exit;

@@ -6,8 +6,12 @@ $camilaUI = new CamilaUserInterface();
 
 $scheme = $camilaUI->isHttps() ? 'https' : 'http';
 $host   = $_SERVER['HTTP_HOST'];
+// See mountMiniApp() in ui.class.inc.php for why this isn't hardcoded to
+// '/app/<dir>/' — it must still resolve correctly when the app is served
+// from under a URL prefix (e.g. a reverse-proxied subfolder).
+$appBasePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
 $config = [
-    'baseUrl'           => $scheme . '://' . $host . '/app/' . CAMILA_APP_DIR . '/cf_api.php',
+    'baseUrl'           => $scheme . '://' . $host . $appBasePath . '/cf_api.php',
     'apiKeyHeaderName'  => 'Authorization',
     'apiKeyHeaderValue' => 'PHPSESSID',
 ];
