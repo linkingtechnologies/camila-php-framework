@@ -1,6 +1,6 @@
 <?php
 /* This File is part of Camila PHP Framework
-   Copyright (C) 2006-2026 Umberto Bresciani */
+   Copyright (C) 2006-2025 Umberto Bresciani */
 
 $camilaUI = new CamilaUserInterface();
 

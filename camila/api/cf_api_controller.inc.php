@@ -171,10 +171,7 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 
 	if (isset($_GET['mcp'])) {
 		$apiKey   = $request->getHeader('X-API-Key')[0] ?? '';
-		// This code runs as part of cf_api.php's own request, so SCRIPT_NAME is
-		// already cf_api.php's real path — including any URL prefix the app is
-		// served under (e.g. a reverse-proxied subfolder), unlike a hardcoded
-		// '/app/<dir>/cf_api.php' which would silently drop that prefix.
+		// Same reasoning as $apiBasePath above: use the real, prefix-aware path.
 		$basePath = $_SERVER['SCRIPT_NAME'];
 		require_once(__DIR__ . '/cf_mcp_handler.inc.php');
 		(new CamilaMcpHandler($api, $apiKey, $basePath))->handle();
