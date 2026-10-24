@@ -1419,9 +1419,12 @@ namespace Tqdev\PhpCrudApi\Controller {
 
         public function getDatabase(ServerRequestInterface $request): ResponseInterface
         {
+            // Load every worktable's configuration up front: without this,
+            // each table in the loop would run its own query.
+            \camila_worktable_column_config();
             $tables = [];
             foreach ($this->reflection->getTableNames() as $table) {
-                $tables[] = $this->reflection->getTable($table);
+                $tables[] = \camila_describe_table($this->reflection->getTable($table));
             }
             $database = ['tables' => $tables];
             return $this->responder->success($database);
@@ -1434,7 +1437,7 @@ namespace Tqdev\PhpCrudApi\Controller {
                 return $this->responder->error(ErrorCode::TABLE_NOT_FOUND, $tableName);
             }
             $table = $this->reflection->getTable($tableName);
-            return $this->responder->success($table);
+            return $this->responder->success(\camila_describe_table($table));
         }
 
         public function getColumn(ServerRequestInterface $request): ResponseInterface
@@ -1448,8 +1451,12 @@ namespace Tqdev\PhpCrudApi\Controller {
             if (!$table->hasColumn($columnName)) {
                 return $this->responder->error(ErrorCode::COLUMN_NOT_FOUND, $columnName);
             }
-            $column = $table->getColumn($columnName);
-            return $this->responder->success($column);
+            $column = (array) $table->getColumn($columnName)->jsonSerialize();
+            $conf = \camila_worktable_column_config($table->getRealName());
+            $meta = $conf[$table->getRealName()][$column['name'] ?? ''] ?? null;
+            return $this->responder->success(
+                \camila_describe_public_names(\camila_describe_merge($column, $meta))
+            );
         }
 
         public function updateTable(ServerRequestInterface $request): ResponseInterface
@@ -9889,6 +9896,9 @@ namespace Tqdev\PhpCrudApi {
             );
             $prefix = sprintf('phpcrudapi-%s-', substr(md5(__FILE__), 0, 8));
             $cache = CacheFactory::create($config->getCacheType(), $prefix, $config->getCachePath());
+            // Camila: the column configuration used by describe rides on this
+            // same cache (see camila_worktable_column_config)
+            \camila_api_cache_handle($cache, $config->getCacheTime());
             $reflection = new ReflectionService($db, $cache, $config->getCacheTime());
             $responder = new JsonResponder($config->getJsonOptions(), $config->getDebug());
             $router = new SimpleRouter($config->getBasePath(), $responder, $cache, $config->getCacheTime());
@@ -10368,3 +10378,229 @@ namespace Tqdev\PhpCrudApi {
     }
 }
 
+namespace {
+
+// -----------------------------------------------------------------------------
+// Camila: worktable column configuration for the describe endpoint (/columns).
+//
+// php-crud-api's reflection describes the PHYSICAL table: it reads the schema
+// from the database and knows nothing about how the column is configured in
+// Camila - list of values, required, read only, help text. That lives in
+// CAMILA_TABLE_WORKC and without these functions would never leave the API.
+//
+// Matching is done on the PHYSICAL name (tablename + col_name), not the public
+// one: it is an exact key and does not depend on the mapping's name transforms.
+// -----------------------------------------------------------------------------
+// Holder for the Cache instance that `Api` builds. Called with an argument it
+// stores it, called without one it returns it.
+//
+// Needed because `ColumnController` receives Router, Responder,
+// ReflectionService and DefinitionService, but not the Cache. The alternative
+// would be rebuilding it through `CacheFactory::create()`, replicating prefix
+// and type - duplicating decisions that already live in `Api::__construct` and
+// that may change there.
+function camila_api_cache_handle($cache = null, ?int $ttl = null): array
+{
+    static $store = null;
+    static $time  = 10;
+    if ($cache !== null) {
+        $store = $cache;
+        if ($ttl !== null) {
+            $time = $ttl;
+        }
+    }
+    return [$store, $time];
+}
+
+// $tablename is the PHYSICAL table name (worktableNN). Passing it reads that
+// table's configuration only; omitting it reads every worktable's, which is
+// what `GET /columns` without a table needs.
+//
+// The filter is not a detail: without it, describing one table meant reading
+// every worktable's columns and discarding them in PHP.
+function camila_worktable_column_config(?string $tablename = null): array
+{
+    global $_CAMILA;
+    // key '' = full read, otherwise the single tablename
+    static $cache = [];
+
+    $key = $tablename ?? '';
+    if (isset($cache[$key])) {
+        return $cache[$key];
+    }
+    // a full read already done also serves requests for a single table
+    if ($key !== '' && isset($cache[''])) {
+        return $cache[''];
+    }
+
+    // Cross-request cache: the object is the same one the framework uses for
+    // schema reflection, but the TTL is its OWN.
+    //
+    // `cacheTime` (10s) is tuned for the schema, which changes rarely but must
+    // be seen immediately when it does. A vocabulary changes even more rarely
+    // and has no such urgency, so tying it to that value meant hitting the
+    // database far more than needed. Raising `cacheTime` was not the answer:
+    // it is global and would drag reflection along with it.
+    //
+    // Tuned with CAMILA_DESCRIBE_CACHE_TTL in config.php. At 0 the
+    // cross-request cache is off and only the per-request one remains, which
+    // helps while a vocabulary is being set up.
+    list($store, ) = camila_api_cache_handle();
+    $ttl = defined('CAMILA_DESCRIBE_CACHE_TTL')
+        ? (int) CAMILA_DESCRIBE_CACHE_TTL
+        : 300;
+    if ($ttl <= 0) {
+        $store = null;
+    }
+    $storeKey = 'camila-WorktableColumnConfig(' . $key . ')';
+    if ($store !== null) {
+        $raw = $store->get($storeKey);
+        if ($raw !== '') {
+            $plain = @gzuncompress($raw);
+            $decoded = $plain === false ? null : json_decode($plain, true);
+            if (is_array($decoded)) {
+                $cache[$key] = $decoded;
+                return $cache[$key];
+            }
+        }
+    }
+
+    $cache[$key] = [];
+    if (!isset($_CAMILA['db']) || !defined('CAMILA_TABLE_WORKC') || !defined('CAMILA_TABLE_WORKT')) {
+        return $cache[$key];
+    }
+
+    $db  = $_CAMILA['db'];
+    $old = $db->SetFetchMode(ADODB_FETCH_ASSOC);
+    $sql = 'SELECT t.tablename, t.short_title, c.col_name, c.name, c.name_abbrev,'
+         . ' c.type, c.listbox_options, c.maxlength, c.required, c.readonly,'
+         . ' c.must_be_unique, c.visible, c.default_value, c.sequence'
+         . ' FROM ' . CAMILA_TABLE_WORKC . ' c'
+         . ' INNER JOIN ' . CAMILA_TABLE_WORKT . ' t ON c.wt_id = t.id'
+         . ' WHERE c.is_deleted <> ' . $db->qstr('y');
+    if ($tablename !== null) {
+        $sql .= ' AND t.tablename = ' . $db->qstr($tablename);
+    }
+    $res = $db->Execute($sql);
+    $db->SetFetchMode($old);
+
+    if ($res === false) {
+        return $cache[$key];   // describe stays as it was: poorer beats broken
+    }
+
+    $flag = function ($v): bool { return strtolower(trim((string) $v)) === 'y'; };
+
+    while (!$res->EOF) {
+        $f = $res->fields;
+        $entry = [
+            'label'    => (string) $f['name'],
+            'abbrev'   => (string) $f['name_abbrev'],
+            'type'     => (string) $f['type'],
+            'sequence' => $f['sequence'] === null || $f['sequence'] === '' ? null : (int) $f['sequence'],
+            'required' => $flag($f['required']),
+            'readonly' => $flag($f['readonly']),
+            'unique'   => $flag($f['must_be_unique']),
+            'visible'  => $flag($f['visible']),
+        ];
+
+        $maxlength = trim((string) $f['maxlength']);
+        if ($maxlength !== '') {
+            $entry['maxlength'] = (int) $maxlength;
+        }
+
+        $default = (string) $f['default_value'];
+        if ($default !== '') {
+            $entry['default'] = $default;
+        }
+
+        // List of values, already split: that is what a dropdown needs. The
+        // comma has no escape, so a value containing one is already split in
+        // the configuration itself.
+        $opts = trim((string) $f['listbox_options']);
+        if ($opts !== '') {
+            $entry['options'] = array_values(array_filter(
+                array_map('trim', explode(',', $opts)),
+                function ($v) { return $v !== ''; }
+            ));
+        }
+
+        $cache[$key][(string) $f['tablename']][(string) $f['col_name']] = $entry;
+        $cache[$key][(string) $f['tablename']]['__table__'] = ['label' => (string) $f['short_title']];
+        $res->MoveNext();
+    }
+
+    if ($store !== null) {
+        $store->set(
+            $storeKey,
+            gzcompress(json_encode($cache[$key], JSON_UNESCAPED_UNICODE)),
+            $ttl
+        );
+    }
+
+    return $cache[$key];
+}
+
+// Merges the Camila configuration into a reflected table's describe output.
+// `ReflectedColumn::serialize()` puts the PHYSICAL name in `name` and the
+// public one in `alias`. That is counter-intuitive, and API consumers have no
+// use for the physical name: here `name` becomes the public one and `alias`
+// goes away. The transform lives here only, not in `serialize()`, so the
+// `serialize()` -> `fromJson()` round trip used internally is unchanged.
+function camila_describe_public_names(array $json): array
+{
+    if (isset($json['alias'])) {
+        $json['name'] = $json['alias'];
+    }
+    unset($json['alias']);
+    return $json;
+}
+
+// Merges the Camila configuration into the reflected column: adds what is
+// missing and overwrites what is already there.
+//
+// The only real collision is `type`: for reflection it is the SQL type
+// (`varchar`), for Camila the field type (`string-listofvalues`). Camila wins,
+// being the more informative of the two; the SQL type is not thrown away but
+// moved to `dbType`, because validation needs it.
+//
+// `maxlength` and `length` both stay: the first is the configured maximum, the
+// second the column's physical size. They usually match, and when they do not
+// they are saying two different things.
+function camila_describe_merge(array $col, ?array $meta): array
+{
+    if ($meta === null) {
+        return $col;
+    }
+    if (isset($meta['type'], $col['type']) && $meta['type'] !== $col['type']) {
+        $col['dbType'] = $col['type'];
+    }
+    return array_merge($col, $meta);
+}
+
+function camila_describe_table($table): array
+{
+    $json = (array) $table->jsonSerialize();
+    $conf = camila_worktable_column_config($table->getRealName());
+    $perTable = $conf[$table->getRealName()] ?? null;
+
+    foreach ($json['columns'] ?? [] as $i => $col) {
+        // `columns` holds ReflectedColumn OBJECTS, not arrays:
+        // `ReflectedTable::serialize()` leaves them as such and json_encode
+        // serializes them one by one. Casting an object to array would yield
+        // its private properties under mangled keys, which would end up in the
+        // JSON: jsonSerialize() must be called.
+        $col = is_object($col) ? (array) $col->jsonSerialize() : (array) $col;
+        // match on the physical name, before renaming
+        $meta = $perTable[$col['name'] ?? ''] ?? null;
+        $json['columns'][$i] = camila_describe_public_names(
+            camila_describe_merge($col, $meta)
+        );
+    }
+
+    if ($perTable !== null && isset($perTable['__table__']['label'])) {
+        $json['label'] = $perTable['__table__']['label'];
+    }
+
+    return camila_describe_public_names($json);
+}
+}
