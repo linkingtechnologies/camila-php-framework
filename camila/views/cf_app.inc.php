@@ -1,6 +1,6 @@
 <?php
 /*  This File is part of Camila PHP Framework
-    Copyright (C) 2006-2025 Umberto Bresciani
+    Copyright (C) 2006-2026 Umberto Bresciani
 
     Camila PHP Framework is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,14 @@ if (isset($_REQUEST['admin'])) {
 	$camilaUI->closeBox();
 	
 	if ($count == 0) {
-		header("Location: index.php");
+		$cat = null;
+		foreach (array_keys($_REQUEST) as $key) {
+			if (preg_match('/^cat([0-9]+)$/', $key, $matches)) {
+				$cat = $matches[1];
+			break;
+			}
+		}
+		header('Location: index.php' . ($cat !== null ? '?cat=' . $cat : ''));
 		exit;
 	}
 }
