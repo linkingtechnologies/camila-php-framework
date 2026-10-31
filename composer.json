@@ -23,7 +23,7 @@
         "neitanod/forceutf8": "~2.0",
         "nyholm/psr7": "*",
         "nyholm/psr7-server": "*",
-        "phpoffice/phpspreadsheet": "5.8.1",
+        "phpoffice/phpspreadsheet": "5.10.0",
         "phpoffice/phpword": "*",
         "phpseclib/phpseclib": "~3.0",
         "psr/http-factory": "*",
