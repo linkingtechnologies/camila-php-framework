@@ -44,6 +44,15 @@ if (basename($_SERVER['PHP_SELF']) == 'cf_api.php' || basename($_SERVER['SCRIPT_
 
 	global $_CAMILA;
 	
+	// The API only needs the session to identify the user, and CamilaAuth has just
+	// started it. PHP holds an exclusive lock on the session file until the request
+	// ends, so release it now: otherwise parallel calls from one browser run one
+	// after the other. $_SESSION stays readable. The middlewares below must not
+	// reopen it (see the session_id() guards in DbAuth and ApiKeyDbAuth).
+	if (session_status() === PHP_SESSION_ACTIVE) {
+		session_write_close();
+	}
+
 	$camilaWT = new CamilaWorkTable();
 	$camilaWT->db = $_CAMILA['db'];
 	$mapping = $camilaWT->getWorktableColumnMapping();

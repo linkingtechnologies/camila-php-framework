@@ -4800,7 +4800,11 @@ namespace Tqdev\PhpCrudApi\Middleware {
 			$browserSession = false;
 
 			if ($apiKey2 != '') {
-				session_start();
+				// Not when a session id exists already: the controller closes the
+				// session early to drop its lock, and session_id() still holds it.
+				if (session_id() === '') {
+					session_start();
+				}
 				$apiKeyColumnName = "session_id";
 				$apiKey = session_id();
 				$browserSession = true;
@@ -4912,6 +4916,13 @@ namespace Tqdev\PhpCrudApi\Middleware {
                 }
             }
             $_SESSION['apiUser'] = $user;
+            // The session is only needed to identify the user. With the files
+            // handler PHP holds an exclusive lock on the session file until the
+            // request ends, so parallel API calls from the same browser would
+            // run one after the other. $_SESSION stays readable after this.
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
             return $next->handle($request);
         }
     }
@@ -5437,7 +5448,9 @@ namespace Tqdev\PhpCrudApi\Middleware {
 
         public function process(ServerRequestInterface $request, RequestHandlerInterface $next): ResponseInterface
         {
-            if (session_status() == PHP_SESSION_NONE) {
+            // session_id() !== '' means the controller already started and closed
+            // the session to release its lock: do not reopen it.
+            if (session_status() == PHP_SESSION_NONE && session_id() === '') {
                 if (!headers_sent()) {
                     $sessionName = $this->getProperty('sessionName', '');
                     if ($sessionName) {
@@ -9258,7 +9271,9 @@ namespace Tqdev\PhpCrudApi\Middleware {
 
         public function process(ServerRequestInterface $request, RequestHandlerInterface $next): ResponseInterface
         {
-            if (session_status() == PHP_SESSION_NONE) {
+            // session_id() !== '' means the controller already started and closed
+            // the session to release its lock: do not reopen it.
+            if (session_status() == PHP_SESSION_NONE && session_id() === '') {
                 if (!headers_sent()) {
                     $sessionName = $this->getProperty('sessionName', '');
                     if ($sessionName) {
