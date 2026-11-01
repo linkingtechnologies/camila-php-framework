@@ -4,13 +4,50 @@
   
   use \ForceUTF8\Encoding;
 
+  /**
+   * The lang files of the plugins, for the keys a plugin is allowed to add to the shared dictionary:
+   * those that start with "menu." (the <lic_title> of its conf/menu.xml tabs, e.g. menu.worktable.help).
+   * The rest of a plugin's lang file is its own business (the plugin reads it itself) and is not merged,
+   * so a plugin can never override a key of the core or of the application.
+   *
+   * @return string[] paths of the plugins' lang files for the current language
+   */
+  function camila_plugin_lang_files() {
+      global $_CAMILA;
+      $home = defined('CAMILA_HOMEDIR') ? CAMILA_HOMEDIR : (defined('CAMILA_APP_PATH') ? CAMILA_APP_PATH : '');
+      if ($home == '')
+          return Array();
+      $files = glob($home.'/plugins/*/lang/'.$_CAMILA['lang'].'.lang.php');
+      return is_array($files) ? $files : Array();
+  }
+
   function camila_translation_init($force=false) {
 
       global $_CAMILA;
-      if (!is_readable(CAMILA_TMP_DIR.'/'.$_CAMILA['lang'].'.lang.php') || $force) {
+      $tmpFile = CAMILA_TMP_DIR.'/'.$_CAMILA['lang'].'.lang.php';
+
+      // The cached dictionary is rebuilt when a plugin's lang file is newer than it: a plugin that is
+      // installed or updated does not have to clear var/tmp by hand.
+      $stale = false;
+      if (is_readable($tmpFile)) {
+          $cachedAt = @filemtime($tmpFile);
+          foreach (camila_plugin_lang_files() as $pf) {
+              if (@filemtime($pf) > $cachedAt) {
+                  $stale = true;
+                  break;
+              }
+          }
+      }
+
+      if (!is_readable($tmpFile) || $force || $stale) {
           $content = @file_get_contents(CAMILA_DIR.'lang/'.$_CAMILA['lang'].'.lang.php')."\r\n";
           $content .= @file_get_contents(CAMILA_LANG_DIR.$_CAMILA['lang'].'.lang.php');
-          $tmpFile = CAMILA_TMP_DIR.'/'.$_CAMILA['lang'].'.lang.php';
+          foreach (camila_plugin_lang_files() as $pf) {
+              foreach (preg_split('/\R/', (string)@file_get_contents($pf)) as $line) {
+                  if (strpos(ltrim($line, "\xEF\xBB\xBF \t"), 'menu.') === 0)
+                      $content .= "\r\n".trim($line, "\xEF\xBB\xBF");
+              }
+          }
           $fh = fopen($tmpFile, 'w');
           if (!$fh) {
               $err = error_get_last();

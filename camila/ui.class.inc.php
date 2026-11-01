@@ -394,11 +394,24 @@ function addTimelineSection(array $events, string $commonIcon = 'ri-calendar-lin
 
 		$isBulma = defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma';
 
+		// The label of a tab: the translation of <lic_title> when there is one, else <title>. A plugin's
+		// menu.xml can carry both: the translated label in the languages that have it, the plain one
+		// everywhere else. (A key with no translation used to leave the tab without a label.)
+		$tabTitle = function ($v) {
+			$title = (string)$v->title;
+			if ((string)$v->lic_title != '') {
+				$translated = camila_get_translation((string)$v->lic_title);
+				if ($translated != '')
+					$title = $translated;
+			}
+			return $title;
+		};
+
 		$activeTitle = '';
 		foreach ($menu as $k => $v) {
 			if ((isset($_REQUEST['dashboard']) && strpos('?'.$_SERVER['QUERY_STRING'], (string)($v->url)) !==  false) || ((string)($v->id) == $defaultId) || (isset($_REQUEST['dashboard']) && strpos(','.(string)($v->pages).',', ','.$_REQUEST['dashboard'].',') !==  false))
 			{
-				$activeTitle = ((string)$v->lic_title != '') ? camila_get_translation((string)$v->lic_title) : (string)$v->title;
+				$activeTitle = $tabTitle($v);
 			}
 		}
 
@@ -421,15 +434,11 @@ function addTimelineSection(array $events, string $commonIcon = 'ri-calendar-lin
 			$curr = false;
 			if ((isset($_REQUEST['dashboard']) && strpos('?'.$_SERVER['QUERY_STRING'], (string)($v->url)) !==  false) || ((string)($v->id) == $defaultId) || (isset($_REQUEST['dashboard']) && strpos(','.(string)($v->pages).',', ','.$_REQUEST['dashboard'].',') !==  false))
 			{
-				$current = Array('id' => (string)$v->id, 'url' => (string)$v->url, 'title' => (string)$v->title);
+				$current = Array('id' => (string)$v->id, 'url' => (string)$v->url, 'title' => $tabTitle($v));
 				$curr = true;
 			}
 			$url = $v->url;
-			$title = '';
-			if ((string)$v->lic_title != '')
-				$title = camila_get_translation((string)$v->lic_title);
-			else
-				$title = $v->title;
+			$title = $tabTitle($v);
 
 			$_CAMILA['page']->add_raw(new HAW_raw(HAW_HTML, '<li role="presentation" class="'. ($curr ? 'active' : '' ).'"><a class="'. ($curr ? 'active' : '' ).' is-size-7" href="'.$url.'">'.$title.'</a></li>'));
 		}
