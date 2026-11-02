@@ -392,8 +392,14 @@ if ($father=='')
         $language = "";
 
      $namespace = "";
-        
-      printf("<html%s%s>\n", $language, $namespace);
+
+      // Bulma 1.x follows the dark mode of the operating system, but the Camila stylesheet
+      // (css/bulma.css) and the pages are drawn for a light background: left alone, the
+      // components turn dark on a white page and the text outside them cannot be read.
+      // Forcing the light theme keeps every page coherent.
+      $theme = (defined('CAMILA_APPLICATION_UI_KIT') && CAMILA_APPLICATION_UI_KIT == 'bulma') ? ' data-theme="light"' : '';
+
+      printf("<html%s%s%s>\n", $language, $namespace, $theme);
       echo "<head>\n";
 
       // validation issue: HTML does not allow XHTML-stylish "/>" within <head> part
